@@ -39,7 +39,8 @@ windows are slower compared to Linux.
 
 ## How this work?
 It simply use google search results.
-I scrape google search results and get cream information like answer of one word question or paragraph which google show on top.
+By using pup I scrape google search results and get cream information like answer of one word question or paragraph which google show on top.
+Sometimes Google give multiple cream information like one word results and other information on right In that case It show result of the basis of priority.
 I do scraping with `pup` and use some Unix tools like `awk` `sed` to do the magic.
 
 ## License
