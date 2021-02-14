@@ -1,0 +1,26 @@
+#!/bin/bash
+
+query="$*"
+query="$(sed 's/ /+/g' <<<$query)"
+
+webpage=$($HOME/.local/bin/gsearch "$query")
+
+res0=$(echo $webpage | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8 )
+[[ -n $res0 ]] && echo "> u mean $res0?"
+
+list=$(echo $webpage | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d') 
+[[ -n "$list" ]] && echo "$list" && exit
+
+res1=$(echo $webpage | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8) 
+[[ -n "$res1" ]] && echo "$res1" && exit
+
+res2=$(echo $webpage | pup 'div.XcVN5d text{}' | recode html..utf8)
+[[ -n "$res2" ]] && echo "$res2" && exit
+
+
+res3=$(echo $webpage | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | xargs -n10)
+[[ -n "$res3" ]] && echo "$res3" && exit
+
+
+tmp=$(echo $webpage | pup 'div.kno-rdesc')
+[[ -z "$tmp" ]] && echo "No Result" || (echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 |xargs -n10)
