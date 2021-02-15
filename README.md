@@ -8,6 +8,7 @@ Tuxi is a simple bash script which scrape google search for getting instant answ
 ## Requirements
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
 * Recode
+* jq 
 
 ## Installation
 First run these commands.
