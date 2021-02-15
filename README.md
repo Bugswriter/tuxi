@@ -24,6 +24,8 @@ echo "#\!/bin/bash" >> $HOME/.local/bin/gsearch"
 xclip -selection clipboard -o >> $HOME/.local/bin/gsearch
 chmod +x $HOME/.local/bin/gsearch
 ```
+* After this in your gsearch change 'https://www.google.com/search?q=linux' -> "https://www.google.com/search?q=$1"
+* And put -s flag in curl => curl -s (to search silently)
 
 ## Usage
 
