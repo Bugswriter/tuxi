@@ -21,7 +21,7 @@ Now you need a to create a `gsearch` script by following these steps:
 * Now run these commands.
 
 ```bash
-echo "#\!/bin/bash" >> $HOME/.local/bin/gsearch"
+echo "#\!/bin/bash" >> $HOME/.local/bin/gsearch
 xclip -selection clipboard -o >> $HOME/.local/bin/gsearch
 chmod +x $HOME/.local/bin/gsearch
 ```
