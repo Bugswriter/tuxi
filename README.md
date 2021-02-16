@@ -34,7 +34,7 @@ operating system while windows are slow on older hardware.
   This is useful, for example to bring up `tuxi` into `notify-send`.
   ```bash
   $ tuxi --raw "Linus Torvalds birthday"
-  tuxi --raw "Linus Torvalds birthday"
+  December 28, 1969
   ```
 
 ## How this work?
