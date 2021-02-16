@@ -13,8 +13,8 @@ Tuxi is a simple bash script which scrape google search for getting instant answ
 ## Installation
 cURL **tuxi** to your **$PATH** and give execute permissions.
 ```bash
-curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
-chmod +x $HOME/.local/bin/tuxi
+$ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
+$ chmod +x $HOME/.local/bin/tuxi
 ```
 
 ## Usage
