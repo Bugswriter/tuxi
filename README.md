@@ -30,24 +30,23 @@ operating system while windows are slow on older hardware.
 ```
 * Quotations are optional if you want to search with some special character.
 * You can write question directly like `tuxi linus torvalds birthday`
-* `-r`, `--raw` arguments are used to simplify output by removing colors and decorations.  
-  This is useful, for example to bring up `tuxi` into `notify-send`.
-  ```bash
-  $ tuxi --raw "Linus Torvalds birthday"
-  December 28, 1969
-  ```
-* `-h`, `--help` arguments to display help message. 
-  ```bash
-  $ tuxi --help
-  Usage: tuxi <your question>
-  Usage: tuxi <OPTIONS> <your question>
 
-  OPTIONS:
-  -r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
-  -h, --help            Displays this help message.
+Use `-h`, `--help` arguments to display help message. 
+```bash
+$ tuxi --help
+Usage: tuxi <your question>
+       tuxi <OPTIONS> <your question>
 
-  Report bugs to https://github.com/Bugswriter/tuxi
-  ```
+OPTIONS:
+-r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
+-h, --help            Displays this help message.
+
+Report bugs to https://github.com/Bugswriter/tuxi
+```
+```bash
+$ tuxi -r linus torvalds birthday
+28 December 1969
+```
 
 ## How this work?
 It simply use google search results.
