@@ -25,12 +25,19 @@ query="$*"
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 
-webpage="$(curl -s -G "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")"
+
+webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
+
 
 res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8)"
 [ -n "$res0" ] && echo -e "${GREEN}>${NC} u mean $res0?"
 
+
 answer() { echo -e "${GREEN}---${NC}\n$@\n${GREEN}---${NC}"; }
+
+list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
+[ -n "$list" ] && echo "$list" && exit
+
 
 list="$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d')"
 [ -n "$list" ] && answer "$list" && exit
