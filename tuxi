@@ -15,7 +15,7 @@ webpage=$(curl -s -G "https://www.google.com/search?hl=en_US" --user-agent "$use
 res0=$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8 )
 [ -n "$res0" ] && echo "> u mean $res0?"
 
-list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d')
+list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
 [ -n "$list" ] && echo "$list" && exit
 
 res1=$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8)
