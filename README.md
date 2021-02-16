@@ -32,6 +32,10 @@ operating system while windows are slow on older hardware.
 * You can write question directly like `tuxi linus torvalds birthday`
 * `--raw` arguments are used to simplify output by removing colors and decorations.  
   This is useful, for example to bring up `tuxi` into `notify-send`.
+  ```bash
+  $ tuxi --raw "Linus Torvalds birthday"
+  tuxi --raw "Linus Torvalds birthday"
+  ```
 
 ## How this work?
 It simply use google search results.
