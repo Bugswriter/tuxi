@@ -47,7 +47,7 @@ res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| r
 [ -n "$res0" ] && msg "u mean $res0?"
 
 list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
-[ -n "$list" ] && echo "$list" && exit
+[ -n "$list" ] && strip "$list" && exit
 
 res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8)"
 [ -n "$res1" ] && strip "$res1" && exit
