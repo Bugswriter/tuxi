@@ -7,26 +7,26 @@ Tuxi is a simple bash script which scrape google search for getting instant answ
 
 ## Requirements
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
-* Recode
-* jq 
+* [recode](https://github.com/rrthomas/recode) - Charset converter tool and library
+* [jq](https://github.com/stedolan/jq) - Command-line JSON processor
 
 ## Installation
-First run these commands.
+cURL **tuxi** to your **$PATH** and give execute permissions.
 ```bash
-git clone https://github.com/bugswriter/tuxi.git
-cd tuxi
-cp tuxi $HOME/.local/bin/tuxi
+curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
+chmod +x $HOME/.local/bin/tuxi
 ```
 
 ## Usage
-
 ```bash
-tuxi "is linux better than windows"
-Linux is very well secure as it is easy to
-detect bugs and fix whereas Windows has a huge user
-base, so it becomes a target of hackers to attack
-windows system. Linux runs faster even with older hardware whereas
-windows are slower compared to Linux.
+$ tuxi "Is Linux better than Windows?"
+---
+Linux has a reputation for being fast and smooth while
+Windows 10 is known to become slow and slow over
+time. Linux runs faster than Windows 8.1 and Windows 10
+along with a modern desktop environment and qualities of the
+operating system while windows are slow on older hardware.
+---
 ```
 * Quotations are optional if you want to search with some special character.
 * You can write question directly like `tuxi linus torvalds birthday`
