@@ -1,13 +1,14 @@
 #!/usr/bin/env sh
 
-N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"
+N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
 
 help_text() {
 echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}"
+echo -e "${G}Usage:${N} tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
 cat << EOF
 
 OPTIONS:
--r, --raw             Simplify tuxi output. Useful for e.g notify-send.
+-r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
 -h, --help            Displays this help message.
 
 EOF
