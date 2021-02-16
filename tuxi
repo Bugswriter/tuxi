@@ -5,12 +5,12 @@ RED="\e[1;31m"
 GREEN="\e[1;32m"
 MAGENTA="\e[1;35m"
 
-checkdep() { [[ ! -x $(command -v "$@" 2> /dev/null) ]] && echo -e "${RED}$@ not found!${NC}" && exit 1; }
+checkdep() { [ ! -x $(command -v "$@" 2> /dev/null) ] && echo -e "${RED}$@ not found!${NC}" && exit 1; }
 checkdep "pup"
 checkdep "recode"
 checkdep "jq"
 
-if [[ $# -le 0 ]]; then
+if [ $# -le 0 ]; then
   echo "Hi, I am Tuxi.. Ask me something"
   echo -e "${GREEN}Usage:${NC} tuxi ${MAGENTA}<your question>${NC}"
   exit $?
@@ -23,22 +23,22 @@ user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Fi
 webpage="$(curl -s -G "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")"
 
 res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8 2> /dev/null)"
-[[ -n "$res0" ]] && echo -e "${GREEN}>${NC} u mean $res0?"
+[ -n "$res0" ] && echo -e "${GREEN}>${NC} u mean $res0?"
 
 answer() { echo -e "${GREEN}---${NC}\n$@\n${GREEN}---${NC}"; }
 
 list="$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d' 2> /dev/null)"
-[[ -n "$list" ]] && answer "$list" && exit
+[ -n "$list" ] && answer "$list" && exit
 
 res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8 2> /dev/null)"
-[[ -n "$res1" ]] && answer "$res1" && exit
+[ -n "$res1" ] && answer "$res1" && exit
 
 res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8 2> /dev/null)"
-[[ -n "$res2" ]] && answer "$res2" && exit
+[ -n "$res2" ] && answer "$res2" && exit
 
 res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | xargs -d ' ' -n10 2> /dev/null)"
-[[ -n "$res3" ]] && answer "$res3" && exit
+[ -n "$res3" ] && answer "$res3" && exit
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
-[[ -z "$tmp" ]] && echo -e "${RED}No Result!${NC}" && exit 1 || \
+[ -z "$tmp" ] && echo -e "${RED}No Result!${NC}" && exit 1 || \
 answer "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | xargs -d ' ' -n10)"
