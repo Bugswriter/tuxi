@@ -2,11 +2,13 @@
 
 Tuxi is a simple bash script which scrape google search for getting instant answers of your question on your terminal.
 
-**[Watch my video on Tuxi with Installation instruction]([https://www.youtube.com/watch?v=EtwWvMa8muU])** (Also Checkout my YT Channel for more scripts like this)
+[Watch this Video Please](https://www.youtube.com/watch?v=EtwWvMa8muU)
+> Also checkout my youtube channel for more scripts like this
 
 ## Requirements
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
 * Recode
+* jq 
 
 ## Installation
 First run these commands.
@@ -15,20 +17,6 @@ git clone https://github.com/bugswriter/tuxi.git
 cd tuxi
 cp tuxi $HOME/.local/bin/tuxi
 ```
-Now you need a to create a `gsearch` script by following these steps:
-* First open your browser. (this guide is for *firefox*)
-* Open Inspect element and go to network tab.
-* Paste this link in URL - [www.google.com/search?q=linux]([www.google.com/search?q=linux])
-* Now right click on first returned html document *go to copy* and then **Copy as CURL**.
-* Now run these commands.
-
-```bash
-echo "#\!/bin/bash" >> $HOME/.local/bin/gsearch
-xclip -selection clipboard -o >> $HOME/.local/bin/gsearch
-chmod +x $HOME/.local/bin/gsearch
-```
-* After this in your gsearch change 'https://www.google.com/search?q=linux' -> "https://www.google.com/search?q=$1"
-* And put -s flag in curl => curl -s (to search silently)
 
 ## Usage
 
