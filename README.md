@@ -30,6 +30,8 @@ operating system while windows are slow on older hardware.
 ```
 * Quotations are optional if you want to search with some special character.
 * You can write question directly like `tuxi linus torvalds birthday`
+* `--raw` arguments are used to simplify output by removing colors and decorations.  
+  This is useful, for example to bring up `tuxi` into `notify-send`.
 
 ## How this work?
 It simply use google search results.
