@@ -3,8 +3,7 @@
 N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
 
 help_text() {
-echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}"
-echo -e "${G}Usage:${N} tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
+echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
 cat << EOF
 
 OPTIONS:
@@ -12,32 +11,25 @@ OPTIONS:
 -h, --help            Displays this help message.
 
 EOF
-echo -e "${G}Report bugs to ${N}https://github.com/Bugswriter/tuxi"
+echo -e "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
 }
-        
+
 case $1 in
-    -r|--raw)
-        [ "$2" = "" ] && echo "Please add query!" && exit 1
-        query="${*:2}" && msg() { echo "> $*"; } && error() { echo "$*"; } && strip() { echo "$*"; }
+    -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
+              query="${*:2}" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
     ;;
-    -h|--help)
-        help_text && exit 0
+    -h|--help) help_text && exit 0
     ;;
-    -*)
-        echo "Unknown option \"$1\"" && exit 1
+    -*) echo -e "${R}Unknown option${N} \"$1\"" && exit 1
     ;;
-    *)
-        query="$*" && msg() { echo -e "${G}>${N} $*"; } && error() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
+    *) query="$*" && msg() { echo -e "${G}>${N} $*"; } && err() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
     ;;
 esac
 
-checkdep() { [ ! $(command -v "$*" 2> /dev/null) ] && error "\"$*\" not found!" && exit 1; }
+checkdep() { [ ! $(command -v "$*" 2> /dev/null) ] && err "\"$*\" not found!" && exit 1; }
 checkdep "pup"; checkdep "recode"; checkdep "jq"
 
-if [ $# -le 0 ]; then
-  echo "Hi, I am Tuxi.. Ask me something"
-  help_text | head -n1 && exit $?
-fi
+[ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 
@@ -59,5 +51,5 @@ res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..u
 [ -n "$res3" ] && strip "$res3" && exit
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
-[ -z "$tmp" ] && error "No Result!" && exit 1 || \
+[ -z "$tmp" ] && err "No Result!" && exit 1 || \
 strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | xargs -d ' ' -n10)"
