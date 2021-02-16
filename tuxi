@@ -2,19 +2,40 @@
 
 N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"
 
-if [ "$1" = "--raw" ]; then
-    [ "$2" = "" ] && echo "Please add query!" && exit 1
-    query="${*:2}" && msg() { echo "> $*"; } && error() { echo "$*"; } && strip() { echo "$*"; }
-else
-    query="$*" && msg() { echo -e "${G}>${N} $*"; } && error() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
-fi
+help_text() {
+echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}"
+cat << EOF
+
+OPTIONS:
+-r, --raw             Simplify tuxi output. Useful for e.g notify-send.
+-h, --help            Displays this help message.
+
+EOF
+echo -e "${G}Report bugs to ${N}https://github.com/Bugswriter/tuxi"
+}
+        
+case $1 in
+    -r|--raw)
+        [ "$2" = "" ] && echo "Please add query!" && exit 1
+        query="${*:2}" && msg() { echo "> $*"; } && error() { echo "$*"; } && strip() { echo "$*"; }
+    ;;
+    -h|--help)
+        help_text && exit 0
+    ;;
+    -*)
+        echo "Unknown option \"$1\"" && exit 1
+    ;;
+    *)
+        query="$*" && msg() { echo -e "${G}>${N} $*"; } && error() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
+    ;;
+esac
 
 checkdep() { [ ! $(command -v "$*" 2> /dev/null) ] && error "\"$*\" not found!" && exit 1; }
 checkdep "pup"; checkdep "recode"; checkdep "jq"
 
 if [ $# -le 0 ]; then
   echo "Hi, I am Tuxi.. Ask me something"
-  echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}" && exit $?
+  help_text | head -n1 && exit $?
 fi
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
