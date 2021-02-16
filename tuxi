@@ -5,7 +5,12 @@ RED="\e[1;31m"
 GREEN="\e[1;32m"
 MAGENTA="\e[1;35m"
 
-checkdep() { [ ! -x $(command -v "$@") ] && echo -e "${RED}$@ not found!${NC}" && exit 1; }
+checkdep() {
+    if ! command -v "$*" > /dev/null 2> /dev/null; then
+        echo -e "${RED}$@ not found!${NC}" && exit 1
+    fi
+}
+
 checkdep "pup"
 checkdep "recode"
 checkdep "jq"
