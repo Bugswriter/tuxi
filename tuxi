@@ -24,9 +24,9 @@ res1=$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf
 res2=$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8)
 [ -n "$res2" ] && echo "$res2" && exit
 
-res3=$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | xargs -d ' ' -n10)
+res3=$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)
 [ -n "$res3" ] && echo "$res3" && exit
 
 
 tmp=$(echo "$webpage" | pup 'div.kno-rdesc')
-[ -z "$tmp" ] && echo "No Result" || (echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | xargs -d ' ' -n10)
+[ -z "$tmp" ] && echo "No Result" || (echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)
