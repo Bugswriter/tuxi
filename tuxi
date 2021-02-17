@@ -3,7 +3,7 @@
 N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
 
 help_text() {
-    echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
+echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
 cat << EOF
 
 OPTIONS:
@@ -11,12 +11,12 @@ OPTIONS:
 -h, --help            Displays this help message.
 
 EOF
-    echo -e "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
+echo -e "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
 }
 
 case $1 in
     -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
-        query="${*:2}" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
+              query="${*:2}" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
     ;;
     -h|--help) help_text && exit 0
     ;;
