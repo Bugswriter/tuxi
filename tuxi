@@ -24,7 +24,7 @@ case $1 in
     ;;
 esac
 
-checkdep() { [ ! $(command -v "$*" 2> /dev/null) ] && err "\"$*\" not found!" && exit 1; }
+checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!" && exit 1; }
 checkdep "pup"; checkdep "recode"; checkdep "jq"
 
 [ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
