@@ -14,17 +14,17 @@ printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
 
 case $1 in
     -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
-              query="$(printf "%s" "$*" | cut -c 2)" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
+              query="$(printf "%s" "$*" | cut -f 2- -d ' ')" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
     ;;
     -h|--help) help_text && exit 0
     ;;
-    -*) printf "%bUnknown option%b \"$1\"" "$R" "$N" && exit 1
+    -*) printf "%bUnknown option%b \"$1\"\n" "$R" "$N" && exit 1
     ;;
     *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
-checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!" && exit 1; }
+checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!\n" && exit 1; }
 checkdep "pup"; checkdep "recode"; checkdep "jq"
 
 [ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
