@@ -2,15 +2,15 @@
 
 help_text() {
     printf "%bUsage:%b tuxi %b<your question>%b\n\ttuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
-    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi strip. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
+    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi output. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
     printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
 }
 
 # Checks if dependencies are installed.
-checkdep() {
+check_dep() {
     while [ -n "$1" ]; do
         if [ ! "$(command -v $1)" ]; then
-            err "\"$1\" not found!"
+            error_msg "\"$1\" not found!"
             exit 1
         fi
         shift
@@ -18,7 +18,7 @@ checkdep() {
 }
 
 # dependency check
-checkdep pup recode jq
+check_dep pup recode jq
 
 # Colour codes
 N="\033[0m"    # Reset
@@ -33,9 +33,9 @@ case $1 in
         [ -z "$2" ] && echo "Please add query!" && exit 1
         query="$(printf "%s" "$*" | cut -f 2- -d ' ')"
 	# Raw formatting functions
-        msg() { echo "> $*"; }
-        err() { echo "$*"; }
-        strip() { echo "$*"; }
+        info_msg() { echo "> $*"; }
+        error_msg() { echo "$*"; }
+        output() { echo "$*"; }
     ;;
     -h|--help)
         help_text
@@ -48,9 +48,9 @@ case $1 in
     *)
         query="$*"
 	# Normal formatting functions
-        msg() { printf "%b>%b $*\n" "$G" "$N"; } 
-        err() { printf "%b$*%b\n" "$R" "$N"; }
-        strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
+        info_msg() { printf "%b>%b %s\n"  "$G" "$N" "$*"; }
+        error_msg() { printf "%b%s%b\n"  "$R" "$*" "$N"; }
+        output() { printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"; }
     ;;
 esac
 
@@ -63,27 +63,27 @@ google_url="https://www.google.com/search?hl=en_US"
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
-[ -n "$did_you_mean" ] && msg "Did you mean $did_you_mean?"
+[ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 
 math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
-[ -n "$math" ] && strip "$math" && exit 0
+[ -n "$math" ] && output "$math" && exit 0
 
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
-[ -n "$list" ] && strip "$kno_top" && exit 0
+[ -n "$list" ] && output "$kno_top" && exit 0
 
 res1="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$res1" ] && strip "$res1" && exit 0
+[ -n "$res1" ] && output "$res1" && exit 0
 
 rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
-[ -n "$rich" ] && strip "$rich" && exit 0
+[ -n "$rich" ] && output "$rich" && exit 0
 
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$feat" ] && strip "a$feat" && exit 0
+[ -n "$feat" ] && output "a$feat" && exit 0
 
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
-[ -n "$lyrics" ] && strip "$lyrics" && exit 0
+[ -n "$lyrics" ] && output "$lyrics" && exit 0
 
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$kno_right" ] && strip "$kno_right" && exit 0
+[ -n "$kno_right" ] && output "$kno_right" && exit 0
 
 error_msg "No Result!" && exit 1
