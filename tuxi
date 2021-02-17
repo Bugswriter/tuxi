@@ -3,7 +3,7 @@
 N="\033[0m"; R="nvim\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
 
 help_text() {
-printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
+printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
 cat << EOF
 OPTIONS:
 -r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
