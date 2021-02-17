@@ -88,6 +88,9 @@ while getopts "hrq" OPT; do
     q)  
         quiet=true
         ;;
+    *)
+        help_text | head -n 1
+        exit 1
     esac
 done
 # shifts to query
