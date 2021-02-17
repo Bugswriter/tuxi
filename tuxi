@@ -7,6 +7,8 @@ help_text () {
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
+    printf "  -q                    Only output search results.\n"
+    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
 }
@@ -43,6 +45,7 @@ C="\033[1;36m" # Cyan
 
 # options
 raw=false
+quiet=false
 
 # search result output format (changes if raw=true)
 output() { 
@@ -52,6 +55,7 @@ output() {
 # Argument parsing
 # -h : help
 # -r : raw search result
+# -q : silences greeting and did you mean
 while getopts "hrq" OPT; do
     case "$OPT" in
     h)
@@ -60,6 +64,9 @@ while getopts "hrq" OPT; do
         ;;
     r)  
         raw=true
+        ;;
+    q)  
+        quiet=true
         ;;
     esac
 done
@@ -77,9 +84,11 @@ fi
 
 # If query is empty: exit
 if [ "$1" = "" ]; then
+if [ $quiet = "false" ]; then
     printf "Hi, I'm Tuxi. Ask me anything!\n"
     help_text | head -n 1
-    exit 0
+fi
+exit 0
 fi
 
 # Else, all arguments are saved in $query
@@ -91,8 +100,10 @@ google_url="https://www.google.com/search?hl=en_US"
 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
-[ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
+if [ $quiet = "false" ]; then
+    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+    [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
+fi
 
 math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
 [ -n "$math" ] && output "$math" && exit 0
