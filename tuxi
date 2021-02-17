@@ -1,32 +1,61 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-if [ $# -le 0 ]; then
-  echo "Hi, I am Tuxi.. Ask me something"
-  echo "Usage: tuxi <your question>"
-  exit
-fi
+N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
 
-query="$*"
+help_text() {
+echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
+cat << EOF
+
+OPTIONS:
+-r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
+-h, --help            Displays this help message.
+
+EOF
+echo -e "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
+}
+
+case $1 in
+    -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
+              query="${*:2}" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
+    ;;
+    -h|--help) help_text && exit 0
+    ;;
+    -*) echo -e "${R}Unknown option${N} \"$1\"" && exit 1
+    ;;
+    *) query="$*" && msg() { echo -e "${G}>${N} $*"; } && err() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
+    ;;
+esac
+
+checkdep() { [ ! $(command -v "$*" 2> /dev/null) ] && err "\"$*\" not found!" && exit 1; }
+checkdep "pup"; checkdep "recode"; checkdep "jq"
+
+[ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 
 webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-res0=$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8 )
-[ -n "$res0" ] && echo "> u mean $res0?"
+res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8)"
+[ -n "$res0" ] && msg "u mean $res0?"
 
 list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
-[ -n "$list" ] && echo "$list" && exit
+[ -n "$list" ] && strip "$list" && exit
 
-res1=$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8)
-[ -n "$res1" ] && echo "$res1" && exit
+res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8)"
+[ -n "$res1" ] && strip "$res1" && exit
 
-res2=$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8)
-[ -n "$res2" ] && echo "$res2" && exit
-
-res3=$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)
-[ -n "$res3" ] && echo "$res3" && exit
+res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8)"
+[ -n "$res2" ] && strip "$res2" && exit
 
 
-tmp=$(echo "$webpage" | pup 'div.kno-rdesc')
-[ -z "$tmp" ] && echo "No Result" || (echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)
+res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$res3" ] && strip "$res3" && exit
+
+
+res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..utf8)"
+[ -n "$res4" ] && strip "$res4" && exit
+
+
+tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
+[ -z "$tmp" ] && err "No Result!" && exit 1 || \
+strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)"
