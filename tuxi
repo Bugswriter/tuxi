@@ -34,9 +34,9 @@ case $1 in
     *)
         query="$*"
 	# Normal formatting functions
-        msg() { printf "%b>%b $*\n" "$G" "$N"; } 
-        err() { printf "%b$*%b\n" "$R" "$N"; }
-        strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
+        msg() { printf "%b>%b %s\n" "$G" "$N" "$*"; } 
+        err() { printf "%b%s%b\n" "$R" "$*" "$N"; }
+        strip() { printf "%b---%b\n%s\n%b---%b\n" "$G" "$N" "$*" "$G" "$N"; }
     ;;
 esac
 
