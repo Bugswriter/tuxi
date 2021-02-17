@@ -184,11 +184,6 @@ feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode htm
 [ -n "$feat" ] && output "a$feat" && exit 0
 
 
-# Google Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | recode html..ISO-8859-1)"
-[ -n "$trans" ] && output "$trans" && exit
-
-
 # Lyrics ( eg: gecgecgec lyrics )
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
@@ -198,6 +193,10 @@ lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$kno_right" ] && output "$kno_right" && exit 0
 
+
+# Google Translate ( eg: Vais para cascais? em ingles )
+trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | recode html..ISO-8859-1)"
+[ -n "$trans" ] && output "$trans" && exit
 
 # Else
 error_msg "No Result!" && exit 1
