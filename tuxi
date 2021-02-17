@@ -117,7 +117,7 @@ fi
 
 # If query is empty: exit
 # If quiet=false: Prints greeting and usage
-if [ "$1" = "" ]; then
+if [ -z "$1" ]; then
 if [ $quiet = "false" ]; then
     printf "Hi, I'm Tuxi. Ask me anything!\n"
     help_text | head -n 1 
@@ -152,7 +152,7 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Knowledge Graph - right
 
 
-# did you mean ( eg: linux torvalds )
+# did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
 if [ $quiet = "false" ]; then
     did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
