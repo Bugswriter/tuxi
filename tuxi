@@ -33,27 +33,27 @@ user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Fi
 
 webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8)"
+res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..ISO-8859-1)"
 [ -n "$res0" ] && msg "u mean $res0?"
 
-list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
+list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
 [ -n "$list" ] && strip "$list" && exit
 
-res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..utf8)"
+res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
 [ -n "$res1" ] && strip "$res1" && exit
 
-res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8)"
+res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)"
 [ -n "$res2" ] && strip "$res2" && exit
 
-res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)"
+res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$res3" ] && strip "$res3" && exit
 
-res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..utf8)"
+res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
 [ -n "$res4" ] && strip "$res4" && exit
 
-res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..utf8)"
+res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$res5" ] && strip "$res5" && exit
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 [ -z "$tmp" ] && err "No Result!" && exit 1 || \
-strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)" 
+strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)" 
