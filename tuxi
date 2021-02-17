@@ -100,29 +100,38 @@ google_url="https://www.google.com/search?hl=en_US"
 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
+# did you mean ( eg: linux torvalds )
+# silenced if quiet=true
 if [ $quiet = "false" ]; then
     did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
+# Math ( eg: log_2(3) * pi^e )
 math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
 [ -n "$math" ] && output "$math" && exit 0
 
+# Knowledge Graph - top (list) ( eg: the office cast )
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
 [ -n "$list" ] && output "$kno_top" && exit 0
 
+# ?
 res1="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
 [ -n "$res1" ] && output "$res1" && exit 0
 
+# Rich Answers ( eg: elevation of mount everest )
 rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 [ -n "$rich" ] && output "$rich" && exit 0
 
+# Featured Snippets ( eg: who is garfield )
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$feat" ] && output "a$feat" && exit 0
 
+# Lyrics ( eg: gecgecgec lyrics )
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
 
+# Knowledge Graph - right ( eg: the office )
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$kno_right" ] && output "$kno_right" && exit 0
 
