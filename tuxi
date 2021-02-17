@@ -2,7 +2,7 @@
 
 help_text() {
     printf "%bUsage:%b tuxi %b<your question>%b\n\ttuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
-    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi output. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
+    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi strip. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
     printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
 }
 
@@ -58,35 +58,32 @@ esac
 [ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
+google_url="https://www.google.com/search?hl=en_US"
 
-webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
+google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..ISO-8859-1)"
-[ -n "$res0" ] && msg "u mean $res0?"
+did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+[ -n "$did_you_mean" ] && msg "Did you mean $did_you_mean?"
 
-list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
-[ -n "$list" ] && strip "$list" && exit
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
+[ -n "$math" ] && strip "$math" && exit 0
 
-res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$res1" ] && strip "$res1" && exit
+kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
+[ -n "$list" ] && strip "$kno_top" && exit 0
 
-res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)"
-[ -n "$res2" ] && strip "$res2" && exit
+res1="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+[ -n "$res1" ] && strip "$res1" && exit 0
 
-res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$res3" ] && strip "$res3" && exit
+rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
+[ -n "$rich" ] && strip "$rich" && exit 0
 
-res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
-[ -n "$res4" ] && strip "$res4" && exit
+feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$feat" ] && strip "a$feat" && exit 0
 
-res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
-[ -n "$res5" ] && strip "$res5" && exit
+lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
+[ -n "$lyrics" ] && strip "$lyrics" && exit 0
 
-tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
+kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$kno_right" ] && strip "$kno_right" && exit 0
 
-if [ -n "$tmp" ]; then
-    strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-else
-    err "No Result!" && exit 1
-fi
-
+error_msg "No Result!" && exit 1
