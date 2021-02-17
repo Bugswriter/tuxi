@@ -20,7 +20,7 @@ case $1 in
     ;;
     -*) printf "%bUnknown option%b \"$1\"" "$R" "$N" && exit 1
     ;;
-    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b" "$G" "$N" "$G" "$N"; }
+    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
