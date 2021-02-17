@@ -22,6 +22,14 @@ check_dep() {
     done
 }
 
+info_msg() {
+    printf "%b>%b %s\n"  "$G" "$N" "$*"
+}
+
+error_msg() {
+    printf "%b%s%b\n"  "$R" "$*" "$N"
+}
+
 # dependency check
 check_dep pup recode jq
 
@@ -33,35 +41,50 @@ Y="\033[1;33m" # Yellow
 M="\033[1;35m" # Magenta
 C="\033[1;36m" # Cyan
 
+# options
+raw=false
+
+# search result output format (changes if raw=true)
+output() { 
+    printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
+}
+
 # Argument parsing
-case $1 in
-    -r|--raw)
-        [ -z "$2" ] && echo "Please add query!" && exit 1
-        query="$(printf "%s" "$*" | cut -f 2- -d ' ')"
-	# Raw formatting functions
-        info_msg() { echo "> $*"; }
-        error_msg() { echo "$*"; }
-        output() { echo "$*"; }
-    ;;
-    -h|--help)
+# -h : help
+# -r : raw search result
+while getopts "hrq" OPT; do
+    case "$OPT" in
+    h)
         help_text
         exit 0
-    ;;
-    -*)
-        printf "%bUnknown option%b \"$1\"\n" "$R" "$N"
-        exit 1
-    ;;
-    *)
-        query="$*"
-	# Normal formatting functions
-        info_msg() { printf "%b>%b %s\n"  "$G" "$N" "$*"; }
-        error_msg() { printf "%b%s%b\n"  "$R" "$*" "$N"; }
-        output() { printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"; }
-    ;;
-esac
+        ;;
+    r)  
+        raw=true
+        ;;
+    esac
+done
+# shifts to query
+shift $((OPTIND-1))
 
+# If raw=true: No colors, No pretty output
+if $raw; then
+    N=""; R=""; G=""; M=""; C="";
 
-[ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
+    output () { 
+        printf "%s\n" "$*"
+    }
+fi
+
+# If query is empty: exit
+if [ "$1" = "" ]; then
+    printf "Hi, I'm Tuxi. Ask me anything!\n"
+    help_text | head -n 1
+    exit 0
+fi
+
+# Else, all arguments are saved in $query
+query="$*"
+
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl=en_US"
