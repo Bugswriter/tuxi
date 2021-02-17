@@ -20,7 +20,7 @@ case $1 in
     ;;
     -*) printf "%bUnknown option%b \"$1\"\n" "$R" "$N" && exit 1
     ;;
-    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
+    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b\n" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
@@ -52,5 +52,5 @@ res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..
 [ -n "$res4" ] && strip "$res4" && exit
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
-[ -z "$tmp" ] && err "No Result!\n" && exit 1 || \
+[ -z "$tmp" ] && err "No Result!" && exit 1 || \
 strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)" 
