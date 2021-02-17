@@ -14,7 +14,7 @@ printf "%bReport bugs to%b https://github.com/Bugswriter/tuxi" "$G" "$N"
 
 case $1 in
     -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
-              query="${*:2}" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
+              query="$(printf "%s" "$*" | cut -c 2)" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
     ;;
     -h|--help) help_text && exit 0
     ;;
