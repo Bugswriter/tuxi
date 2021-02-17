@@ -1,9 +1,9 @@
 # Tuxi
 
-Tuxi is a simple bash script which scrape google search for getting instant answers of your question on your terminal.
+Tuxi is a simple bash script which scrapes Google's search results and provides instant, concise answers for your questions in the terminal.
 
 [Watch this Video Please](https://www.youtube.com/watch?v=EtwWvMa8muU)
-> Also checkout my youtube channel for more scripts like this
+> Also checkout my YouTube channel for more scripts like this.
 
 ## Requirements
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
@@ -28,8 +28,8 @@ along with a modern desktop environment and qualities of the
 operating system while windows are slow on older hardware.
 ---
 ```
-* Quotations are optional if you want to search with some special character.
-* You can write question directly like `tuxi linus torvalds birthday`
+* Quotations are optional, but should be used if you want to search with special characters. 
+* You can also write your query as a statement, e.g. `tuxi linus torvalds birthday`
 
 Use `-h`, `--help` arguments to display help message. 
 ```bash
@@ -49,10 +49,9 @@ $ tuxi -r linus torvalds birthday
 ```
 
 ## How this work?
-It simply use google search results.
-By using pup I scrape google search results and get cream information like answer of one word question or paragraph which google show on top.
-Sometimes Google give multiple cream information like one word results and other information on right In that case It show result of the basis of priority.
-I do scraping with `pup` and use some Unix tools like `awk` `sed` to do the magic.
+The script uses pup to scrape Google search results and return a clean, concise answer based on the top search result. If the query returns several results that are concise enough for tuxi to return, tuxi will show the results on the basis of priority.
+
+In addition to using `pup` for scraping, `tuxi` also uses `awk` and `sed` to process and return results.
 
 ## License
-Do whatever you want. Just don't make money from this and If you do 70% is mine.
+Do whatever you want. Just don't make money from this, but if you do 70% is mine.
