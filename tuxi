@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+### Functions ###
+
 help_text () {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
     printf "\n"
@@ -32,10 +34,10 @@ error_msg() {
     printf "%b%s%b\n"  "$R" "$*" "$N"
 }
 
-# dependency check
+### Dependency Check ###
 check_dep pup recode jq
 
-# Colour codes
+### Color Codes ###
 N="\033[0m"    # Reset
 R="\033[1;31m" # Red
 G="\033[1;32m" # Green
@@ -43,7 +45,7 @@ Y="\033[1;33m" # Yellow
 M="\033[1;35m" # Magenta
 C="\033[1;36m" # Cyan
 
-# options
+### Default Options ### 
 raw=false
 quiet=false
 
@@ -52,7 +54,7 @@ output() {
     printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
 }
 
-# Argument parsing
+### Getopts ###
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
@@ -73,6 +75,7 @@ done
 # shifts to query
 shift $((OPTIND-1))
 
+### Raw Formatting ###
 # If raw=true: No colors, No pretty output
 if $raw; then
     N=""; R=""; G=""; M=""; C="";
@@ -82,6 +85,7 @@ if $raw; then
     }
 fi
 
+### Query Check ###
 # If query is empty: exit
 if [ "$1" = "" ]; then
 if [ $quiet = "false" ]; then
@@ -94,10 +98,12 @@ fi
 # Else, all arguments are saved in $query
 query="$*"
 
+### Snippet Extraction ###
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl=en_US"
 
+# Response from Google via cURL (-G: get, -s: silent)
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 # did you mean ( eg: linux torvalds )
@@ -135,4 +141,5 @@ lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$kno_right" ] && output "$kno_right" && exit 0
 
+# Else
 error_msg "No Result!" && exit 1
