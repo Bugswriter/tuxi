@@ -147,12 +147,9 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # ?
 # Rich Answers
 # Featured Snippets
+# Google Translate
 # Lyrics
 # Knowledge Graph - right
-res6="$(echo "$webpage" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | recode html..ISO-8859-1)"
-[ -n "$res6" ] && strip "$res6" && exit
-
-tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 
 
 # did you mean ( eg: linux torvalds )
@@ -185,6 +182,11 @@ rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 # Featured Snippets ( eg: who is garfield )
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$feat" ] && output "a$feat" && exit 0
+
+
+# Google Translate ( eg: Vais para cascais? em ingles )
+trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | recode html..ISO-8859-1)"
+[ -n "$trans" ] && output "$trans" && exit
 
 
 # Lyrics ( eg: gecgecgec lyrics )
