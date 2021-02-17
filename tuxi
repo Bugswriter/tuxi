@@ -1,9 +1,9 @@
 #!/usr/bin/env sh
 
-N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
+N="\033[0m"; R="\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
 
 help_text() {
-echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
+printf '%b' "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
 cat << EOF
 
 OPTIONS:
@@ -11,7 +11,7 @@ OPTIONS:
 -h, --help            Displays this help message.
 
 EOF
-echo -e "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
+printf '%b' "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
 }
 
 case $1 in
@@ -20,9 +20,9 @@ case $1 in
     ;;
     -h|--help) help_text && exit 0
     ;;
-    -*) echo -e "${R}Unknown option${N} \"$1\"" && exit 1
+    -*) printf '%b' "${R}Unknown option${N} \"$1\"" && exit 1
     ;;
-    *) query="$*" && msg() { echo -e "${G}>${N} $*"; } && err() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
+    *) query="$*" && msg() { printf '%b' "${G}>${N} $*"; } && err() { printf '%b' "${R}$*${N}"; } && strip() { printf '%b' "${G}---${N}\n$*\n${G}---${N}"; }
     ;;
 esac
 
