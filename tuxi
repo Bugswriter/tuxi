@@ -47,7 +47,7 @@ res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ut
 res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8)"
 [ -n "$res2" ] && strip "$res2" && exit
 
-res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | xargs -d ' ' -n10)"
+res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10"
 [ -n "$res3" ] && strip "$res3" && exit
 
 res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..utf8)"
@@ -55,4 +55,4 @@ res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 [ -z "$tmp" ] && err "No Result!" && exit 1 || \
-strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | xargs -d ' ' -n10)"
+strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10"
