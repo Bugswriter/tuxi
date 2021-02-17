@@ -3,15 +3,13 @@
 N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
 
 help_text() {
-printf "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
+printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
 cat << EOF
-
 OPTIONS:
 -r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
 -h, --help            Displays this help message.
-
 EOF
-printf "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
+printf "%bReport bugs to%b https://github.com/Bugswriter/tuxi" "$G" "$N"
 }
 
 case $1 in
@@ -20,9 +18,9 @@ case $1 in
     ;;
     -h|--help) help_text && exit 0
     ;;
-    -*) printf "${R}Unknown option${N} \"$1\"" && exit 1
+    -*) printf "%bUnknown option%b \"$1\"" "$R" "$N" && exit 1
     ;;
-    *) query="$*" && msg() { printf "${G}>${N} $*"; } && err() { printf "${R}$*${N}"; } && strip() { printf "${G}---${N}\n$*\n${G}---${N}"; }
+    *) query="$*" && msg() { printf "%b>%b $*" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
