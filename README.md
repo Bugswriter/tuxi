@@ -7,30 +7,46 @@ Tuxi is a simple bash script which scrapes Google's search results and provides 
 
 ## Requirements
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
-* Recode
-* jq 
+* [recode](https://github.com/rrthomas/recode) - Charset converter tool and library
+* [jq](https://github.com/stedolan/jq) - Command-line JSON processor
 
 ## Installation
-To install, clone the repository and copy tuxi to a location in your $PATH:
-
+cURL **tuxi** to your **$PATH** and give execute permissions.
 ```bash
-git clone https://github.com/bugswriter/tuxi.git
-cd tuxi
-cp tuxi $HOME/.local/bin/tuxi
+$ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
+$ chmod +x $HOME/.local/bin/tuxi
 ```
 
 ## Usage
-
 ```bash
-tuxi "is linux better than windows"
-Linux is very well secure as it is easy to
-detect bugs and fix whereas Windows has a huge user
-base, so it becomes a target of hackers to attack
-windows system. Linux runs faster even with older hardware whereas
-windows are slower compared to Linux.
+$ tuxi "Is Linux better than Windows?"
+---
+Linux has a reputation for being fast and smooth while
+Windows 10 is known to become slow and slow over
+time. Linux runs faster than Windows 8.1 and Windows 10
+along with a modern desktop environment and qualities of the
+operating system while windows are slow on older hardware.
+---
 ```
 * Quotations are optional, but should be used if you want to search with special characters. 
 * You can also write your query as a statement, e.g. `tuxi linus torvalds birthday`
+
+Use `-h`, `--help` arguments to display help message. 
+```bash
+$ tuxi --help
+Usage: tuxi <your question>
+       tuxi <OPTIONS> <your question>
+
+OPTIONS:
+-r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
+-h, --help            Displays this help message.
+
+Report bugs to https://github.com/Bugswriter/tuxi
+```
+```bash
+$ tuxi -r linus torvalds birthday
+28 December 1969
+```
 
 ## How this work?
 The script uses pup to scrape Google search results and return a clean, concise answer based on the top search result. If the query returns several results that are concise enough for tuxi to return, tuxi will show the results on the basis of priority.
