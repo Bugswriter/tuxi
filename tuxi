@@ -53,6 +53,9 @@ res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..u
 res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..utf8)"
 [ -n "$res4" ] && strip "$res4" && exit
 
+res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..utf8)"
+[ -n "$res5" ] && strip "$res5" && exit
+
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 [ -z "$tmp" ] && err "No Result!" && exit 1 || \
 strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | xargs -d ' ' -n10)"
