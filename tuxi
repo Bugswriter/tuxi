@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-N="\033[0m"; R="nvim\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
+N="\033[0m"; R="\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
 
 help_text() {
 printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
