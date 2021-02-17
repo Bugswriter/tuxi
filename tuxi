@@ -1,32 +1,30 @@
 #!/usr/bin/env sh
 
-N="\e[0m"; R="\e[1;31m"; G="\e[1;32m"; M="\e[1;35m"; C="\e[1;36m"
+N="\033[0m"; R="\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
 
 help_text() {
-echo -e "${G}Usage:${N} tuxi ${M}<your question>${N}\n       tuxi ${C}<OPTIONS>${N} ${M}<your question>${N}"
+printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
 cat << EOF
-
 OPTIONS:
 -r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
 -h, --help            Displays this help message.
-
 EOF
-echo -e "${G}Report bugs to${N} https://github.com/Bugswriter/tuxi"
+printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
 }
 
 case $1 in
     -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
-              query="${*:2}" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
+              query="$(printf "%s" "$*" | cut -f 2- -d ' ')" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
     ;;
     -h|--help) help_text && exit 0
     ;;
-    -*) echo -e "${R}Unknown option${N} \"$1\"" && exit 1
+    -*) printf "%bUnknown option%b \"$1\"\n" "$R" "$N" && exit 1
     ;;
-    *) query="$*" && msg() { echo -e "${G}>${N} $*"; } && err() { echo -e "${R}$*${N}"; } && strip() { echo -e "${G}---${N}\n$*\n${G}---${N}"; }
+    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b\n" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
-checkdep() { [ ! $(command -v "$*" 2> /dev/null) ] && err "\"$*\" not found!" && exit 1; }
+checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!\n" && exit 1; }
 checkdep "pup"; checkdep "recode"; checkdep "jq"
 
 [ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
@@ -47,7 +45,7 @@ res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ut
 res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..utf8)"
 [ -n "$res2" ] && strip "$res2" && exit
 
-res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | xargs -d ' ' -n10)"
+res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$res3" ] && strip "$res3" && exit
 
 res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..utf8)"
@@ -58,4 +56,4 @@ res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..utf8)"
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 [ -z "$tmp" ] && err "No Result!" && exit 1 || \
-strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | xargs -d ' ' -n10)"
+strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)" 
