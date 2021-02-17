@@ -149,6 +149,10 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Featured Snippets
 # Lyrics
 # Knowledge Graph - right
+res6="$(echo "$webpage" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | recode html..ISO-8859-1)"
+[ -n "$res6" ] && strip "$res6" && exit
+
+tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 
 
 # did you mean ( eg: linux torvalds )
