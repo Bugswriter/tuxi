@@ -1,17 +1,31 @@
 #!/usr/bin/env sh
 
+help_text() {
+    printf "%bUsage:%b tuxi %b<your question>%b\n\ttuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
+    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi output. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
+    printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
+}
+
+# Checks if dependencies are installed.
+checkdep() {
+    while [ -n "$1" ]; do
+        if [ ! "$(command -v $1)" ]; then
+            err "\"$1\" not found!"
+            exit 1
+        fi
+        shift
+    done
+}
+
+# dependency check
+checkdep pup recode jq
+
 # Colour codes
 N="\033[0m"    # Reset
 R="\033[1;31m" # Red
 G="\033[1;32m" # Green
 M="\033[1;35m" # Magenta
 C="\033[1;36m" # Cyan
-
-help_text() {
-    printf "%bUsage:%b tuxi %b<your question>%b\n\ttuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
-    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi output. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
-    printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
-}
 
 # Argument parsing
 case $1 in
@@ -40,17 +54,6 @@ case $1 in
     ;;
 esac
 
-# Check if dependencies (pup, recode, jq) are installed.
-checkdep() {
-    while [ -n "$1" ]; do
-        if [ ! "$(command -v $1)" ]; then
-            err "\"$1\" not found!"
-            exit 1
-        fi
-        shift
-    done
-}
-checkdep pup recode jq
 
 [ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
 
