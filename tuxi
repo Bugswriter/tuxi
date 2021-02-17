@@ -20,7 +20,7 @@ case $1 in
     ;;
     -*) printf "%bUnknown option%b \"$1\"" "$R" "$N" && exit 1
     ;;
-    *) query="$*" && msg() { printf "%b>%b $*" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b" "$G" "$N" "$G" "$N"; }
+    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
@@ -34,7 +34,7 @@ user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Fi
 webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8)"
-[ -n "$res0" ] && msg "u mean $res0?\n"
+[ -n "$res0" ] && msg "u mean $res0?"
 
 list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
 [ -n "$list" ] && strip "$list" && exit
