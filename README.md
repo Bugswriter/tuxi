@@ -53,5 +53,3 @@ The script uses pup to scrape Google search results and return a clean, concise 
 
 In addition to using `pup` for scraping, `tuxi` also uses `awk` and `sed` to process and return results.
 
-## License
-Do whatever you want. Just don't make money from this, but if you do 70% is mine.
