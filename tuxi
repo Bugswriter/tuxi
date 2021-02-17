@@ -1,9 +1,14 @@
 #!/usr/bin/env sh
 
-help_text() {
-    printf "%bUsage:%b tuxi %b<your question>%b\n\ttuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
-    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi output. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
-    printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
+help_text () {
+    printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
+    printf "\n"
+    printf "%bOptions:%b\n"                                 "$G" "$N"
+    printf "  -h                    Show this help message and exit.\n"
+    printf "  -r                    Raw search results.\n"
+    printf "                        (no pretty output, no colors)\n"
+    printf "\n"
+    printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
 }
 
 # Checks if dependencies are installed.
