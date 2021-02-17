@@ -24,6 +24,7 @@ check_dep pup recode jq
 N="\033[0m"    # Reset
 R="\033[1;31m" # Red
 G="\033[1;32m" # Green
+Y="\033[1;33m" # Yellow
 M="\033[1;35m" # Magenta
 C="\033[1;36m" # Cyan
 
