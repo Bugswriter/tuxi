@@ -34,7 +34,7 @@ user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Fi
 webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..utf8)"
-[ -n "$res0" ] && msg "u mean $res0?"
+[ -n "$res0" ] && msg "u mean $res0?\n"
 
 list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..utf8)
 [ -n "$list" ] && strip "$list" && exit
@@ -52,5 +52,5 @@ res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..
 [ -n "$res4" ] && strip "$res4" && exit
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
-[ -z "$tmp" ] && err "No Result!" && exit 1 || \
-strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)"
+[ -z "$tmp" ] && err "No Result!\n" && exit 1 || \
+strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..utf8 | tr ' ' '\0' | xargs -0 -n10)" 
