@@ -150,7 +150,8 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Google Translate
 # Lyrics
 # Knowledge Graph - right
-
+# Units
+# Currency
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
@@ -192,6 +193,21 @@ lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-
 # Knowledge Graph - right ( eg: the office )
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$kno_right" ] && output "$kno_right" && exit 0
+
+
+# Weather ( eg: weather new york)
+weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
+[ -n "$weather" ] && output "$weather" && exit 0
+
+
+# Units ( eg: 1m into 1 cm )
+unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value')"
+[ -n "$unit" ] && output "$unit" && exit
+
+
+# Currency conversion ( eg: 1 USD in rupee )
+currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0')"
+[ -n "$currency" ] && output "$currency" && exit
 
 
 # Google Translate ( eg: Vais para cascais? em ingles )
