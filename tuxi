@@ -14,11 +14,13 @@ help_text() {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
     printf "\n"
     printf "%bOptions:%b\n"                             "$G" "$N"
+
     printf "  -v                    Print version number and exit.\n"
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
+    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
@@ -85,13 +87,14 @@ output() {
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-# -d : debug
+# -d : debug mode
+
 while getopts "vhrqd" OPT; do
     case "$OPT" in
     v)
         version_text
         exit 0
-    ;;
+        ;;
     h)
         help_text
         exit 0
@@ -161,7 +164,6 @@ if $debug; then
 
     file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
     html_location="$HOME/.cache/tuxi/$file_name"
-
     printf "%s" $google_html | pup -i 2 > $html_location
     printf "HTML for \"$query\" -> $html_location\n"
     exit 0
