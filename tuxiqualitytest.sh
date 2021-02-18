@@ -21,7 +21,8 @@ tuxi "weather new york"
 tuxi "100 cm to m"
 tuxi "100 GBP to USD"
 tuxi "vais para cascais? em ingles"
-tuxi "lorem ipsum"')"
+tuxi "lorem ipsum"
+tuxi "elephant height"')"
   
 echo "$commands" | while read command ;
 do
