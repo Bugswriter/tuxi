@@ -21,6 +21,7 @@ help_text() {
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
     printf "  -a                    Try all snippets and print them.\n"
+    printf "  -l                    Print location Google is getting.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
@@ -74,6 +75,7 @@ raw=false
 quiet=false
 debug=false
 all=false
+location=false
 
 # search result output format (changes if raw=true)
 output() { 
@@ -106,7 +108,7 @@ snipcall() {
 # -d : debug mode
 # -a : try all snippets
 
-while getopts "vhrqda" OPT; do
+while getopts "vhrqdal" OPT; do
     case "$OPT" in
     v)
         version_text
@@ -127,6 +129,9 @@ while getopts "vhrqda" OPT; do
         ;;
     a)
         all=true
+        ;;
+    l)
+        location=true
         ;;
     *)
         help_text | head -n 1
@@ -193,6 +198,14 @@ if $debug; then
 fi
 
 
+# Print location
+if $location; then
+    loc="$(echo "$google_html" | pup 'span.Q8LRLc text{}' | recd)"
+    echo "$loc"
+    exit 0
+fi
+
+
 ## WARNING: Never put Define after Rich Answers, since it :will get only the word itself ##
 ## Snippet Priority ##
 # Did you mean
@@ -230,7 +243,7 @@ snipcall "$define"
 
 
 # Rich Answers ( eg: elevation of mount everest )
-rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recd)
+rich=$(echo "$google_html" | pup 'div.di3YZe text{}' | sed 's/^ //' | recd)
 snipcall "$rich"
 
 
