@@ -172,32 +172,28 @@ if [ $quiet = "false" ]; then
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
-# Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
-[ -n "$math" ] && output "$math" && exit 0
+# Basic Answers ( eg: tuxi christmas day )
+basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+[ -n "$basic" ] && output "$basic" && exit 0
 
-
-# Knowledge Graph - top (list) ( eg: the office cast )
-kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
-[ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 #define (eg: define Aggrandize)
 define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | recode html..ISO-8859-1)"
 [ -n "$define" ] && output "$define" && exit 0
-
-# Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$basic" ] && output "$basic" && exit 0
 
 
 # Rich Answers ( eg: elevation of mount everest )
 rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 [ -n "$rich" ] && output "$rich" && exit 0
 
-
 # Featured Snippets ( eg: who is garfield )
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$feat" ] && output "$feat" && exit 0
+
+
+# Math ( eg: log_2(3) * pi^e )
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
+[ -n "$math" ] && output "$math" && exit 0
 
 
 # Lyrics ( eg: gecgecgec lyrics )
@@ -208,6 +204,16 @@ lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-
 # Weather ( eg: weather new york)
 weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
 [ -n "$weather" ] && output "$weather" && exit 0
+
+
+# Knowledge Graph - top (list) ( eg: the office cast )
+kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
+[ -n "$kno_top" ] && output "$kno_top" && exit 0
+
+
+# Knowledge Graph - right ( eg: the office )
+kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$kno_right" ] && output "$kno_right" && exit 0
 
 
 # Units Conversion ( eg: 1m into 1 cm )
@@ -223,11 +229,6 @@ currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0
 # Translate ( eg: Vais para cascais? em ingles )
 trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
 [ -n "$trans" ] && output "$trans" && exit
-
-
-# Knowledge Graph - right ( eg: the office )
-kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$kno_right" ] && output "$kno_right" && exit 0
 
 
 # Else

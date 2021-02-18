@@ -73,6 +73,7 @@ $ tuxi -h
 Usage: tuxi [options] query
 
 Options:
+  -v                    Show version message and exit.
   -h                    Show this help message and exit.
   -r                    Raw search results.
                         (no pretty output, no colors)
