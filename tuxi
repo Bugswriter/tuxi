@@ -171,18 +171,19 @@ fi
 
 ## Snippet Priority ##
 # Did you mean
-# Math
-# Knowledge Graph - top
-# Define
 # Basic Answers
+# Define
 # Rich Answers
 # Featured Snippets
+# Math
 # Lyrics
 # Weather
+# Translate
+# Rich list
+# Knowledge Graph - top
+# Knowledge Graph - right
 # Units Convertion
 # Currency Convertion
-# Translate
-# Knowledge Graph - right
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
@@ -210,6 +211,7 @@ feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode htm
 [ -n "$feat" ] && output "$feat" && exit 0
 
 
+
 # Math ( eg: log_2(3) * pi^e )
 math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
 [ -n "$math" ] && output "$math" && exit 0
@@ -228,6 +230,13 @@ lyrics="$(echo "$google_html" | pup 'div.ujudUb text{}' | recode html..ISO-8859-
 weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
 [ -n "$weather" ] && output "$weather" && exit 0
 
+# Translate ( eg: Vais para cascais? em ingles )
+trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
+[ -n "$trans" ] && output "$trans" && exit
+
+# Rich list (eg: game of thrones s03 episodes)
+rich_list="$(echo "$google_html" | pup 'div.mR2gOd text{}' | recode html..ISO-8859-1)"
+[ -n "$rich_list" ] && output "$rich_list" && exit 0
 
 # Knowledge Graph - top (list) ( eg: the office cast )
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
@@ -247,11 +256,6 @@ unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[
 # Currency Conversion ( eg: 1 USD in rupee )
 currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recode html..ISO-8859-1)"
 [ -n "$currency" ] && output "$currency" && exit
-
-
-# Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
-[ -n "$trans" ] && output "$trans" && exit
 
 
 # Else
