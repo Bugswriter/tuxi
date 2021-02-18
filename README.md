@@ -1,9 +1,21 @@
-# Tuxi
+<h1 align="center">TUXI</h1>
+<p align="center">Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</p>
 
-Tuxi is a simple bash script that scrapes Google search results and SERPs,
-and provides instant, concise answers for your questions in the terminal.
+##  
 
-[Watch this video for more info](https://www.youtube.com/watch?v=EtwWvMa8muU)
+<img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
+
+#### How does this work?
+
+The script uses `pup` to scrape Google search results and SERPs.
+If the query returns several results, Tuxi will choose the most 
+relevant result on the basis of priority.
+
+In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed` 
+to process and return results, and `recode` to unescape html.
+
+
+[Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
 > Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
@@ -61,6 +73,7 @@ $ tuxi -h
 Usage: tuxi [options] query
 
 Options:
+  -v                    Show version message and exit.
   -h                    Show this help message and exit.
   -r                    Raw search results.
                         (no pretty output, no colors)
@@ -114,16 +127,11 @@ Are you going to Cascais?
 
 * And much more (lyrics, weather, conversions...)
 
----
+## License
 
-## How does this work?
+[GPL-3.0](./LICENSE)
 
-The script uses `pup` to scrape Google search results and SERPs.
-If the query returns several results, Tuxi will choose the most 
-relevant result on the basis of priority.
+## Contributing
 
-In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed` 
-to process and return results, and `recode` to unescape html.
-
-If you want to contribute, please see [CONTRIBUTING.md](https://github.com/Bugswriter/tuxi/blob/main/.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
+If you want to contribute, please see [CONTRIBUTING.md](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 
