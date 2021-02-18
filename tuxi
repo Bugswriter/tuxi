@@ -4,7 +4,12 @@
 #####      Functions      #####
 ###############################
 
-help_text () {
+# Version text should remain simple btw.
+version_text() {
+    printf "tuxi 1.1.3\n"
+}
+
+help_text() {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
     printf "\n"
     printf "%bOptions:%b\n"                             "$G" "$N"
@@ -76,8 +81,12 @@ output() {
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-while getopts "hrq" OPT; do
+while getopts "vhrq" OPT; do
     case "$OPT" in
+    v)
+        version_text
+        exit 0
+    ;;
     h)
         help_text
         exit 0

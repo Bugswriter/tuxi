@@ -47,7 +47,12 @@ operating system while windows are slow on older hardware.
 * You can also ask tuxi to translate for you.
 * Tuxi can also convert currency or units.
 
-Use `-h` argument to display help message.
+Use `-h` argument to display help message, `-v` to show version.
+
+```sh
+$ tuxi -v
+tuxi 1.1.3
+```
 
 ```sh
 $ tuxi -h
