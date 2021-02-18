@@ -145,6 +145,7 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Did you mean
 # Math
 # Knowledge Graph - top
+# Define
 # Basic Answers
 # Rich Answers
 # Featured Snippets
@@ -171,6 +172,9 @@ math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode ht
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
 [ -n "$kno_top" ] && output "$kno_top" && exit 0
 
+#define (eg: define Aggrandize)
+define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | recode html..ISO-8859-1)"
+[ -n "$define" ] && output "$define" && exit 0
 
 # Basic Answers ( eg: tuxi christmas day )
 basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
