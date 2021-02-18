@@ -40,16 +40,16 @@ operating system while windows are slow on older hardware.
 * Your query can also be a mathematical expression.
 * You can also ask tuxi to translate for you.
 
-Use `-h`, `--help` arguments to display help message.
+Use `-h` argument to display help message.
 
 ```sh
-$ tuxi --help
+$ tuxi -h
 Usage: tuxi <your question>
        tuxi <OPTIONS> <your question>
 
 OPTIONS:
 -r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
--h, --help            Displays this help message.
+-h                    Displays this help message.
 
 Report bugs to https://github.com/Bugswriter/tuxi
 ```
