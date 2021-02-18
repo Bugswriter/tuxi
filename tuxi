@@ -1,56 +1,31 @@
 #!/usr/bin/env sh
 
-# Colour codes
-N="\033[0m"    # Reset
-R="\033[1;31m" # Red
-G="\033[1;32m" # Green
-M="\033[1;35m" # Magenta
-C="\033[1;36m" # Cyan
+N="\033[0m"; R="\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
 
 help_text() {
-    printf "%bUsage:%b tuxi %b<your question>%b\n\ttuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
-    printf "%bOPTIONS:%b\n-r, --raw\tSimplify Tuxi output. Useful for e.g notify-send.\n-h, --help\tDisplays this help message.\n" "$G" "$N"
-    printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
+printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
+cat << EOF
+OPTIONS:
+-r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
+-h, --help            Displays this help message.
+EOF
+printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
 }
 
-# Argument parsing
 case $1 in
-    -r|--raw)
-        [ -z "$2" ] && echo "Please add query!" && exit 1
-        query="$(printf "%s" "$*" | cut -f 2- -d ' ')"
-	# Raw formatting functions
-        msg() { echo "> $*"; }
-        err() { echo "$*"; }
-        strip() { echo "$*"; }
+    -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
+              query="$(printf "%s" "$*" | cut -f 2- -d ' ')" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
     ;;
-    -h|--help)
-        help_text
-        exit 0
+    -h|--help) help_text && exit 0
     ;;
-    -*)
-        printf "%bUnknown option%b \"$1\"\n" "$R" "$N"
-        exit 1
+    -*) printf "%bUnknown option%b \"$1\"\n" "$R" "$N" && exit 1
     ;;
-    *)
-        query="$*"
-	# Normal formatting functions
-        msg() { printf "%b>%b %s\n" "$G" "$N" "$*"; } 
-        err() { printf "%b%s%b\n" "$R" "$*" "$N"; }
-        strip() { printf "%b---%b\n%s\n%b---%b\n" "$G" "$N" "$*" "$G" "$N"; }
+    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b\n" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
     ;;
 esac
 
-# Check if dependencies (pup, recode, jq) are installed.
-checkdep() {
-    while [ -n "$1" ]; do
-        if [ ! "$(command -v $1)" ]; then
-            err "\"$1\" not found!"
-            exit 1
-        fi
-        shift
-    done
-}
-checkdep pup recode jq
+checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!\n" && exit 1; }
+checkdep "pup"; checkdep "recode"; checkdep "jq"
 
 [ $# -le 0 ] && echo "Hi, I am Tuxi.. Ask me something" && help_text | head -n1 && exit $?
 
@@ -80,10 +55,6 @@ res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$res5" ] && strip "$res5" && exit
 
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
-
-if [ -n "$tmp" ]; then
-    strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-else
-    err "No Result!" && exit 1
-fi
+[ -z "$tmp" ] && err "No Result!" && exit 1 || \
+strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)" 
 
