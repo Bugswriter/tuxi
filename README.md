@@ -1,9 +1,11 @@
-# Tuxi
+# TUXI
 
-A CLI tool that scrapes Google search results and SERPs,
-and provides instant, concise answers for your questions in the terminal.
-
-![Working demo GIF](https://i.ibb.co/sCwYpZ8/general.gif)
+<table border="0">
+<tr>
+<td>Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</td>
+<td width="698px" height="458px"><img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right"/></td>
+</tr>
+</table>
 
 [Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
 > Also checkout BugsWriter's YouTube channel for more scripts like this.
