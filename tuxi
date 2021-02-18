@@ -87,12 +87,21 @@ recd() {
     recode html..ISO-8859-1
 }
 
-# exit after snippet is called (changes if all=true)
+# give location true result
+modifyloc() {
+    loc="$(echo "$google_html" | pup 'span.Q8LRLc text{}' | recd)"
+}
+
+# test after snippet is called
 snipcall() {
+    if $location; then
+        modifyloc
+    fi
+
     if [ "$all" = "false" ]; then
-        [ -n "$1" ] && output "$1" && exit 0
+        [ -n "$1" ] && output "$1" "$loc" && exit 0
     else
-        [ -n "$1" ] && output "$1"
+        [ -n "$1" ] && output "$1" "$loc"
     fi
 }
 
@@ -185,6 +194,8 @@ google_url="https://www.google.com/search?hl=en_US"
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
+# Print location
+loc=""
 
 # Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
 if $debug; then
@@ -196,15 +207,6 @@ if $debug; then
     printf "HTML for \"$query\" -> $html_location\n"
     exit 0
 fi
-
-
-# Print location
-if $location; then
-    loc="$(echo "$google_html" | pup 'span.Q8LRLc text{}' | recd)"
-    echo "$loc"
-    exit 0
-fi
-
 
 ## WARNING: Never put Define after Rich Answers, since it :will get only the word itself ##
 ## Snippet Priority ##
