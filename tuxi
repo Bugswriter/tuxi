@@ -14,7 +14,8 @@ help_text() {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
     printf "\n"
     printf "%bOptions:%b\n"                             "$G" "$N"
-    printf "  -v                    Show version number and exit.\n"
+
+    printf "  -v                    Print version number and exit.\n"
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
@@ -87,6 +88,7 @@ output() {
 # -r : raw search result
 # -q : silences greeting and did you mean
 # -d : debug mode
+
 while getopts "vhrqd" OPT; do
     case "$OPT" in
     v)
@@ -128,7 +130,6 @@ if $raw; then
     }
 fi
 
-
 #############################
 #####    Query check    #####
 #############################
@@ -163,12 +164,10 @@ if $debug; then
 
     file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
     html_location="$HOME/.cache/tuxi/$file_name"
-    
     printf "%s" $google_html | pup -i 2 > $html_location
     printf "HTML for \"$query\" -> $html_location\n"
     exit 0
 fi
-
 
 ## Snippet Priority ##
 # Did you mean
@@ -198,7 +197,7 @@ basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode htm
 
 
 #define (eg: define Aggrandize)
-define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | recode html..ISO-8859-1)"
+define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | sed 's/^/\*\ /g' | recode html..ISO-8859-1)"
 [ -n "$define" ] && output "$define" && exit 0
 
 
