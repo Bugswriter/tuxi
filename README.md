@@ -5,7 +5,7 @@
 
 <img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
 
-#### How does this work?
+### How does this work?
 
 The script uses `pup` to scrape Google search results and SERPs.
 If the query returns several results, Tuxi will choose the most 
@@ -108,9 +108,13 @@ $ tuxi "log(30)"
 
 **Translate**
 ```sh
-$ tuxi "Vais para Cascais? em ingles"
+$ tuxi "I love you in japanese"
 ---
-Are you going to Cascais?
+わたしは、あなたを愛しています
+---
+$ tuxi "わたしは、あなたを愛しています in english"
+---
+I love you
 ---
 ```
 
