@@ -1,31 +1,19 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-# Color Codes
-N="\033[0m"
-Y="\033[1;33m"
-R="\033[1;31m"
+# Please do not try to make this script any more fancy or extensible, just leave it as is.
 
-checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!\n" && exit 1; }
-checkdep "pup"; checkdep "recode"; checkdep "jq";
+printf "Testing help message¬\n" && tuxi -h 1>>testoutputs.txt && printf "\tpassed.\n"|| printf "\tFailed...\n"
+printf "Testing error corrrection¬\n" && tuxi "Linux Tarvalds" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Math¬\n" && tuxi "log(30)" 1>>testoutputs.txt && tuxi "(40/3)+4*6" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Knowledge Graph - top¬\n" && tuxi "the office cast" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Rich Answer¬\n" && tuxi "elevation of mt everest" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Featured Snippets¬\n" && tuxi "the meaning of life the universe and everything else" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Lyrics¬\n" && tuxi "the motans inainte sa ne fi nascut lyrics" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Weather¬\n" && tuxi "weather new york" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Units¬\n" && tuxi "100 cm to m" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Currency¬\n" && tuxi "100 GBP to USD" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Translate¬\n" && tuxi "Vais para cascais? em ingles" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Knowledge Graph - right¬\n" && tuxi "lorem ipsum" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Define¬\n" && tuxi "define humor" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Rich List" && tuxi "elephant height" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 
-err () { printf "\n%bTuxTester%b:$ An Error has occured for the command > %s)\n" "$R" "$N" "$*" && sleep 3; }
-
-
-  commands="$(printf 'tuxi -h
-tuxi "Linux Tarvalds"
-tuxi "the office cast"
-tuxi "elevation of mt everest"
-tuxi "the meaning of life and everything else"
-tuxi "the motans inainte sa ne fi nascut lyrics"
-tuxi "weather new york"
-tuxi "100 cm to m"
-tuxi "100 GBP to USD"
-tuxi "vais para cascais? em ingles"
-tuxi "lorem ipsum"
-tuxi "elephant height"')"
-  
-echo "$commands" | while read command ;
-do
-  printf "\n\n\n\n%bTuxTester%b:$ %s\n\n" "$Y" "$N" "$command"
-  ./$command || err "$command"
-done 
