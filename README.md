@@ -1,11 +1,11 @@
 <h1 align="center">TUXI</h1>
-<p align="center">Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</p>
+<p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers</p>
 
 ##  
 
 <img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
 
-#### How does this work?
+### How does this work?
 
 The script uses `pup` to scrape Google search results and SERPs.
 If the query returns several results, Tuxi will choose the most 
@@ -29,13 +29,13 @@ to process and return results, and `recode` to unescape html.
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
-curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
-chmod +x $HOME/.local/bin/tuxi
+$ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
+$ chmod +x $HOME/.local/bin/tuxi
 ```
 
-If you're on Arch, then Tuxi is available as the `tuxi-git` package in the AUR.
+If you're on Arch, then Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
 ```sh
-yay -S tuxi-git
+$ yay -S tuxi-git
 ```
 
 ## Usage
@@ -85,7 +85,7 @@ Report bugs at https://github.com/Bugswriter/tuxi/issues.
 
 ## Features
 
-* Gives corrections
+**Gives corrections**
 ```sh
 $ tuxi linux torvalds birthday
 > Did you mean linus?
@@ -94,7 +94,7 @@ $ tuxi linux torvalds birthday
 ---
 ```
 
-* When you know it's actually linux torvalds (-q option)
+**When you know it's actually linux torvalds** <kbd>-q option</kbd>
 ```sh
 $ tuxi -q linux torvalds birthday
 ---
@@ -102,14 +102,15 @@ $ tuxi -q linux torvalds birthday
 ---
 ```
 
-* Raw formatting for output (no colors) (-r option)
+**Raw formatting for output (no colors)** <kbd>-r option</kbd>
+> Useful for e.g scripting `notify-send`.
 ```sh
 $ tuxi -r linux torvalds birthday
 > Did you mean linus?
 28 December 1969
 ```
 
-* Can do math
+**Math operations**
 ```sh
 $ tuxi "log(30)"
 ---
@@ -117,21 +118,25 @@ $ tuxi "log(30)"
 ---
 ```
 
-* Translate
+**Translate**
 ```sh
-$ tuxi "Vais para Cascais? em ingles"
+$ tuxi "I love you in japanese"
 ---
-Are you going to Cascais?
+わたしは、あなたを愛しています
+---
+$ tuxi "わたしは、あなたを愛しています in english"
+---
+I love you
 ---
 ```
 
-* And much more (lyrics, weather, conversions...)
+**And much more (lyrics, weather, conversions...)**
 
 ## License
 
-[GPL-3.0](./LICENSE)
+This project is licensed under [GPL-3.0](./LICENSE).
 
 ## Contributing
 
-If you want to contribute, please see [CONTRIBUTING.md](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
+If you want to contribute, please see [CONTRIBUTING](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 
