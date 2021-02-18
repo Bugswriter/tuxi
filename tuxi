@@ -216,6 +216,12 @@ trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
 [ -n "$kno_right" ] && output "$kno_right" && exit 0
 
-
+#roll dic ( eg: roll the dic)
+roll_dic=
+   for i in {1}
+   do
+	    echo "Your rolled No is..."
+     	echo $(($RANDOM % 6 + 1))
+   done && exit
 # Else
 error_msg "No Result!" && exit 1
