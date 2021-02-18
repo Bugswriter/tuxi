@@ -14,6 +14,12 @@ instant, concise answers for your questions in the terminal.
 
 ## Installation
 
+### AUR (Arch Linux)
+
+Tuxi is available as the `tuxi-git` package in the AUR
+
+### Other
+
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
@@ -39,6 +45,7 @@ operating system while windows are slow on older hardware.
 * The -r flag will make the output not have formatting, which can be convenient for use in scripts.
 * Your query can also be a mathematical expression.
 * You can also ask tuxi to translate for you.
+* Tuxi can also convert currency or units.
 
 Use `-h` argument to display help message.
 
@@ -70,6 +77,13 @@ $ tuxi "log(30)"
 $ tuxi "Vais para Cascais? em ingles"
 ---
 Are you going to Cascais?
+---
+```
+
+```sh
+$ tuxi "100 cm to m"
+---
+1
 ---
 ```
 

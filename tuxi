@@ -195,6 +195,21 @@ kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk 
 [ -n "$kno_right" ] && output "$kno_right" && exit 0
 
 
+# Weather ( eg: weather new york)
+weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
+[ -n "$weather" ] && output "$weather" && exit 0
+
+
+# Units ( eg: 1m into 1 cm )
+unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value')"
+[ -n "$unit" ] && output "$unit" && exit
+
+
+# Currency conversion ( eg: 1 USD in rupee )
+currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0')"
+[ -n "$currency" ] && output "$currency" && exit
+
+
 # Google Translate ( eg: Vais para cascais? em ingles )
 trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
 [ -n "$trans" ] && output "$trans" && exit
