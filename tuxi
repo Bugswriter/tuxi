@@ -14,10 +14,12 @@ help_text() {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
     printf "\n"
     printf "%bOptions:%b\n"                             "$G" "$N"
+    printf "  -v                    Show version number and exit.\n"
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
+    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
@@ -80,11 +82,17 @@ output() {
 #####     Getopts       #####
 #############################
 
+# -v : version
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-while getopts "hrqvd" OPT; do
+# -d : debug mode
+while getopts "vhrqd" OPT; do
     case "$OPT" in
+    v)
+        version_text
+        exit 0
+        ;;
     h)
         help_text
         exit 0
@@ -94,10 +102,6 @@ while getopts "hrqvd" OPT; do
         ;;
     q)  
         quiet=true
-        ;;
-    v)
-        version_text
-        exit 0
         ;;
     d)
         debug=true
