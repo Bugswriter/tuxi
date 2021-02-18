@@ -219,6 +219,10 @@ math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode ht
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
 
+lyrics="$(echo "$google_html" | pup 'div.ujudUb text{}' | recode html..ISO-8859-1)"
+[ -n "$lyrics" ] && output "$lyrics" && exit 0
+#works with a bunch of tested songs, previous one didnt work with some songs, i.e. "adele hello lyrics"
+#only problem is that it includes the "...More", and idk how to remove it from the variable
 
 # Weather ( eg: weather new york)
 weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
