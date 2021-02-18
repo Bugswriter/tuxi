@@ -144,7 +144,7 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Did you mean
 # Math
 # Knowledge Graph - top
-# ?
+# Basic Answers ( eg: tuxi christmas day )
 # Rich Answers
 # Featured Snippets
 # Google Translate
@@ -169,7 +169,7 @@ kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .childre
 [ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
-# Basic Answers ( eg: tuxi christmass day)
+# Basic Answers ( eg: tuxi christmas day )
 basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
 [ -n "$basic" ] && output "$basic" && exit 0
 
