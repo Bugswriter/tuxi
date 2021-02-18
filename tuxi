@@ -169,9 +169,9 @@ kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .childre
 [ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
-# ?
-res1="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$res1" ] && output "$res1" && exit 0
+# Basic Information - ( eg: christmas day )
+basic_top="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+[ -n "$basic_top" ] && output "$basic_top" && exit 0
 
 
 # Rich Answers ( eg: elevation of mount everest )
@@ -181,12 +181,17 @@ rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 
 # Featured Snippets ( eg: who is garfield )
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$feat" ] && output "a$feat" && exit 0
+[ -n "$feat" ] && output "$feat" && exit 0
 
 
 # Lyrics ( eg: gecgecgec lyrics )
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
+
+
+# Weather (eg: weather new york )
+weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
+[ -n "$weather" ] && output "$weather" && exit 0
 
 
 # Knowledge Graph - right ( eg: the office )
@@ -195,7 +200,7 @@ kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk 
 
 
 # Google Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
+trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
 [ -n "$trans" ] && output "$trans" && exit
 
 # Else
