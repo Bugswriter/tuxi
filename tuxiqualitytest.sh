@@ -1,0 +1,10 @@
+echo "Testing Translation¬" && tuxi "Vais para cascais? em ingles" || echo "\tFailed..."
+echo "Testing Math¬" && tuxi "log(30)" && tuxi "(40/3)+4*6" || echo "\tFailed..."
+echo "Testing Lyrics¬" && tuxi "the motans inainte sa ne fi nascut lyrics" || echo "\tFailed..."
+echo "Testing Featured¬" && tuxi "the meaning of life the universe and everything else" || echo "\tFailed..."
+echo "Testing Rich Answer¬" && tuxi "elevation of mt everest" || echo "\tFailed..."
+echo "Testing kno_rigth¬" && tuxi "lorem ipsum" || echo "\tFailed..."
+echo "Testing kno_top¬" && tuxi "the office cast" || echo "\tFailed..."
+echo "Testing Error corrrection¬" && tuxi "Linux Tarvalds" || echo "\tFailed..."
+echo "Testing help message¬" && tuxi -h || echo "\tFailed..."
+

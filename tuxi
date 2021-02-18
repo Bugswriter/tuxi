@@ -1,32 +1,105 @@
 #!/usr/bin/env sh
 
-N="\033[0m"; R="\033[1;31m"; G="\033[1;32m"; M="\033[1;35m"; C="\033[1;36m"
+###############################
+#####      Functions      #####
+###############################
 
-help_text() {
-printf "%bUsage:%b tuxi %b<your question>%b\n       tuxi %b<OPTIONS>%b %b<your question>%b\n\n" "$G" "$N" "$M" "$N" "$C" "$N" "$M" "$N"
-cat << EOF
-OPTIONS:
--r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
--h, --help            Displays this help message.
-EOF
-printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
+help_text () {
+    printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
+    printf "\n"
+    printf "%bOptions:%b\n"                             "$G" "$N"
+    printf "  -h                    Show this help message and exit.\n"
+    printf "  -r                    Raw search results.\n"
+    printf "                        (no pretty output, no colors)\n"
+    printf "  -q                    Only output search results.\n"
+    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
+    printf "\n"
+    printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
 }
 
-case $1 in
-    -r|--raw) [ "$2" = "" ] && echo "Please add query!" && exit 1
-              query="$(printf "%s" "$*" | cut -f 2- -d ' ')" && msg() { echo "> $*"; } && err() { echo "$*"; } && strip() { echo "$*"; }
-    ;;
-    -h|--help) help_text && exit 0
-    ;;
-    -*) printf "%bUnknown option%b \"$1\"\n" "$R" "$N" && exit 1
-    ;;
-    *) query="$*" && msg() { printf "%b>%b $*\n" "$G" "$N"; } && err() { printf "%b$*%b\n" "$R" "$N"; } && strip() { printf "%b---%b\n$*\n%b---%b\n" "$G" "$N" "$G" "$N"; }
-    ;;
-esac
+# Checks if dependencies are installed.
+check_deps() {
+    while [ -n "$1" ]; do
+        if [ ! "$(command -v $1)" ]; then
+            error_msg "\"$1\" not found!"
+            exit 2
+        fi
+        shift
+    done
+}
 
-checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!\n" && exit 1; }
-checkdep "pup"; checkdep "recode"; checkdep "jq"
+info_msg() {
+    printf "%b>%b %s\n"  "$G" "$N" "$*"
+}
 
+error_msg() {
+    printf "%b%s%b\n"  "$R" "$*" "$N"
+}
+
+
+#############################
+##### Dependency check  #####
+#############################
+
+# pup : https://github.com/ericchiang/pup
+# recode : https://github.com/rrthomas/recode
+# jq : https://github.com/stedolan/jq
+check_deps "pup" "recode" "jq"
+
+
+###############################
+#####       Defaults      #####
+###############################
+
+# color codes
+N="\033[0m"    # Reset
+R="\033[1;31m" # Red
+G="\033[1;32m" # Green
+Y="\033[1;33m" # Yellow
+M="\033[1;35m" # Magenta
+C="\033[1;36m" # Cyan
+
+# options
+raw=false
+quiet=false
+
+# search result output format (changes if raw=true)
+output() { 
+    printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
+}
+
+
+#############################
+#####     Getopts       #####
+#############################
+
+# -h : help
+# -r : raw search result
+# -q : silences greeting and did you mean
+while getopts "hrq" OPT; do
+    case "$OPT" in
+    h)
+        help_text
+        exit 0
+        ;;
+    r)  
+        raw=true
+        ;;
+    q)  
+        quiet=true
+        ;;
+    *)
+        help_text | head -n 1
+        exit 1
+    esac
+done
+# shifts to query
+shift $((OPTIND-1))
+
+
+#############################
+#####   Raw formatting  #####
+#############################
 
 # If raw=true: No colors, No pretty output
 if $raw; then
@@ -93,7 +166,7 @@ math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode ht
 
 # Knowledge Graph - top (list) ( eg: the office cast )
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
-[ -n "$list" ] && output "$kno_top" && exit 0
+[ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
 # ?
@@ -105,33 +178,21 @@ res1="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html
 rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 [ -n "$rich" ] && output "$rich" && exit 0
 
-webpage=$(curl -s -G --compressed "https://www.google.com/search?hl=en_US" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-res0="$(echo "$webpage" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g'| recode html..ISO-8859-1)"
-[ -n "$res0" ] && msg "u mean $res0?"
+# Featured Snippets ( eg: who is garfield )
+feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$feat" ] && output "a$feat" && exit 0
 
 
 # Lyrics ( eg: gecgecgec lyrics )
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
 
-list=$(echo "$webpage" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
-[ -n "$list" ] && strip "$list" && exit
 
-res1="$(echo "$webpage" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$res1" ] && strip "$res1" && exit
+# Knowledge Graph - right ( eg: the office )
+kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$kno_right" ] && output "$kno_right" && exit 0
 
-res2="$(echo "$webpage" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)"
-[ -n "$res2" ] && strip "$res2" && exit
-
-res3="$(echo "$webpage" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$res3" ] && strip "$res3" && exit
-
-res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
-[ -n "$res4" ] && strip "$res4" && exit
-
-res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
-[ -n "$res5" ] && strip "$res5" && exit
 
 # Google Translate ( eg: Vais para cascais? em ingles )
 trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
