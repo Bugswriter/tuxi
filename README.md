@@ -115,7 +115,11 @@ Are you going to Cascais?
 
 * And much more (lyrics, weather, conversions...)
 
----
+## License
+
+[GPL-3.0](./LICENSE)
+
+## Contributing
 
 If you want to contribute, please see [CONTRIBUTING.md](https://github.com/Bugswriter/tuxi/blob/main/.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 
