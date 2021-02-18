@@ -1,7 +1,7 @@
 <h2 align="center">TUXI</h2>
 <p align="center">Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</p>
 
----
+##  
 
 <img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
 
