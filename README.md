@@ -1,6 +1,6 @@
 # Tuxi
 
-Tuxi is a simple bash script that scrapes Google search results and SERPs,
+A CLI tool that scrapes Google search results and SERPs,
 and provides instant, concise answers for your questions in the terminal.
 
 ![Working demo GIF](https://i.ibb.co/sCwYpZ8/general.gif)
