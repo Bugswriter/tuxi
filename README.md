@@ -9,8 +9,8 @@ and provides instant, concise answers for your questions in the terminal.
 ## Requirements
 
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
-* [recode](https://github.com/rrthomas/recode) - Charset converter tool and library
-* [jq](https://github.com/stedolan/jq) - Command-line JSON processor
+* [recode](https://github.com/rrthomas/recode) - Charset converter tool and library.
+* [jq](https://github.com/stedolan/jq) - Command-line JSON processor.
 
 ## Installation
 
@@ -21,7 +21,7 @@ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/
 chmod +x $HOME/.local/bin/tuxi
 ```
 
-If you're on Arch, then Tuxi is available as the `tuxi-git` package in the AUR
+If you're on Arch, then Tuxi is available as the `tuxi-git` package in the AUR.
 ```sh
 yay -S tuxi-git
 ```
@@ -39,9 +39,9 @@ operating system while windows are slow on older hardware.
 ---
 ```
 * Quotations are optional, but should be used if you want to search with special characters (?=!|&<>%$#/\\).
-* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`
+* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`.
 * The -r option will make the output not have formatting, which can be convenient for use in scripts.
-* The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`
+* The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`.
 
 Use `-h` to display the help message.
 
@@ -56,7 +56,7 @@ Options:
   -q                    Only output search results.
                         (silences "Did you mean?", greeting, usage)
 
-Report bugs at https://github.com/Bugswriter/tuxi/issues
+Report bugs at https://github.com/Bugswriter/tuxi/issues.
 ```
 
 ## Features
@@ -114,5 +114,5 @@ relevant result on the basis of priority.
 In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed` 
 to process and return results, and `recode` to unescape html.
 
-If you want to contribute, please see [CONTRIBUTING.md](https://github.com/Bugswriter/tuxi/blob/main/.github/ISSUE_TEMPLATE/CONTRIBUTING.md)
+If you want to contribute, please see [CONTRIBUTING.md](https://github.com/Bugswriter/tuxi/blob/main/.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 
