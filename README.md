@@ -14,6 +14,12 @@ instant, concise answers for your questions in the terminal.
 
 ## Installation
 
+### AUR (Arch Linux)
+
+Tuxi is available as the `tuxi-git` package in the AUR.
+
+### Other
+
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
