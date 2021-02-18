@@ -54,6 +54,14 @@ res4="$(echo "$webpage" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..
 res5="$(echo "$webpage" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$res5" ] && strip "$res5" && exit
 
+# Unit conversion
+res6="$(echo $webpage | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value')"
+[ -n "$res6" ] && strip "$res6" && exit
+
+# Currency conversion
+res7="$(echo $webpage | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0')"
+[ -n "$res7" ] && strip "$res7" && exit
+
 tmp="$(echo "$webpage" | pup 'div.kno-rdesc')"
 [ -z "$tmp" ] && err "No Result!" && exit 1 || \
 strip "$(echo "$tmp" | pup 'span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)" 
