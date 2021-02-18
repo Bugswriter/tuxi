@@ -30,7 +30,7 @@ check_deps() {
 }
 
 info_msg() {
-    printf "%b>%b %s\n"  "$G" "$N" "$*"
+    printf "%b>%b %b%s%b\n"  "$Y" "$N" "$GR" "$*" "$N"
 }
 
 error_msg() {
@@ -59,6 +59,7 @@ G="\033[1;32m" # Green
 Y="\033[1;33m" # Yellow
 M="\033[1;35m" # Magenta
 C="\033[1;36m" # Cyan
+GR="\033[1;2m" # Gray
 
 # options
 raw=false
@@ -104,7 +105,7 @@ shift $((OPTIND-1))
 
 # If raw=true: No colors, No pretty output
 if $raw; then
-    N=""; R=""; G=""; Y=""; M=""; C="";
+    N=""; R=""; G=""; Y=""; M=""; C=""; GR="";
 
     output () { 
         printf "%s\n" "$*"
