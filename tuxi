@@ -177,10 +177,14 @@ basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode htm
 [ -n "$basic" ] && output "$basic" && exit 0
 
 
+#define (eg: define Aggrandize)
+define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | recode html..ISO-8859-1)"
+[ -n "$define" ] && output "$define" && exit 0
+
+
 # Rich Answers ( eg: elevation of mount everest )
 rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 [ -n "$rich" ] && output "$rich" && exit 0
-
 
 # Featured Snippets ( eg: who is garfield )
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
@@ -220,11 +224,6 @@ unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[
 # Currency Conversion ( eg: 1 USD in rupee )
 currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recode html..ISO-8859-1)"
 [ -n "$currency" ] && output "$currency" && exit
-
-
-#define (eg: define Aggrandize)
-define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | recode html..ISO-8859-1)"
-[ -n "$define" ] && output "$define" && exit 0
 
 
 # Translate ( eg: Vais para cascais? em ingles )
