@@ -9,7 +9,7 @@ OPTIONS:
 -r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
 -h, --help            Displays this help message.
 EOF
-printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi\n" "$G" "$N"
+printf "\n%bReport bugs to%b https://github.com/Bugswriter/tuxi/issues\n" "$G" "$N"
 }
 
 case $1 in
