@@ -181,7 +181,7 @@ rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
 
 # Featured Snippets ( eg: who is garfield )
 feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$feat" ] && output "a$feat" && exit 0
+[ -n "$feat" ] && output "$feat" && exit 0
 
 
 # Lyrics ( eg: gecgecgec lyrics )
