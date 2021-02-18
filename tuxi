@@ -19,10 +19,10 @@ help_text() {
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
+    printf "  -d                    Debug file for log.\n"
     printf "  -q                    Only output search results.\n"
     printf "  -a                    Try all snippets and print them.\n"
     printf "  -l                    Print location Google is getting.\n"
-    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
@@ -75,7 +75,7 @@ raw=false
 quiet=false
 debug=false
 all=false
-location=false
+location=false; loc=""
 
 # search result output format (changes if raw=true)
 output() { 
@@ -94,10 +94,6 @@ modifyloc() {
 
 # test after snippet is called
 snipcall() {
-    if $location; then
-        modifyloc
-    fi
-
     if [ "$all" = "false" ]; then
         [ -n "$1" ] && output "$1" "$loc" && exit 0
     else
@@ -194,9 +190,6 @@ google_url="https://www.google.com/search?hl=en_US"
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-# Print location
-loc=""
-
 # Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
 if $debug; then
     mkdir -p "$HOME/.cache/tuxi"
@@ -206,6 +199,11 @@ if $debug; then
     printf "%s" $google_html | pup -i 2 > $html_location
     printf "HTML for \"$query\" -> $html_location\n"
     exit 0
+fi
+
+# Prints location after snippet is called
+if $location; then
+    modifyloc
 fi
 
 ## WARNING: Never put Define after Rich Answers, since it :will get only the word itself ##
