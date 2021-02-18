@@ -27,9 +27,9 @@ kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk 
 
 ```
 
-* Your code must be **posix compatible**. **Pup**, **recode**, and **jq** are dependencies.
+* Your code must be **posix compatible**. **Pup**, **Recode**, and **Jq** are dependencies.
 
-* Use **consice and readable variables** (snake_case is preferred).
+* Use **concise and readable variables** (snake_case is preferred).
 
 
 #### **Do you want to add a new feature?**
