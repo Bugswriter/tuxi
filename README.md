@@ -3,9 +3,9 @@
 
 ---
 
-<img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="400px"/>
+<img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
 
-### How does this work?
+#### How does this work?
 
 The script uses `pup` to scrape Google search results and SERPs.
 If the query returns several results, Tuxi will choose the most 
