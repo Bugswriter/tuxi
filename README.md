@@ -121,5 +121,5 @@ Are you going to Cascais?
 
 ## Contributing
 
-If you want to contribute, please see [CONTRIBUTING.md](https://github.com/Bugswriter/tuxi/blob/main/.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
+If you want to contribute, please see [CONTRIBUTING.md](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 
