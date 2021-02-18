@@ -194,7 +194,7 @@ if [ $quiet = "false" ]; then
 fi
 
 # Quotes
-quotes="$(echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1)"
+quotes="$(echo "$google_html" | pup 'div.Qynugf json{}' | jq -r '"> " + .[].children[0].text' | recode html..ISO-8859-1)"
 [ -n "$quotes" ] && output "$quotes" && exit 0
 
 # Basic Answers ( eg: tuxi christmas day )
