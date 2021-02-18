@@ -2,7 +2,7 @@
 
 <table border="0">
 <tr>
-<td>A CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</td>
+<td>Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</td>
 <td width="698px" height="458px"><img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right"/></td>
 </tr>
 </table>
