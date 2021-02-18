@@ -169,9 +169,9 @@ kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .childre
 [ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
-# ?
-res1="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$res1" ] && output "$res1" && exit 0
+# Basic Answers ( eg: tuxi christmass day)
+basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+[ -n "$basic" ] && output "$basic" && exit 0
 
 
 # Rich Answers ( eg: elevation of mount everest )
