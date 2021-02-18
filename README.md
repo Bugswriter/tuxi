@@ -1,24 +1,41 @@
-# Tuxi
+<h1 align="center">TUXI</h1>
+<p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers</p>
 
-Tuxi is a simple bash script which scrapes Google's search results and provides 
-instant, concise answers for your questions in the terminal.
+##  
 
-[Watch this Video Please](https://www.youtube.com/watch?v=EtwWvMa8muU)
-> Also checkout my YouTube channel for more scripts like this.
+<img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
+
+### How does this work?
+
+The script uses `pup` to scrape Google search results and SERPs.
+If the query returns several results, Tuxi will choose the most 
+relevant result on the basis of priority.
+
+In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed` 
+to process and return results, and `recode` to unescape html.
+
+
+[Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
+> Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
 
 * [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
-* [recode](https://github.com/rrthomas/recode) - Charset converter tool and library
-* [jq](https://github.com/stedolan/jq) - Command-line JSON processor
+* [recode](https://github.com/rrthomas/recode) - Charset converter tool and library.
+* [jq](https://github.com/stedolan/jq) - Command-line JSON processor.
 
 ## Installation
 
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
-curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
-chmod +x $HOME/.local/bin/tuxi
+$ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
+$ chmod +x $HOME/.local/bin/tuxi
+```
+
+If you're on Arch, then Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
+```sh
+$ yay -S tuxi-git
 ```
 
 ## Usage
@@ -33,32 +50,55 @@ along with a modern desktop environment and qualities of the
 operating system while windows are slow on older hardware.
 ---
 ```
+* Quotations are optional, but should be used if you want to search with special characters (?=!|&<>%$#/\\).
+* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`.
+* The -r option will make the output not have formatting, which can be convenient for use in scripts.
+* The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`.
 
-* Quotations are optional, but should be used if you want to search with special characters(?=!|&<>%$#/\\).
-* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`
-* The -r flag will make the output not have formatting, which can be convenient for use in scripts.
-* Your query can also be a mathematical expression.
-* You can also ask tuxi to translate for you.
-
-Use `-h` argument to display help message.
+Use `-h` to display the help message.
 
 ```sh
 $ tuxi -h
-Usage: tuxi <your question>
-       tuxi <OPTIONS> <your question>
+Usage: tuxi [options] query
 
-OPTIONS:
--r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
--h                    Displays this help message.
+Options:
+  -h                    Show this help message and exit.
+  -r                    Raw search results.
+                        (no pretty output, no colors)
+  -q                    Only output search results.
+                        (silences "Did you mean?", greeting, usage)
 
-Report bugs to https://github.com/Bugswriter/tuxi
+Report bugs at https://github.com/Bugswriter/tuxi/issues.
 ```
 
+## Features
+
+**Gives corrections**
 ```sh
-$ tuxi -r linus torvalds birthday
+$ tuxi linux torvalds birthday
+> Did you mean linus?
+---
+28 December 1969
+---
+```
+
+**When you know it's actually linux torvalds** <kbd>-q option</kbd>
+```sh
+$ tuxi -q linux torvalds birthday
+---
+28 December 1969
+---
+```
+
+**Raw formatting for output (no colors)** <kbd>-r option</kbd>
+> Useful for e.g scripting `notify-send`.
+```sh
+$ tuxi -r linux torvalds birthday
+> Did you mean linus?
 28 December 1969
 ```
 
+**Math operations**
 ```sh
 $ tuxi "log(30)"
 ---
@@ -66,20 +106,25 @@ $ tuxi "log(30)"
 ---
 ```
 
+**Translate**
 ```sh
-$ tuxi "Vais para Cascais? em ingles"
+$ tuxi "I love you in japanese"
 ---
-Are you going to Cascais?
+わたしは、あなたを愛しています
+---
+$ tuxi "わたしは、あなたを愛しています in english"
+---
+I love you
 ---
 ```
 
-## How this work?
+**And much more (lyrics, weather, conversions...)**
 
-The script uses pup to scrape Google search results and return a clean, concise 
-answer based on the top search result. If the query returns several results that 
-are concise enough for tuxi to return, tuxi will show the results on the basis 
-of priority.
+## License
 
-In addition to using `pup` for scraping, `tuxi` also uses `awk` and `sed` to 
-process and return results.
+This project is licensed under [GPL-3.0](./LICENSE).
+
+## Contributing
+
+If you want to contribute, please see [CONTRIBUTING](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 
