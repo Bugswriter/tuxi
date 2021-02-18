@@ -157,7 +157,7 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 if $debug; then
     [ ! -d "$HOME/.cache/tuxi" ] && mkdir -p "$HOME/.cache/tuxi"
 
-    file_name="tuxi-$(printf %s "$query" | sed 's/ /_/g')-$(date +%s).html"
+    file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
     html_location="$HOME/.cache/tuxi/$file_name"
     
     printf "%s" $google_html | pup -i 2 > $html_location
