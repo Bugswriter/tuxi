@@ -112,6 +112,10 @@ $ tuxi "I love you in japanese"
 ---
 わたしは、あなたを愛しています
 ---
+$ tuxi "わたしは、あなたを愛しています in english"
+---
+I love you
+---
 ```
 
 **And much more (lyrics, weather, conversions...)**
