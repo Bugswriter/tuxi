@@ -1,10 +1,10 @@
 # Tuxi
 
-Tuxi is a simple bash script which scrapes Google's search results and provides 
-instant, concise answers for your questions in the terminal.
+Tuxi is a simple bash script that scrapes Google search results and SERPs,
+and provides instant, concise answers for your questions in the terminal.
 
-[Watch this Video Please](https://www.youtube.com/watch?v=EtwWvMa8muU)
-> Also checkout my YouTube channel for more scripts like this.
+[Watch this video for more info](https://www.youtube.com/watch?v=EtwWvMa8muU)
+> Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
 
@@ -14,18 +14,16 @@ instant, concise answers for your questions in the terminal.
 
 ## Installation
 
-### AUR (Arch Linux)
-
-Tuxi is available as the `tuxi-git` package in the AUR
-
-
-### Other
-
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
 curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
 chmod +x $HOME/.local/bin/tuxi
+```
+
+If you're on Arch, then Tuxi is available as the `tuxi-git` package in the AUR
+```sh
+yay -S tuxi-git
 ```
 
 ## Usage
@@ -40,33 +38,54 @@ along with a modern desktop environment and qualities of the
 operating system while windows are slow on older hardware.
 ---
 ```
-
-* Quotations are optional, but should be used if you want to search with special characters(?=!|&<>%$#/\\).
+* Quotations are optional, but should be used if you want to search with special characters (?=!|&<>%$#/\\).
 * You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`
-* The -r flag will make the output not have formatting, which can be convenient for use in scripts.
-* Your query can also be a mathematical expression.
-* You can also ask tuxi to translate for you.
-* Tuxi can also convert currency or units.
+* The -r option will make the output not have formatting, which can be convenient for use in scripts.
+* The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`
 
-Use `-h` argument to display help message.
+Use `-h` to display the help message.
 
 ```sh
 $ tuxi -h
-Usage: tuxi <your question>
-       tuxi <OPTIONS> <your question>
+Usage: tuxi [options] query
 
-OPTIONS:
--r, --raw             Simplify Tuxi output. Useful for e.g notify-send.
--h                    Displays this help message.
+Options:
+  -h                    Show this help message and exit.
+  -r                    Raw search results.
+                        (no pretty output, no colors)
+  -q                    Only output search results.
+                        (silences "Did you mean?", greeting, usage)
 
-Report bugs to https://github.com/Bugswriter/tuxi
+Report bugs at https://github.com/Bugswriter/tuxi/issues
 ```
 
+## Features
+
+* Gives corrections
 ```sh
-$ tuxi -r linus torvalds birthday
+$ tuxi linux torvalds birthday
+> Did you mean linus?
+---
+28 December 1969
+---
+```
+
+* When you know it's actually linux torvalds (-q option)
+```sh
+$ tuxi -q linux torvalds birthday
+---
+28 December 1969
+---
+```
+
+* Raw formatting for output (no colors) (-r option)
+```sh
+$ tuxi -r linux torvalds birthday
+> Did you mean linus?
 28 December 1969
 ```
 
+* Can do math
 ```sh
 $ tuxi "log(30)"
 ---
@@ -74,6 +93,7 @@ $ tuxi "log(30)"
 ---
 ```
 
+* Translate
 ```sh
 $ tuxi "Vais para Cascais? em ingles"
 ---
@@ -81,20 +101,18 @@ Are you going to Cascais?
 ---
 ```
 
-```sh
-$ tuxi "100 cm to m"
+* And much more (lyrics, weather, conversions...)
+
 ---
-1
----
-```
 
-## How this work?
+## How does this work?
 
-The script uses pup to scrape Google search results and return a clean, concise 
-answer based on the top search result. If the query returns several results that 
-are concise enough for tuxi to return, tuxi will show the results on the basis 
-of priority.
+The script uses `pup` to scrape Google search results and SERPs.
+If the query returns several results, Tuxi will choose the most 
+relevant result on the basis of priority.
 
-In addition to using `pup` for scraping, `tuxi` also uses `awk` and `sed` to 
-process and return results.
+In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed` 
+to process and return results, and `recode` to unescape html.
+
+If you want to contribute, please see [CONTRIBUTING.md](https://github.com/Bugswriter/tuxi/blob/main/.github/ISSUE_TEMPLATE/CONTRIBUTING.md)
 
