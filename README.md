@@ -42,8 +42,19 @@ operating system while windows are slow on older hardware.
 * You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`.
 * The -r option will make the output not have formatting, which can be convenient for use in scripts.
 * The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`.
+* Quotations are optional, but should be used if you want to search with special characters(?=!|&<>%$#/\\).
+* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`
+* The -r flag will make the output not have formatting, which can be convenient for use in scripts.
+* Your query can also be a mathematical expression.
+* You can also ask tuxi to translate for you.
+* Tuxi can also convert currency or units.
 
-Use `-h` to display the help message.
+Use `-h` argument to display help message, `-v` to show version.
+
+```sh
+$ tuxi -v
+tuxi 1.1.3
+```
 
 ```sh
 $ tuxi -h

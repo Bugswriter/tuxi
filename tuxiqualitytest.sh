@@ -28,4 +28,3 @@ do
   printf "\n\n\n\n%bTuxTester%b:$ %s\n\n" "$Y" "$N" "$command"
   ./$command || err "$command"
 done 
-
