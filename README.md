@@ -1,4 +1,4 @@
-<h2 align="center">TUXI</h2>
+<h1 align="center">TUXI</h1>
 <p align="center">Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</p>
 
 ##  
