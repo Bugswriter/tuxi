@@ -68,6 +68,7 @@ C="\033[1;36m" # Cyan
 # options
 raw=false
 quiet=false
+debug=false
 
 # search result output format (changes if raw=true)
 output() { 
@@ -79,10 +80,12 @@ output() {
 #####     Getopts       #####
 #############################
 
+# -v : version
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-while getopts "vhrq" OPT; do
+# -d : debug
+while getopts "vhrqd" OPT; do
     case "$OPT" in
     v)
         version_text
@@ -97,6 +100,9 @@ while getopts "vhrq" OPT; do
         ;;
     q)  
         quiet=true
+        ;;
+    d)
+        debug=true
         ;;
     *)
         help_text | head -n 1
@@ -119,7 +125,6 @@ if $raw; then
         printf "%s\n" "$*"
     }
 fi
-
 
 #############################
 #####    Query check    #####
@@ -149,6 +154,17 @@ google_url="https://www.google.com/search?hl=en_US"
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
+# Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
+if $debug; then
+    [ ! -d "$HOME/.cache/tuxi" ] && mkdir -p "$HOME/.cache/tuxi"
+
+    file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
+    html_location="$HOME/.cache/tuxi/$file_name"
+
+    printf "%s" $google_html | pup -i 2 > $html_location
+    printf "HTML for \"$query\" -> $html_location\n"
+    exit 0
+fi
 
 ## Snippet Priority ##
 # Did you mean
@@ -178,7 +194,7 @@ basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode htm
 
 
 #define (eg: define Aggrandize)
-define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | recode html..ISO-8859-1)"
+define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | sed 's/^/\*\ /g' | recode html..ISO-8859-1)"
 [ -n "$define" ] && output "$define" && exit 0
 
 
