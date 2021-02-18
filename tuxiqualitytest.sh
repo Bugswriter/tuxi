@@ -1,15 +1,31 @@
-printf "\nTesting help message¬\n" && tuxi -h || printf "\tFailed...\n"
-printf "\nTesting error corrrection¬\n" && tuxi "Linux Tarvalds" || printf "\tFailed...\n"
-printf "\nTesting Math¬\n" && tuxi "log(30)" && tuxi "(40/3)+4*6" || printf "\tFailed...\n"
-printf "\nTesting Knowledge Graph - top¬\n" && tuxi "the office cast" || printf "\tFailed...\n"
-printf "\nTesting Rich Answer¬\n" && tuxi "elevation of mt everest" || printf "\tFailed...\n"
-printf "\nTesting Featured Snippets¬\n" && tuxi "the meaning of life the universe and everything else" || printf "\tFailed...\n"
-printf "\nTesting Lyrics¬\n" && tuxi "the motans inainte sa ne fi nascut lyrics" || printf "\tFailed...\n"
-printf "\nTesting Weather¬\n" && tuxi "weather new york" || printf "\tFailed...\n"
-printf "\nTesting Units¬\n" && tuxi "100 cm to m" || printf "\tFailed...\n"
-printf "\nTesting Currency¬\n" && tuxi "100 GBP to USD" || printf "\tFailed...\n"
-printf "\nTesting Translate¬\n" && tuxi "Vais para cascais? em ingles" || printf "\tFailed...\n"
-printf "\nTesting Knowledge Graph - right¬\n" && tuxi "lorem ipsum" || printf "\tFailed...\n"
+#!/bin/sh
+
+# Color Codes
+N="\033[0m"
+Y="\033[1;33m"
+R="\033[1;31m"
+
+checkdep() { [ ! "$(command -v "$*" 2> /dev/null)" ] && err "\"$*\" not found!\n" && exit 1; }
+checkdep "pup"; checkdep "recode"; checkdep "jq";
+
+err () { printf "\n%bTuxTester%b:$ An Error has occured for the command > %s)\n" "$R" "$N" "$*" && sleep 3; }
 
 
+  commands="$(printf 'tuxi -h
+tuxi "Linux Tarvalds"
+tuxi "the office cast"
+tuxi "elevation of mt everest"
+tuxi "the meaning of life and everything else"
+tuxi "the motans inainte sa ne fi nascut lyrics"
+tuxi "weather new york"
+tuxi "100 cm to m"
+tuxi "100 GBP to USD"
+tuxi "vais para cascais? em ingles"
+tuxi "lorem ipsum"')"
+  
+echo "$commands" | while read command ;
+do
+  printf "\n\n\n\n%bTuxTester%b:$ %s\n\n" "$Y" "$N" "$command"
+  ./$command || err "$command"
+done 
 
