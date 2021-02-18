@@ -196,9 +196,9 @@ fi
 basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
 [ -n "$basic" ] && output "$basic" && exit 0
 
-
-#define (eg: define Aggrandize)
-define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | sed 's/^/\*\ /g' | recode html..ISO-8859-1)"
+# WARNING: Do not put Define after Rich Answers, since it will scrappe only the word itself #
+# Define (eg: define Aggrandize)
+define="$(echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div.eO6Jqe text{}' | sed -e 's/^/* /' -e '1,2 s/* //' | recode html..ISO-8859-1)"
 [ -n "$define" ] && output "$define" && exit 0
 
 
