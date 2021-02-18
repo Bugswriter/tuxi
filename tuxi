@@ -195,7 +195,7 @@ kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk 
 
 
 # Google Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | recode html..ISO-8859-1)"
+trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
 [ -n "$trans" ] && output "$trans" && exit
 
 # Else
