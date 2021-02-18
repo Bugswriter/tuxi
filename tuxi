@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
+
 ###############################
 #####      Functions      #####
 ###############################
@@ -208,6 +209,7 @@ unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[
 # Currency conversion ( eg: 1 USD in rupee )
 currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0')"
 [ -n "$currency" ] && output "$currency" && exit
+
 
 
 # Google Translate ( eg: Vais para cascais? em ingles )
