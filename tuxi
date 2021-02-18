@@ -21,7 +21,6 @@ help_text() {
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
-    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
 }
