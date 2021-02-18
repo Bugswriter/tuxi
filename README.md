@@ -3,7 +3,9 @@
 Tuxi is a simple bash script that scrapes Google search results and SERPs,
 and provides instant, concise answers for your questions in the terminal.
 
-[Watch this video for more info](https://www.youtube.com/watch?v=EtwWvMa8muU)
+![Working demo GIF](https://i.ibb.co/sCwYpZ8/general.gif)
+
+[Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
 > Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
