@@ -171,18 +171,19 @@ fi
 
 ## Snippet Priority ##
 # Did you mean
-# Math
-# Knowledge Graph - top
-# Define
 # Basic Answers
+# Define
 # Rich Answers
 # Featured Snippets
+# Math
 # Lyrics
 # Weather
+# Translate
+# Rich list
+# Knowledge Graph - top
+# Knowledge Graph - right
 # Units Convertion
 # Currency Convertion
-# Translate
-# Knowledge Graph - right
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
