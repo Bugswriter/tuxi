@@ -68,6 +68,7 @@ C="\033[1;36m" # Cyan
 # options
 raw=false
 quiet=false
+debug=false
 
 # search result output format (changes if raw=true)
 output() { 
@@ -82,12 +83,8 @@ output() {
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-while getopts "vhrq" OPT; do
+while getopts "hrqvd" OPT; do
     case "$OPT" in
-    v)
-        version_text
-        exit 0
-    ;;
     h)
         help_text
         exit 0
@@ -97,6 +94,13 @@ while getopts "vhrq" OPT; do
         ;;
     q)  
         quiet=true
+        ;;
+    v)
+        version_text
+        exit 0
+        ;;
+    d)
+        debug=true
         ;;
     *)
         help_text | head -n 1
@@ -148,6 +152,18 @@ google_url="https://www.google.com/search?hl=en_US"
 
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
+
+# Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
+if $debug; then
+    [ ! -d "$HOME/.cache/tuxi" ] && mkdir -p "$HOME/.cache/tuxi"
+
+    file_name="tuxi-$(printf %s "$query" | sed 's/ /_/g')-$(date +%s).html"
+    html_location="$HOME/.cache/tuxi/$file_name"
+    
+    printf "%s" $google_html | pup -i 2 > $html_location
+    printf "HTML for \"$query\" -> $html_location\n"
+    exit 0
+fi
 
 
 ## Snippet Priority ##
