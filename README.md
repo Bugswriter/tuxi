@@ -108,9 +108,9 @@ $ tuxi "log(30)"
 
 **Translate**
 ```sh
-$ tuxi "Vais para Cascais? em ingles"
+$ tuxi "I love you in japanese"
 ---
-Are you going to Cascais?
+わたしは、あなたを愛しています
 ---
 ```
 
