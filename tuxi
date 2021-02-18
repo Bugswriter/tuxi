@@ -171,6 +171,7 @@ fi
 
 ## Snippet Priority ##
 # Did you mean
+# Quotes
 # Basic Answers
 # Define
 # Rich Answers
@@ -191,6 +192,10 @@ if [ $quiet = "false" ]; then
     did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
+
+# Quotes
+quotes="$(echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1)"
+[ -n "$quotes" ] && output "$quotes" && exit 0
 
 # Basic Answers ( eg: tuxi christmas day )
 basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
