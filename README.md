@@ -1,5 +1,5 @@
 <h1 align="center">TUXI</h1>
-<p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers for your questions.</p>
+<p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers.</p>
 
 ##  
 
