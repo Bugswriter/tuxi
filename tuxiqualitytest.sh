@@ -10,6 +10,3 @@ printf "\nTesting Units¬\n" && tuxi "100 cm to m" || printf "\tFailed...\n"
 printf "\nTesting Currency¬\n" && tuxi "100 GBP to USD" || printf "\tFailed...\n"
 printf "\nTesting Translate¬\n" && tuxi "Vais para cascais? em ingles" || printf "\tFailed...\n"
 printf "\nTesting Knowledge Graph - right¬\n" && tuxi "lorem ipsum" || printf "\tFailed...\n"
-
-
-
