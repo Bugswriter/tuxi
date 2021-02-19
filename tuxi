@@ -193,7 +193,7 @@ lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-
 
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'img.wob_tci' ; echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
+weather="$(echo "$google_html" | pup 'img.wob_tci' | rev | cut -f 3- -d ' ' | rev | cut -f 3- -d ' ' | cut -c 5- ; echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
 [ -n "$weather" ] && output "$weather" && exit 0
 
 
