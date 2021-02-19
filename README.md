@@ -41,7 +41,7 @@ $ sudo chmod +x /usr/local/bin/tuxi
 $ git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
 $ sudo make install
 ```
-> To update, just `git pull` on your local tuxi repository.  
+> To update, just `git pull` on your local tuxi repository and resinstall with `make`.  
 > To uninstall, simply run `sudo make uninstall`.
 
 ### Arch Linux AUR
