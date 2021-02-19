@@ -5,21 +5,13 @@
 #####      Functions      #####
 ###############################
 
-# Version text should remain simple btw.
-version_text() {
-    printf "tuxi 1.1.4\n"
-}
-
-help_text() {
+help_text () {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
     printf "\n"
     printf "%bOptions:%b\n"                             "$G" "$N"
-
-    printf "  -v                    Print version number and exit.\n"
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
-    printf "  -d                    Debug file for log.\n"
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "\n"
@@ -71,32 +63,10 @@ C="\033[1;36m" # Cyan
 # options
 raw=false
 quiet=false
-debug=false
-all=false
-location=false; loc=""
 
 # search result output format (changes if raw=true)
 output() { 
     printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
-}
-
-# recode for character compatibility
-recd() {
-    recode html..ISO-8859-1
-}
-
-# give location true result
-modifyloc() {
-    loc="$(echo "$google_html" | pup 'span.Q8LRLc text{}' | recd)"
-}
-
-# test after snippet is called
-snipcall() {
-    if [ "$all" = "false" ]; then
-        [ -n "$1" ] && output "$1" "$loc" && exit 0
-    else
-        [ -n "$1" ] && output "$1" "$loc"
-    fi
 }
 
 
@@ -104,19 +74,11 @@ snipcall() {
 #####     Getopts       #####
 #############################
 
-# -v : version
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-# -d : debug mode
-# -a : try all snippets
-
-while getopts "vhrqdal" OPT; do
+while getopts "hrq" OPT; do
     case "$OPT" in
-    v)
-        version_text
-        exit 0
-        ;;
     h)
         help_text
         exit 0
@@ -127,21 +89,11 @@ while getopts "vhrqdal" OPT; do
     q)  
         quiet=true
         ;;
-    d)
-        debug=true
-        ;;
-    a)
-        all=true
-        ;;
-    l)
-        location=true
-        ;;
     *)
         help_text | head -n 1
         exit 1
     esac
 done
-
 # shifts to query
 shift $((OPTIND-1))
 
@@ -159,6 +111,7 @@ if $raw; then
     }
 fi
 
+
 #############################
 #####    Query check    #####
 #############################
@@ -166,11 +119,11 @@ fi
 # If query is empty: exit
 # If quiet=false: Prints greeting and usage
 if [ -z "$1" ]; then
-    if [ $quiet = "false" ]; then
-        printf "Hi, I'm Tuxi. Ask me anything!\n"
-        help_text | head -n 1 
-    fi
-    exit 0
+if [ $quiet = "false" ]; then
+    printf "Hi, I'm Tuxi. Ask me anything!\n"
+    help_text | head -n 1 
+fi
+exit 0
 fi
     
 # Else, all arguments are saved in $query
@@ -184,136 +137,88 @@ query="$*"
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl=en_US"
 
-
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
-# Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
-if $debug; then
-    mkdir -p "$HOME/.cache/tuxi"
 
-    file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
-    html_location="$HOME/.cache/tuxi/$file_name"
-    printf "%s" $google_html | pup -i 2 > $html_location
-    printf "HTML for \"$query\" -> $html_location\n"
-    exit 0
-fi
-
-# Prints location after snippet is called
-if $location; then
-    modifyloc
-fi
-
-
-## WARNING: Never put Define after Rich Answers, since it :will get only the word itself ##
 ## Snippet Priority ##
 # Did you mean
+# Math
+# Knowledge Graph - top
 # Basic Answers
-# Define
 # Rich Answers
 # Featured Snippets
-# Math
 # Lyrics
 # Weather
-# Translate
-# Rich list
-# Knowledge Graph - top
-# Knowledge Graph - right
 # Units Convertion
 # Currency Convertion
-
+# Translate
+# Knowledge Graph - right
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
 if [ $quiet = "false" ]; then
-    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recd)"
+    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
-
-# Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recd)"
-snipcall "$basic"
-
-
-# Define (eg: define Aggrandize)
-define="$(echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recd)"
-snipcall "$define"
-
-
-# Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
-#"what is the " seems to be required for some things
-kno_val=$(echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}'| tr '\n' ' ' )
-snipcall "$kno_val"
-
-
 # Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ')"
-snipcall "$math"
-
-# Featured Snippets ( eg: who is garfield )
-feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recd | tr ' ' '\0' | xargs -0 -n10)"
-snipcall "$feat"
-
-
-# Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recd)"
-snipcall "$trans"
-
- 
-# Rich Rich Answers ( eg: social network cast )
-richcast=$(echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recd)
-snipcall "$richcast"
-
-
-# Simple lists (eg Need for Speed Heat cars list)
-rich=$(echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recd)
-snipcall "$rich"
-
-
-# This serves for a lot of things, simplified for performance
-# Rich Answers      ( eg: elevation of mount everest )
-# bbVIQb & ujudUb   ( eg: gecgecgec lyrics )                 ( Lyrics )
-# mR2g0d            ( eg: game of thrones s03 episodes )     ( Somewhat complicated lists )
-rich=$(echo "$google_html" | pup 'div.bbVIQb, div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recd)
-snipcall "$rich"
-
-# works with a bunch of tested songs, previous one didnt work with some songs, i.e. "adele hello lyrics"
-# only problem is that it includes the "...More", and idk how to remove it from the variable
-# "..More" is only visible for a few locations, please provide which one is giving you this and the output
-
-
-
-
-
-# Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recd)"
-snipcall "$weather"
-
-
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
+[ -n "$math" ] && output "$math" && exit 0
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
-kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recd)
-snipcall "$kno_top"
+kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
+[ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
-# Knowledge Graph - right ( eg: the office )
-kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recd | tr ' ' '\0' | xargs -0 -n10)"
-snipcall "$kno_right"
+# Basic Answers ( eg: tuxi christmas day )
+basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+[ -n "$basic" ] && output "$basic" && exit 0
+
+
+# Rich Answers ( eg: elevation of mount everest )
+rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
+[ -n "$rich" ] && output "$rich" && exit 0
+
+
+# Featured Snippets ( eg: who is garfield )
+feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$feat" ] && output "$feat" && exit 0
+
+
+# Lyrics ( eg: gecgecgec lyrics )
+lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
+[ -n "$lyrics" ] && output "$lyrics" && exit 0
+
+#Lyrics for US users, above does not work for US
+lyrics="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1)"
+[ -n "$lyrics" ] && output "$lyrics" && exit 0
+
+# Weather ( eg: weather new york)
+weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
+[ -n "$weather" ] && output "$weather" && exit 0
 
 
 # Units Conversion ( eg: 1m into 1 cm )
-unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recd)"
-snipcall "$unit"
+unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1)"
+[ -n "$unit" ] && output "$unit" && exit
 
 
 # Currency Conversion ( eg: 1 USD in rupee )
-currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recd)"
-snipcall "$currency"
+currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recode html..ISO-8859-1)"
+[ -n "$currency" ] && output "$currency" && exit
+
+
+# Translate ( eg: Vais para cascais? em ingles )
+trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
+[ -n "$trans" ] && output "$trans" && exit
+
+
+# Knowledge Graph - right ( eg: the office )
+kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+[ -n "$kno_right" ] && output "$kno_right" && exit 0
 
 
 # Else
-if [ "$all" = "false" ]; then
-    error_msg "No Result!" && exit 1
-fi
+error_msg "No Result!" && exit 1
