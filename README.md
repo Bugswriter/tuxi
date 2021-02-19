@@ -59,7 +59,7 @@ Use `-h` to display help message, `-v` to show version.
 
 ```sh
 $ tuxi -v
-tuxi 1.1.3
+tuxi 1.1.4
 ```
 
 ```sh
@@ -73,6 +73,9 @@ Options:
                         (no pretty output, no colors)
   -q                    Only output search results.
                         (silences "Did you mean?", greeting, usage)
+  -d                    Debug file. Help with logging for issues.
+  -a                    Use all snippets.
+  -l                    Prints location after snippet is called.
 
 Report bugs at https://github.com/Bugswriter/tuxi/issues.
 ```
