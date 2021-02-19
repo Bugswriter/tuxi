@@ -15,7 +15,7 @@ In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed`
 to process and return results, and `recode` to unescape html.
 
 
-[Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
+[Watch this video for more info](https://youtu.be/EtwWvMa8muU)
 > Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
