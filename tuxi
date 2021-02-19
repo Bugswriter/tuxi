@@ -206,6 +206,7 @@ if $location; then
     modifyloc
 fi
 
+
 ## WARNING: Never put Define after Rich Answers, since it :will get only the word itself ##
 ## Snippet Priority ##
 # Did you mean
@@ -242,9 +243,26 @@ define="$(echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn
 snipcall "$define"
 
 
-# Rich Answers ( eg: elevation of mount everest )
-rich=$(echo "$google_html" | pup 'div.di3YZe text{}' | sed 's/^ //' | recd)
+# Rich Rich Answers ( eg: social network cast )
+richcast=$(echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recd)
+snipcall "$richcast"
+
+
+# Simple lists (eg Need for Speed Heat cars list)
+rich=$(echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recd)
 snipcall "$rich"
+
+
+# This serves for a lot of things, simplified for performance
+# Rich Answers      ( eg: elevation of mount everest )
+# bbVIQb & ujudUb   ( eg: gecgecgec lyrics )                 ( Lyrics )
+# mR2g0d            ( eg: game of thrones s03 episodes )     ( Somewhat complicated lists )
+rich=$(echo "$google_html" | pup 'div.bbVIQb, div.ujudUb, div.mR2gOd text{}' | sed 's/^ //' | recd)
+snipcall "$rich"
+
+# works with a bunch of tested songs, previous one didnt work with some songs, i.e. "adele hello lyrics"
+# only problem is that it includes the "...More", and idk how to remove it from the variable
+# "..More" is only visible for a few locations, please provide which one is giving you this and the output
 
 
 # Featured Snippets ( eg: who is garfield )
@@ -256,18 +274,6 @@ snipcall "$feath"
 math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ')"
 snipcall "$math"
 
-
-# Lyrics ( eg: gecgecgec lyrics )
-lyrics="$(echo "$google_html" | pup 'div.bbVIQb, div.ujudUb text{}' | recd)"
-snipcall "$lyrics"
-
-# lyrics="$(echo "$google_html" | pup 'div.ujudUb text{}' | recd)$"
-# [ -n "$lyrics" ] && output "$lyrics" && exit 0
-# works with a bunch of tested songs, previous one didnt work with some songs, i.e. "adele hello lyrics"
-# only problem is that it includes the "...More", and idk how to remove it from the variable
-# "..More" is only visible for a few locations, please provide which one is giving you this and the output
-
-
 # Weather ( eg: weather new york)
 weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recd)"
 snipcall "$weather"
@@ -276,11 +282,6 @@ snipcall "$weather"
 # Translate ( eg: Vais para cascais? em ingles )
 trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recd)"
 snipcall "$trans"
-
-
-# Rich list (eg: game of thrones s03 episodes)
-rich_list="$(echo "$google_html" | pup 'div.mR2gOd text{}' | recd)"
-snipcall "$rich_list"
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
