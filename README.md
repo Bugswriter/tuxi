@@ -29,8 +29,8 @@ to process and return results, and `recode` to unescape html.
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
-$ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
-$ chmod +x $HOME/.local/bin/tuxi
+$ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
+$ sudo chmod +x /usr/local/bin/tuxi
 ```
 
 If you're on Arch, then Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
