@@ -241,6 +241,26 @@ define="$(echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn
 snipcall "$define"
 
 
+# Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
+#"what is the " seems to be required for some things
+kno_val=$(echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}'| tr '\n' ' ' )
+snipcall "$kno_val"
+
+
+# Math ( eg: log_2(3) * pi^e )
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ')"
+snipcall "$math"
+
+# Featured Snippets ( eg: who is garfield )
+feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recd | tr ' ' '\0' | xargs -0 -n10)"
+snipcall "$feat"
+
+
+# Translate ( eg: Vais para cascais? em ingles )
+trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recd)"
+snipcall "$trans"
+
+ 
 # Rich Rich Answers ( eg: social network cast )
 richcast=$(echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recd)
 snipcall "$richcast"
@@ -263,23 +283,14 @@ snipcall "$rich"
 # "..More" is only visible for a few locations, please provide which one is giving you this and the output
 
 
-# Featured Snippets ( eg: who is garfield )
-feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recd | tr ' ' '\0' | xargs -0 -n10)"
-snipcall "$feath"
 
 
-# Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ')"
-snipcall "$math"
 
 # Weather ( eg: weather new york)
 weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recd)"
 snipcall "$weather"
 
 
-# Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recd)"
-snipcall "$trans"
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
