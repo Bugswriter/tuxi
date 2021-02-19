@@ -32,6 +32,7 @@ cURL **tuxi** to your **$PATH** and give execute permissions.
 $ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
 $ sudo chmod +x /usr/local/bin/tuxi
 ```
+> To update just do `curl`, no need to `chmod` anymore.
 
 If you're on Arch, then Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
 ```sh
