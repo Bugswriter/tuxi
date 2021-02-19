@@ -1,5 +1,5 @@
 <h1 align="center">TUXI</h1>
-<p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers</p>
+<p align="center">A CLI tool that scrapes Google search results and SERPs, and provides instant and concise answers</p>
 
 ##  
 
@@ -16,11 +16,10 @@ to process and return results, and `recode` to unescape html.
 
 
 [Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
-> Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
 
-* [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
+* [pup](https://github.com/ericchiang/pup) - Command-line tool for processing HTML.
 * [recode](https://github.com/rrthomas/recode) - Charset converter tool and library.
 * [jq](https://github.com/stedolan/jq) - Command-line JSON processor.
 
@@ -54,18 +53,13 @@ operating system while windows are slow on older hardware.
 * You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`.
 * The -r option will make the output not have formatting, which can be convenient for use in scripts.
 * The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`.
-* Quotations are optional, but should be used if you want to search with special characters(?=!|&<>%$#/\\).
-* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`
-* The -r flag will make the output not have formatting, which can be convenient for use in scripts.
-* Your query can also be a mathematical expression.
-* You can also ask tuxi to translate for you.
-* Tuxi can also convert currency or units.
+* **NOTE**: all options must go before the query.
 
-Use `-h` argument to display help message, `-v` to show version.
+Use `-h` to display help message, `-v` to show version.
 
 ```sh
 $ tuxi -v
-tuxi 1.1.3
+tuxi 1.1.4
 ```
 
 ```sh
@@ -73,12 +67,15 @@ $ tuxi -h
 Usage: tuxi [options] query
 
 Options:
-  -v                    Show version message and exit.
+  -v                    Print version number and exit.
   -h                    Show this help message and exit.
   -r                    Raw search results.
                         (no pretty output, no colors)
   -q                    Only output search results.
                         (silences "Did you mean?", greeting, usage)
+  -d                    Debug file. Help with logging for issues.
+  -a                    Use all snippets.
+  -l                    Prints location after snippet is called.
 
 Report bugs at https://github.com/Bugswriter/tuxi/issues.
 ```
@@ -103,7 +100,7 @@ $ tuxi -q linux torvalds birthday
 ```
 
 **Raw formatting for output (no colors)** <kbd>-r option</kbd>
-> Useful for e.g scripting `notify-send`.
+> Useful for scripting e.g. `notify-send` `dunst`.
 ```sh
 $ tuxi -r linux torvalds birthday
 > Did you mean linus?

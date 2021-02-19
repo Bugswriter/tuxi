@@ -16,3 +16,4 @@ printf "Testing Translate¬\n" && tuxi "Vais para cascais? em ingles" 1>>testout
 printf "Testing Knowledge Graph - right¬\n" && tuxi "lorem ipsum" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 printf "Testing Define¬\n" && tuxi "define humor" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 printf "Testing Debug¬\n" && tuxi -d "linus torvalds age" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing Rich List" && tuxi "elephant height" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
