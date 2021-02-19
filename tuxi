@@ -192,7 +192,7 @@ if [ $quiet = "false" ]; then
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
-diseases="$(echo "$google_html" | pup 'div.Is4rb text{}' | recode html..ISO-8859-1)"
+diseases="$(echo "$google_html" | pup 'div.os0Kkc > div.m6vS6b text{}'| recode html..ISO-8859-1)"
 [ -n "$diseases" ] && output "$diseases" && exit 0
 
 # Basic Answers ( eg: tuxi christmas day )
