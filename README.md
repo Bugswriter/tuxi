@@ -1,11 +1,11 @@
 <h1 align="center">TUXI</h1>
-<p align="center">Tuxi is a CLI tool that scrapes Google search results and SERPs, and provides instant, concise answers for your questions in the terminal.</p>
+<p align="center">A CLI tool that scrapes Google search results and SERPs, and provides instant and concise answers</p>
 
 ##  
 
 <img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
 
-#### How does this work?
+### How does this work?
 
 The script uses `pup` to scrape Google search results and SERPs.
 If the query returns several results, Tuxi will choose the most 
@@ -16,26 +16,37 @@ to process and return results, and `recode` to unescape html.
 
 
 [Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
-> Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
 
-* [pup](https://github.com/ericchiang/pup) - CLI tool for processing HTML.
+* [pup](https://github.com/ericchiang/pup) - Command-line tool for processing HTML.
 * [recode](https://github.com/rrthomas/recode) - Charset converter tool and library.
 * [jq](https://github.com/stedolan/jq) - Command-line JSON processor.
 
 ## Installation
 
+### cURL
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
-curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
-chmod +x $HOME/.local/bin/tuxi
+$ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
+$ sudo chmod +x /usr/local/bin/tuxi
 ```
+> To update, just do `curl` again, no need to `chmod` anymore.  
+> To uninstall, simply remove `tuxi` from your **$PATH**, for example `sudo rm -f /usr/local/bin/tuxi`.
 
-If you're on Arch, then Tuxi is available as the `tuxi-git` package in the AUR.
+### Make
 ```sh
-yay -S tuxi-git
+$ git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
+$ sudo make install
+```
+> To update, just `git pull` on your local tuxi repository and reinstall with `sudo make install`.  
+> To uninstall, simply run `sudo make uninstall`.
+
+### Arch Linux AUR
+Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
+```sh
+$ yay -S tuxi-git
 ```
 
 ## Usage
@@ -54,18 +65,13 @@ operating system while windows are slow on older hardware.
 * You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`.
 * The -r option will make the output not have formatting, which can be convenient for use in scripts.
 * The -q option silences "Did you mean?" and Tuxi's greeting on calling `tuxi`.
-* Quotations are optional, but should be used if you want to search with special characters(?=!|&<>%$#/\\).
-* You can also write your query as a statement, e.g: `tuxi linus torvalds birthday`
-* The -r flag will make the output not have formatting, which can be convenient for use in scripts.
-* Your query can also be a mathematical expression.
-* You can also ask tuxi to translate for you.
-* Tuxi can also convert currency or units.
+* **NOTE**: all options must go before the query.
 
-Use `-h` argument to display help message, `-v` to show version.
+Use `-h` to display help message, `-v` to show version.
 
 ```sh
 $ tuxi -v
-tuxi 1.1.3
+tuxi 1.1.4
 ```
 
 ```sh
@@ -73,19 +79,22 @@ $ tuxi -h
 Usage: tuxi [options] query
 
 Options:
-  -v                    Show version message and exit.
+  -v                    Print version number and exit.
   -h                    Show this help message and exit.
   -r                    Raw search results.
                         (no pretty output, no colors)
   -q                    Only output search results.
                         (silences "Did you mean?", greeting, usage)
+  -d                    Debug file. Help with logging for issues.
+  -a                    Use all snippets.
+  -l                    Prints location after snippet is called.
 
 Report bugs at https://github.com/Bugswriter/tuxi/issues.
 ```
 
 ## Features
 
-* Gives corrections
+**Gives corrections**
 ```sh
 $ tuxi linux torvalds birthday
 > Did you mean linus?
@@ -94,7 +103,7 @@ $ tuxi linux torvalds birthday
 ---
 ```
 
-* When you know it's actually linux torvalds (-q option)
+**When you know it's actually linux torvalds** <kbd>-q option</kbd>
 ```sh
 $ tuxi -q linux torvalds birthday
 ---
@@ -102,14 +111,15 @@ $ tuxi -q linux torvalds birthday
 ---
 ```
 
-* Raw formatting for output (no colors) (-r option)
+**Raw formatting for output (no colors)** <kbd>-r option</kbd>
+> Useful for scripting e.g. `notify-send` `dunst`.
 ```sh
 $ tuxi -r linux torvalds birthday
 > Did you mean linus?
 28 December 1969
 ```
 
-* Can do math
+**Math operations**
 ```sh
 $ tuxi "log(30)"
 ---
@@ -117,21 +127,25 @@ $ tuxi "log(30)"
 ---
 ```
 
-* Translate
+**Translate**
 ```sh
-$ tuxi "Vais para Cascais? em ingles"
+$ tuxi "I love you in japanese"
 ---
-Are you going to Cascais?
+わたしは、あなたを愛しています
+---
+$ tuxi "わたしは、あなたを愛しています in english"
+---
+I love you
 ---
 ```
 
-* And much more (lyrics, weather, conversions...)
+**And much more (lyrics, weather, conversions...)**
 
 ## License
 
-[GPL-3.0](./LICENSE)
+This project is licensed under [GPL-3.0](./LICENSE).
 
 ## Contributing
 
-If you want to contribute, please see [CONTRIBUTING.md](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
+If you want to contribute, please see [CONTRIBUTING](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
 

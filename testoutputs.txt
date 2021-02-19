@@ -1,0 +1,224 @@
+[1;32mUsage:[0m tuxi [1;33m[options][0m [1;35mquery[0m
+
+[1;32mOptions:[0m
+  -v                    Print version number and exit.
+  -h                    Show this help message and exit.
+  -r                    Raw search results.
+                        (no pretty output, no colors)
+  -d                    Debug file for log.
+  -q                    Only output search results.
+                        (silences "Did you mean?", greeting, usage)
+  -a                    Output all search results.
+
+[1;32mReport bugs at[0m [1;36mhttps://github.com/Bugswriter/tuxi/issues[0m
+[1;32m>[0m Did you mean Linus Torvalds?
+[1;32m---[0m
+Linus Benedict Torvalds is a Finnish software engineer who is
+the creator and, historically, the principal developer of the Linux
+kernel, used by Linux distributions and other operating systems such
+as Android and Chrome OS. 
+[1;32m---[0m
+[1;32m---[0m
+1.4771212547196624 
+[1;32m---[0m
+[1;32m---[0m
+37.33333333333333 
+[1;32m---[0m
+[1;32m---[0m
+* John Krasinski (Jim Halpert)
+* Jenna Fischer (Pam Beesly)
+* Rainn Wilson (Dwight Schrute)
+* Angela Kinsey (Angela Martin)
+* Mindy Kaling (Kelly Kapoor)
+* B. J. Novak (Ryan Howard)
+* Brian Baumgartner (Kevin Malone)
+* Ed Helms (Andy Bernard)
+* Kate Flannery (Meredith Palmer)
+* Oscar Nunez (Oscar Martinez)
+* Phyllis Smith (Phyllis Vance)
+* Creed Bratton (Creed Bratton)
+* Leslie David Baker (Stanley Hudson)
+* Paul Lieberstein (Toby Flenderson)
+* Ellie Kemper (Erin Hannon)
+* Craig Robinson (Darryl Philbin)
+* Greg Daniels
+* Melora Hardin (Jan Levinson)
+* Catherine Tate (Nellie Bertram)
+* David Denman (Roy Anderson)
+* Rashida Jones (Karen Filippelli)
+* Andy Buckley (David Wallace)
+* Zach Woods (Gabe Lewis)
+* Amy Ryan (Holly Flax)
+* Michael Schur (Mose)
+* James Spader (Robert California)
+* Nancy Carell (Carol Stills)
+* David Koechner
+* Jake Lacy (Pete Miller)
+* Will Ferrell (Deangelo Vickers)
+* Hugh Dane
+* Amy Adams (Katy)
+* Robert R. Shafer
+* Kathy Bates (Jo Bennett)
+* Clark Duke (Clark Green)
+* Idris Elba (Charles Miner)
+* Linda Purl
+* Devon Abner (Devon White)
+* Jack Coleman
+* Steve Carell (Michael Scott)
+* Lindsey Broad
+* Amy Pietz
+* Jack Black (Sam)
+* Charles Esten (Josh Porter)
+* Timothy Olyphant
+* Chris Diamantopoulos (Brian)
+* Mark Proksch (Nate)
+* Mike Bruner (Tony)
+* Jackie Debatin
+* Ursula Burton (Hannah Smotridge-Barr)
+* Rob Huebel 
+[1;32m---[0m
+[1;32m---[0m
+8,849 m  
+[1;32m---[0m
+[1;32m---[0m
+The number 42 is, in The Hitchhiker's Guide to the
+Galaxy by Douglas Adams, the "Answer to the Ultimate Question
+of Life, the Universe, and Everything", calculated by an enormous
+supercomputer named Deep Thought over a period of 7.5 million
+years. Unfortunately, no one knows what the question is. 
+[1;32m---[0m
+[1;32m---[0m
+Inainte sa ne fi nascut,
+Te-am rugat pe tine sa-mi alegi culoarea ochilor
+Dar sufletele noastre erau tinere si nu cazusera niciodata pe Pamant
+Tot ce-am vazut pana atunci era cerul asa ca mi-ai ales albastrul
+Ganduri lasate prin vant
+Ca scrisorile in sticla duse de val
+Batut de timp si cu inima franta
+Inca astept sa ajung in mal
+Ai asteptat sa-ti spun ce simt
+Dar vesnicia n-are timp
+Asa ca am ales sa te iubesc ca un simplu muritor de rand
+Am crezut ca voi muri de sete
+Asteptandu-mi sufletul pereche
+Dar noi ne-am promis ca ne vom revedea, demult
+Inainte sa ne fi nascut
+Poate, poate
+Apusul de soare e doar rasaritul vazut de la spate
+Vazut de la spate
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+… 
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+Printre miliarde de lumini si oameni
+Stiu ca ai sa-mi iesi acum in cale
+Stiu ca ne vom regasi odata
+Doar sufletul o limba are
+Caut in viata mea un rost
+In ochii tai un adapost
+Pierdut in amintiri in care inca nu am fost
+Am crezut ca voi muri de sete
+Asteptandu-mi sufletul pereche
+Dar noi ne-am promis ca ne vom revedea, demult
+Inainte sa ne fi nascut
+Poate, poate
+Apusul de soare e doar rasaritul vazut de la spate
+Vazut de la spate
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+Poate, poate
+Apusul de soare e doar rasaritul vazut de la spate
+Vazut de la spate
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+Inainte sa ne fi nascut,
+Te-am rugat pe tine sa-mi alegi culoarea ochilor
+Dar sufletele noastre erau tinere si nu cazusera niciodata pe Pamant
+Tot ce-am vazut pana atunci era cerul asa ca mi-ai ales albastrul
+Ganduri lasate prin vant
+Ca scrisorile in sticla duse de val
+Batut de timp si cu inima franta
+Inca astept sa ajung in mal
+Ai asteptat sa-ti spun ce simt
+Dar vesnicia n-are timp
+Asa ca am ales sa te iubesc ca un simplu muritor de rand
+Am crezut ca voi muri de sete
+Asteptandu-mi sufletul pereche
+Dar noi ne-am promis ca ne vom revedea, demult
+Inainte sa ne fi nascut
+Poate, poate
+Apusul de soare e doar rasaritul vazut de la spate
+Vazut de la spate
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+… 
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+Printre miliarde de lumini si oameni
+Stiu ca ai sa-mi iesi acum in cale
+Stiu ca ne vom regasi odata
+Doar sufletul o limba are
+Caut in viata mea un rost
+In ochii tai un adapost
+Pierdut in amintiri in care inca nu am fost
+Am crezut ca voi muri de sete
+Asteptandu-mi sufletul pereche
+Dar noi ne-am promis ca ne vom revedea, demult
+Inainte sa ne fi nascut
+Poate, poate
+Apusul de soare e doar rasaritul vazut de la spate
+Vazut de la spate
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+Poate, poate
+Apusul de soare e doar rasaritul vazut de la spate
+Vazut de la spate
+Poate, poate
+Intr-o alta viata ne vom regasi si vom invata sa fim fericiti
+Admirand cate doua rasarituri pe zi
+View all 
+[1;32m---[0m
+[1;32m---[0m
+-1 ºC
+30 ºF 
+[1;32m---[0m
+[1;32m---[0m
+1 
+[1;32m---[0m
+[1;32m---[0m
+140.00 
+[1;32m---[0m
+[1;32m---[0m
+View all 
+[1;32m---[0m
+[1;32m---[0m
+In publishing and graphic design, Lorem ipsum is a placeholder
+text commonly used to demonstrate the visual form of a
+document or a typeface without relying on meaningful content. Lorem
+ipsum may be used as a placeholder before final copy
+is available. 
+[1;32m---[0m
+[1;32m---[0m
+humour
+* noun
+* verb
+* the quality of being amusing or comic, especially as expressed in literature or speech.
+* a mood or state of mind.
+* comply with the wishes of (someone) in order to keep them content, however unreasonable such wishes might be. 
+[1;32m---[0m
+[1;32m---[0m
+Elephants are mammals of the family Elephantidae and the largest
+existing land animals. Three species are currently recognised: the African
+bush elephant, the African forest elephant, and the Asian elephant.
+Elephantidae is the only surviving family of the order Proboscidea;
+extinct members include the mastodons. 
+[1;32m---[0m
+HTML for "linus torvalds age" -> /home/dan/.cache/tuxi/tuxi-1613738191-linus_torvalds_age.html

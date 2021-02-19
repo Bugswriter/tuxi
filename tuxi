@@ -7,7 +7,7 @@
 
 # Version text should remain simple btw.
 version_text() {
-    printf "tuxi 1.1.3\n"
+    printf "tuxi 1.1.4\n"
 }
 
 help_text() {
@@ -19,9 +19,10 @@ help_text() {
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
+    printf "  -d                    Debug file for log.\n"
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
-    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
+    printf "  -a                    Output all search results.\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
 }
@@ -72,10 +73,31 @@ C="\033[1;36m" # Cyan
 raw=false
 quiet=false
 debug=false
+all=false
+location=false; loc=""
 
 # search result output format (changes if raw=true)
 output() { 
     printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
+}
+
+# recode for character compatibility
+recd() {
+    recode html..ISO-8859-1
+}
+
+# give location true result
+modifyloc() {
+    loc="$(echo "$google_html" | pup 'span.Q8LRLc text{}' | recd)"
+}
+
+# test after snippet is called
+snipcall() {
+    if [ "$all" = "false" ]; then
+        [ -n "$1" ] && output "$1" "$loc" && exit 0
+    else
+        [ -n "$1" ] && output "$1" "$loc"
+    fi
 }
 
 
@@ -88,8 +110,9 @@ output() {
 # -r : raw search result
 # -q : silences greeting and did you mean
 # -d : debug mode
+# -a : try all snippets
 
-while getopts "vhrqd" OPT; do
+while getopts "vhrqdal" OPT; do
     case "$OPT" in
     v)
         version_text
@@ -108,11 +131,18 @@ while getopts "vhrqd" OPT; do
     d)
         debug=true
         ;;
+    a)
+        all=true
+        ;;
+    l)
+        location=true
+        ;;
     *)
         help_text | head -n 1
         exit 1
     esac
 done
+
 # shifts to query
 shift $((OPTIND-1))
 
@@ -137,11 +167,11 @@ fi
 # If query is empty: exit
 # If quiet=false: Prints greeting and usage
 if [ -z "$1" ]; then
-if [ $quiet = "false" ]; then
-    printf "Hi, I'm Tuxi. Ask me anything!\n"
-    help_text | head -n 1 
-fi
-exit 0
+    if [ $quiet = "false" ]; then
+        printf "Hi, I'm Tuxi. Ask me anything!\n"
+        help_text | head -n 1 
+    fi
+    exit 0
 fi
     
 # Else, all arguments are saved in $query
@@ -155,100 +185,132 @@ query="$*"
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl=en_US"
 
+
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 # Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
 if $debug; then
-    [ ! -d "$HOME/.cache/tuxi" ] && mkdir -p "$HOME/.cache/tuxi"
+    mkdir -p "$HOME/.cache/tuxi"
 
     file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
     html_location="$HOME/.cache/tuxi/$file_name"
-    printf "%s" $google_html | pup -i 2 > $html_location
+    printf "%s" "$google_html" > $html_location
     printf "HTML for \"$query\" -> $html_location\n"
     exit 0
 fi
 
+# Prints location after snippet is called
+if $location; then
+    modifyloc
+fi
+
+### BIGGER WARNING: From now on, any changes to this order must have an explanation as to why. ###
+## WARNING: Never put Define after Rich Answers, since it :will get only the word itself ##
+# Warning: Rich list will apparently break anything and everything it touches, Bad Boy!. #
 ## Snippet Priority ##
-# Did you mean
-# Math
-# Knowledge Graph - top
-# Define
+# Did you mean			#Reason : Always above all exiting calls, as this is the only one that doesnt exit on completion.
 # Basic Answers
+# Define
 # Rich Answers
-# Featured Snippets
-# Lyrics
-# Weather
-# Units Convertion
-# Currency Convertion
-# Translate
-# Knowledge Graph - right
+# Featured Snippets		#Reason : Goes on to the top of this list... ^^^
+# Math				#Reason : Same.
+# Lyrics			#Reason : Same / Would conflict with Rich lists.
+# Weather			#Reason : Same. VVV
+# Knowledge Graph - top		#Reason : Same as below. VVV
+# Knowledge Graph - right	#Reason : No specific reason thta we know of.			### Any above this point are likely to break if put below.
+# Units Convertion		#Reason : Same as below. VVV
+# Currency Convertion		#Reason : Almost as slow as translate, likely to break rich.
+# Translate			#Reason : Slowest operation there is. should always be as low as possible.
+# Rich list			#Reason : Slow operation, breaks Kno_TOP and Kno_RIGHT and Translate.
+
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
 if [ $quiet = "false" ]; then
-    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recd)"
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
+
 # Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
-[ -n "$basic" ] && output "$basic" && exit 0
+basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recd)"
+snipcall "$basic"
 
 
-#define (eg: define Aggrandize)
-define="$(echo "$google_html" | pup 'div[data-dobid="dfn"] text{}' | sed 's/^/\*\ /g' | recode html..ISO-8859-1)"
-[ -n "$define" ] && output "$define" && exit 0
+# Define (eg: define Aggrandize)
+define="$(echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recd)"
+snipcall "$define"
 
 
-# Rich Answers ( eg: elevation of mount everest )
-rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
-[ -n "$rich" ] && output "$rich" && exit 0
-
-# Featured Snippets ( eg: who is garfield )
-feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$feat" ] && output "$feat" && exit 0
+# Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
+#"what is the " seems to be required for some things
+kno_val=$(echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}'| tr '\n' ' ' )
+snipcall "$kno_val"
 
 
 # Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
-[ -n "$math" ] && output "$math" && exit 0
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ')"
+snipcall "$math"
 
 
-# Lyrics ( eg: gecgecgec lyrics )
-lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
-[ -n "$lyrics" ] && output "$lyrics" && exit 0
+# Featured Snippets ( eg: who is garfield )
+feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recd | tr ' ' '\0' | xargs -0 -n10)"
+snipcall "$feat"
+
+ 
+# Rich Rich Answers ( eg: social network cast )
+richcast=$(echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recd)
+snipcall "$richcast"
+
+
+# Simple lists (eg Need for Speed Heat cars list)
+rich=$(echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recd)
+snipcall "$rich"
 
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recode html..ISO-8859-1)"
-[ -n "$weather" ] && output "$weather" && exit 0
+weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recd)"
+snipcall "$weather"
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
-kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
-[ -n "$kno_top" ] && output "$kno_top" && exit 0
+kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recd)
+snipcall "$kno_top"
 
 
 # Knowledge Graph - right ( eg: the office )
-kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$kno_right" ] && output "$kno_right" && exit 0
+kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recd | tr ' ' '\0' | xargs -0 -n10)"
+snipcall "$kno_right"
 
 
 # Units Conversion ( eg: 1m into 1 cm )
-unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1)"
-[ -n "$unit" ] && output "$unit" && exit
+unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recd)"
+snipcall "$unit"
 
 
 # Currency Conversion ( eg: 1 USD in rupee )
-currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recode html..ISO-8859-1)"
-[ -n "$currency" ] && output "$currency" && exit
+currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recd)"
+snipcall "$currency"
 
 
 # Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
-[ -n "$trans" ] && output "$trans" && exit
+trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
+snipcall "$trans"
+
+## Be thankfull i placed an ugly hard fix and didnt just remove this alltogether.
+# This serves for a lot of things, simplified for performance
+# Rich Answers      ( eg: elevation of mount everest )
+# bbVIQb & ujudUb   ( eg: gecgecgec lyrics )                 ( Lyrics )
+# mR2g0d            ( eg: game of thrones s03 episodes )     ( Somewhat complicated lists )
+rich=$(echo "$google_html" | pup 'div.bbVIQb, div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recd)
+[ "$rich" != "View all" ] && snipcall "$rich"
+# works with a bunch of tested songs, previous one didnt work with some songs, i.e. "adele hello lyrics"
+# only problem is that it includes the "...More", and idk how to remove it from the variable
+# "..More" is only visible for a few locations, please provide which one is giving you this and the output
 
 
 # Else
-error_msg "No Result!" && exit 1
+if [ "$all" = "false" ]; then
+    error_msg "No Result!" && exit 1
+fi
