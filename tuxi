@@ -194,7 +194,7 @@ if $debug; then
 
     file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
     html_location="$HOME/.cache/tuxi/$file_name"
-    printf "%s" $google_html | pup -i 2 > $html_location
+    printf "%s" "$google_html" > $html_location
     printf "HTML for \"$query\" -> $html_location\n"
     exit 0
 fi
