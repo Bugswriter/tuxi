@@ -191,6 +191,9 @@ feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode htm
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
 
+#Lyrics for US users, above does not work for US
+lyrics="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1)"
+[ -n "$lyrics" ] && output "$lyrics" && exit 0
 
 # Weather ( eg: weather new york)
 weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
