@@ -193,7 +193,7 @@ lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-
 
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.[] | .. | .text?' | sed '/null/d;/.[C,F]/d;/.*:/d;$d' | awk '1 == NR {print $0 "ºC"}; 2 == NR {print $0 "ºF"}; 3 == NR {print "Precipitation: " $0}; 4 == NR {print "Humidity: " $0}; 5 == NR {print "Wind: "$0};' | recode html..ISO-8859-1)"
+weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.[] | .. | .text?' | sed '/null/d;/.[C,F]/d;/.*:/d;$d' | awk '1 == NR {print $0 "ºC"}; 2 == NR {print $0 "ºF"}; 3 == NR {print "Precipitation: " $0}; 4 == NR {print "Humidity: " $0}; 5 == NR {print "Wind: "$0};' | sed '1{N;s/\n/\t/;}' | recode html..ISO-8859-1)"
 [ -n "$weather" ] && output "$weather" && exit 0
 
 
