@@ -2,6 +2,12 @@
 
 
 ###############################
+#####      Constants      #####
+###############################
+
+LANGUAGE="en_US"
+
+###############################
 #####      Functions      #####
 ###############################
 
@@ -135,7 +141,7 @@ query="$*"
 ##############################
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
-google_url="https://www.google.com/search?hl=en_US"
+google_url="https://www.google.com/search?hl=$LANGUAGE"
 
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
