@@ -15,7 +15,7 @@ In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed`
 to process and return results, and `recode` to unescape html.
 
 
-[Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
+[Watch this video for more info](https://youtu.be/EtwWvMa8muU)
 > Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
@@ -26,14 +26,26 @@ to process and return results, and `recode` to unescape html.
 
 ## Installation
 
+### cURL
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
-$ curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o $HOME/.local/bin/tuxi
-$ chmod +x $HOME/.local/bin/tuxi
+$ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
+$ sudo chmod +x /usr/local/bin/tuxi
 ```
+> To update, just do `curl` again, no need to `chmod` anymore.  
+> To uninstall, simply remove `tuxi` from your **$PATH**, for example `sudo rm -f /usr/local/bin/tuxi`.
 
-If you're on Arch, then Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
+### Make
+```sh
+$ git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
+$ sudo make install
+```
+> To update, just `git pull` on your local tuxi repository and reinstall with `sudo make install`.  
+> To uninstall, simply run `sudo make uninstall`.
+
+### Arch Linux AUR
+Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
 ```sh
 $ yay -S tuxi-git
 ```
