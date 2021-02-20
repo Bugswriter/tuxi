@@ -275,14 +275,8 @@ snipcall "$rich"
 # Rich Answers      ( eg: elevation of mount everest )
 # bbVIQb & ujudUb   ( eg: gecgecgec lyrics )                 ( Lyrics )
 # mR2g0d            ( eg: game of thrones s03 episodes )     ( Somewhat complicated lists )
-rich=$(echo "$google_html" | pup 'div.bbVIQb, div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recd)
+rich=$(echo "$google_html" | pup 'div.bbVIQb, span[jsname="YS01Ge"] , div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recd)
 snipcall "$rich"
-
-# works with a bunch of tested songs, previous one didnt work with some songs, i.e. "adele hello lyrics"
-# only problem is that it includes the "...More", and idk how to remove it from the variable
-# "..More" is only visible for a few locations, please provide which one is giving you this and the output
-
-
 
 
 
