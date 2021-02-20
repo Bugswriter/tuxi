@@ -287,8 +287,9 @@ snipcall "$rich"
 
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' -e '2 s/$/ ºF/' | recd)"
+weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recd)"
 snipcall "$weather"
+
 
 
 
