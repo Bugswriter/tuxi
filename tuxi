@@ -172,17 +172,17 @@ if [ $quiet = "false" ]; then
 fi
 
 # Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1)"
 [ -n "$math" ] && output "$math" && exit 0
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
-kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
+kno_top="$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1)"
 [ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
 # Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | sed 's/\n//g' | recode html..ISO-8859-1)"
 [ -n "$basic" ] && output "$basic" && exit 0
 
 
@@ -215,7 +215,7 @@ unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[
 
 
 # Currency Conversion ( eg: 1 USD in rupee )
-currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recode html..ISO-8859-1)"
+currency="$(echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1)"
 [ -n "$currency" ] && output "$currency" && exit
 
 
