@@ -2,6 +2,12 @@
 
 
 ###############################
+#####      Constants      #####
+###############################
+
+LANGUAGE=""
+
+###############################
 #####      Functions      #####
 ###############################
 
@@ -51,6 +57,9 @@ check_deps "pup" "recode" "jq"
 ###############################
 #####       Defaults      #####
 ###############################
+
+# system language fallback
+LANG=$(echo $LANG | sed 's/\..*//')
 
 # color codes
 N="\033[0m"    # Reset
@@ -135,7 +144,7 @@ query="$*"
 ##############################
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
-google_url="https://www.google.com/search?hl=en_US"
+google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
 # Response from Google via cURL (-G: get, -s: silent) 
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
@@ -163,17 +172,17 @@ if [ $quiet = "false" ]; then
 fi
 
 # Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
+math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1)"
 [ -n "$math" ] && output "$math" && exit 0
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
-kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recode html..ISO-8859-1)
+kno_top="$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1)"
 [ -n "$kno_top" ] && output "$kno_top" && exit 0
 
 
 # Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | sed 's/\n//g' | recode html..ISO-8859-1)"
 [ -n "$basic" ] && output "$basic" && exit 0
 
 
@@ -191,9 +200,12 @@ feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode htm
 lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
 
+#Lyrics for US users, above does not work for US
+lyrics="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1)"
+[ -n "$lyrics" ] && output "$lyrics" && exit 0
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºF/' -e '2 s/$/ ºC/' | recode html..ISO-8859-1)"
+weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
 [ -n "$weather" ] && output "$weather" && exit 0
 
 
@@ -203,7 +215,7 @@ unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[
 
 
 # Currency Conversion ( eg: 1 USD in rupee )
-currency="$(echo "$google_html" | pup '.SwHCTb text{}' | tr -d '\n' | tr ' ' '\0' | recode html..ISO-8859-1)"
+currency="$(echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1)"
 [ -n "$currency" ] && output "$currency" && exit
 
 
