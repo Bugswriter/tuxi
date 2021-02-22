@@ -11,6 +11,34 @@ LANGUAGE=""
 tuxi_pid="$$"
 [ ! "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
 
+######################################
+#####      Snippet Priority      #####
+######################################
+
+# this variable determines the order the tests are started, they are processed in parallel
+# the first word should be the name of the a_function() followed by a space
+# you can disable tests by commenting out the line(s)
+priority="
+did_you_mean    # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
+define          # Define ( eg: define Aggrandize )
+kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen )
+math            # Math ( eg: log_2(3) * pi^e )
+kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
+quotes          # Quotes ( eg: mahatma gandhi quotes )
+basic           # Basic Answers ( eg: tuxi christmas day )
+richcast        # Rich Rich Answers ( eg: social network cast )
+lists           # Simple lists ( eg Need for Speed Heat cars list )
+rich            # Rich Answers ( eg: elevation of mount everest )
+feat            # Featured Snippets ( eg: who is garfield )
+lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
+lyrics_us       # Lyrics for US users, above does not work for US
+weather         # Weather ( eg: weather new york )
+unit            # Units Conversion ( eg: 1m into 1 cm )
+currency        # Currency Conversion ( eg: 1 USD in rupee )
+trans           # Translate ( eg: Vais para cascais? em ingles )
+kno_right       # Knowledge Graph - right ( eg: the office )
+"
+
 ###############################
 #####      Functions      #####
 ###############################
@@ -25,6 +53,8 @@ help_text() {
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "  -a                    Prints all valid answers.\n"
+    printf "  -t                    Pick answers to test.\n"
+    printf "                        (you can specify multiple answers using tuxi_NAME in your query)\n"
     printf "\n"
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n" "$G" "$N" "$C" "$N"
 }
@@ -58,7 +88,7 @@ catch_signal_usr2() {
 }
 trap catch_signal_usr2 USR2
 
-# calculates execution time and number and answers processed
+# calculates execution time and number of answers processed
 debug_info() {
     timer_stop=$(date +'%s %N')
     timer_start_secs=$(echo $timer_start | cut -d ' ' -f1)
@@ -135,6 +165,7 @@ C="\033[1;36m" # Cyan
 raw=false
 quiet=false
 all=false
+pick_search=false
 debug=false
 save_html=false
 
@@ -153,9 +184,10 @@ output() {
 # -r : raw search result
 # -q : silences greeting and did you mean
 # -a : print all answers
+# -t : specify answer type
 # -d : print debug info
 # -s : save google HTML response
-while getopts "hrqads" OPT; do
+while getopts "hrqatds" OPT; do
     case "$OPT" in
     h)
         help_text
@@ -169,6 +201,9 @@ while getopts "hrqads" OPT; do
         ;;
     a)
         all=true
+        ;;
+    t)
+        pick_search=true
         ;;
     d)
         debug=true
@@ -222,6 +257,45 @@ fi
 # Else, all arguments are saved in $query
 query="$*"
 
+####################################
+#####      Custom answers      #####
+####################################
+
+if $pick_search; then
+    list_priority="$priority"
+    priority="did_you_mean"
+    query="$(printf '%s\n' "$query" | sed 's/ /\\n/g')"
+    for words in $(printf '%b\n' "$query" | grep 'tuxi_'); do
+        case $words in
+        *define) priority="$(printf '%b\ndefine\n' "$priority")" ;;
+        *kno_val) priority="$(printf '%b\nkno_val\n' "$priority")" ;;
+        *math) priority="$(printf '%b\nimath\n' "$priority")" ;;
+        *kno_top) priority="$(printf '%b\nkno_top\n' "$priority")" ;;
+        *quotes) priority="$(printf '%b\nquotes\n' "$priority")" ;;
+        *basic) priority="$(printf '%b\nbasic\n' "$priority")" ;;
+        *richcast) priority="$(printf '%b\nrichcast\n' "$priority")" ;;
+        *lists) priority="$(printf '%b\nlists\n' "$priority")" ;;
+        *rich) priority="$(printf '%b\nrich\n' "$priority")" ;;
+        *feat) priority="$(printf '%b\nfeat\n' "$priority")" ;;
+        *lyrics_int) priority="$(printf '%b\nlyrics_int\n' "$priority")" ;;
+        *lyrics_us) priority="$(printf '%b\nlyrics_us\n' "$priority")" ;;
+        *weather) priority="$(printf '%b\nweather\n' "$priority")" ;;
+        *unit) priority="$(printf '%b\nunit\n' "$priority")" ;;
+        *currency) priority="$(printf '%b\ncurrency\n' "$priority")" ;;
+        *trans) priority="$(printf '%b\ntrans\n' "$priority")" ;;
+        *kno_right) priority="$(printf '%b\nkno_right\n' "$priority")" ;;
+        *)
+            printf "Sorry but %s is not a valid search type\nPlease retry your search using one of the following: tuxi_\n" "$words"
+            printf "%b\n" "$(echo "$list_priority" | sed /did_you_mean/d)"
+            printf "\n"
+            printf "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" "$(echo $words | sed 's/tuxi_//')"
+            exit 1
+            ;;
+        esac
+    done
+    query="$(printf '%b\n' "$query" | grep -v "tuxi_" | sed 's/\\n/ /g')"
+fi
+
 ########################################
 #####      Snippet extraction      #####
 ########################################
@@ -245,43 +319,18 @@ fi
 # start timer for debug_info after receiving results from google
 $debug && timer_start=$(date +'%s %N')
 
-## Snippet Priority ##
-# this variable determines the order the tests are started, they are processed in parallel
-# the first word should be the name of the a_function() followed by a space
-# you can disable tests by commenting out the line(s)
-priority="
-did_you_mean    # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
-define          # Define (eg: define Aggrandize)
-kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
-math            # Math ( eg: log_2(3) * pi^e )
-kno_top         # Knowledge Graph - top (list) ( eg: the office cast )
-basic           # Basic Answers ( eg: tuxi christmas day )
-richcast        # Rich Rich Answers ( eg: social network cast )
-lists           # Simple lists (eg Need for Speed Heat cars list)
-rich            # Rich Answers ( eg: elevation of mount everest )
-feat            # Featured Snippets ( eg: who is garfield )
-lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
-lyrics_us       # Lyrics for US users, above does not work for US
-weather         # Weather ( eg: weather new york)
-unit            # Units Conversion ( eg: 1m into 1 cm )
-currency        # Currency Conversion ( eg: 1 USD in rupee )
-trans           # Translate ( eg: Vais para cascais? em ingles )
-kno_right       # Knowledge Graph - right ( eg: the office )
-"
-priority=$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
-
-####################################
-####      Answer functions      ####
-####################################
+######################################
+#####      Answer functions      #####
+######################################
 
 ## NOTE: the order of these functions doesn't matter, priority is determined by the variable
 
 ## FUNCTION TEMPLATE
-# just find & replace all NewAnswerName with the name used in $priority
+# just find & replace all NewAnswerName with the name used in $priority and add scrape methed
 
 # # Answer description (and example)
 # a_NewAnswerName() {
-#     NewAnswerName="$(echo "$google_html" | pup ...)"
+#     NewAnswerName="$(echo "$google_html" | pup ... [ SCRAPE METHOD HERE ] ...)"
 #     if [ -n "$NewAnswerName" ]; then
 #         kill -USR1 "$tuxi_pid"
 #         if ! $all; then
@@ -420,6 +469,29 @@ a_kno_top() {
                 info_msg "Answer selected: kno_top"
             fi
             output "$kno_top"
+        fi
+    fi
+}
+
+# Quotes ( eg: mahatma gandhi quotes )
+a_quotes() {
+    quotes="$(echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1)"
+    if [ -n "$quotes" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: quotes"
+                fi
+                output "$quotes"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: quotes"
+            fi
+            output "$quotes"
         fi
     fi
 }
@@ -700,14 +772,15 @@ a_kno_right() {
     fi
 }
 
-##############################
-####      Processing      ####
-##############################
+################################
+#####      Processing      #####
+################################
 
 # launches all the snippet functions and saves the pids for later
 pids=""
 answers_found=0
 printed=0
+priority=$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
 for tests in $(echo "$priority"); do
     "a_${tests}" 2>/dev/null &
     if [ -z "$pids" ]; then
