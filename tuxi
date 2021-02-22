@@ -43,6 +43,12 @@ error_msg() {
     printf "%b%s%b\n"  "$R" "$*" "$N"
 }
 
+# Scrap HTML with external arguments
+snipcall() {
+    com="$(echo "$google_html" | eval "$@")"
+    [ -n "$com" ] && output "$com" && exit 0
+}
+
 
 #############################
 ##### Dependency check  #####
@@ -171,62 +177,45 @@ if [ $quiet = "false" ]; then
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
-# Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1)"
-[ -n "$math" ] && output "$math" && exit 0
 
+# Math ( eg: log_2(3) * pi^e )
+snipcall "pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1"
 
 # Knowledge Graph - top (list) ( eg: the office cast )
-kno_top="$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1)"
-[ -n "$kno_top" ] && output "$kno_top" && exit 0
-
+snipcall "pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;\$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,\$s/.*/*&/;\$d' | recode html..ISO-8859-1"
 
 # Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | sed 's/\n//g' | recode html..ISO-8859-1)"
-[ -n "$basic" ] && output "$basic" && exit 0
-
+snipcall "pup 'div.zCubwf text{}' | sed 's/\n//g' | recode html..ISO-8859-1"
 
 # Rich Answers ( eg: elevation of mount everest )
-rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
-[ -n "$rich" ] && output "$rich" && exit 0
-
+snipcall "pup 'div.XcVN5d text{}' | recode html..ISO-8859-1"
 
 # Featured Snippets ( eg: who is garfield )
-feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$feat" ] && output "$feat" && exit 0
-
+snipcall "pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10"
 
 # Lyrics ( eg: gecgecgec lyrics )
-lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
-[ -n "$lyrics" ] && output "$lyrics" && exit 0
+snipcall "pup 'div.bbVIQb text{}' | recode html..ISO-8859-1"
 
 #Lyrics for US users, above does not work for US
-lyrics="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1)"
-[ -n "$lyrics" ] && output "$lyrics" && exit 0
+snipcall "pup 'span[jsname=\"YS01Ge\"] text{}' | recode html..ISO-8859-1"
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
-[ -n "$weather" ] && output "$weather" && exit 0
-
+snipcall "pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '\$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,\${N;s/\n/\t/;};3s/.*/&ºF/;\$s/\t/\t\t/' | recode html..ISO-8859-1"
 
 # Units Conversion ( eg: 1m into 1 cm )
-unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1)"
-[ -n "$unit" ] && output "$unit" && exit
-
+snipcall "pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1"
 
 # Currency Conversion ( eg: 1 USD in rupee )
-currency="$(echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1)"
-[ -n "$currency" ] && output "$currency" && exit
-
+snipcall "pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1"
 
 # Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
-[ -n "$trans" ] && output "$trans" && exit
+snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!=\"BCGytf\")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1"
 
+# Translate ( eg: Vais para cascais? em ingles )
+snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!=\"BCGytf\")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1"
 
 # Knowledge Graph - right ( eg: the office )
-kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$kno_right" ] && output "$kno_right" && exit 0
+snipcall "pup 'div.kno-rdesc span' | sed -n '2p' | awk '{\$1=\$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10"
 
 
 # Else
