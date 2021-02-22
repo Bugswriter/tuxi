@@ -205,12 +205,12 @@ lyrics="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html
 [ -n "$lyrics" ] && output "$lyrics" && exit 0
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
+weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºF/;2,${N;s/\n/\t/;};3s/.*/&ºC/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
 [ -n "$weather" ] && output "$weather" && exit 0
 
 
 # Units Conversion ( eg: 1m into 1 cm )
-unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1)"
+unit="$(echo "$google_html" | pup '#NotFQb input attr{value}' | recode html..ISO-8859-1)"
 [ -n "$unit" ] && output "$unit" && exit
 
 
