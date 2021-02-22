@@ -1,5 +1,12 @@
-<h1 align="center">TUXI</h1>
-<p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers</p>
+<h1 align="center">TUXI-UnGoogled</h1>
+<p align="center">A CLI tool that scrapes Whoogle search results and SERPs that provides instant and concise answers</p>
+
+```
+This is currently in beta as whoogle search relies on independent
+hosting and the result page does not use id's therefore we have to
+use CSS paths. Therefore an URL variable is created to change the 
+whoogle pubic instance quickly without changing anything else.
+```
 
 ##  
 
@@ -7,7 +14,7 @@
 
 ### How does this work?
 
-The script uses `pup` to scrape Google search results and SERPs.
+The script uses `pup` to scrape Whoogle search results and SERPs.
 If the query returns several results, Tuxi will choose the most 
 relevant result on the basis of priority.
 
