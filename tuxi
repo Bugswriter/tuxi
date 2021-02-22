@@ -25,7 +25,8 @@ kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what 
 math            # Math ( eg: log_2(3) * pi^e )
 kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
 quotes          # Quotes ( eg: mahatma gandhi quotes )
-basic           # Basic Answers ( eg: tuxi christmas day )
+diseases        # Disease facts ( eg: common cold )
+basic           # Basic Answers ( eg: christmas day )
 richcast        # Rich Rich Answers ( eg: social network cast )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
 rich            # Rich Answers ( eg: elevation of mount everest )
@@ -272,6 +273,7 @@ if $pick_search; then
         *math) priority="$(printf '%b\nimath\n' "$priority")" ;;
         *kno_top) priority="$(printf '%b\nkno_top\n' "$priority")" ;;
         *quotes) priority="$(printf '%b\nquotes\n' "$priority")" ;;
+        *diseases) priority="$(printf '%b\ndiseases\n' "$priority")" ;;
         *basic) priority="$(printf '%b\nbasic\n' "$priority")" ;;
         *richcast) priority="$(printf '%b\nrichcast\n' "$priority")" ;;
         *lists) priority="$(printf '%b\nlists\n' "$priority")" ;;
@@ -492,6 +494,29 @@ a_quotes() {
                 info_msg "Answer selected: quotes"
             fi
             output "$quotes"
+        fi
+    fi
+}
+
+# Disease facts ( eg: common cold )
+a_diseases() {
+    diseases="$(echo "$google_html" | pup 'div.os0Kkc > div.m6vS6b text{}' | recode html..ISO-8859-1)"
+    if [ -n "$diseases" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: diseases"
+                fi
+                output "$diseases"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: diseases"
+            fi
+            output "$diseases"
         fi
     fi
 }
