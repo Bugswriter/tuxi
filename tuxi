@@ -1,27 +1,32 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
+# adapted from https://github.com/Bugswriter/tuxi
+printf "\n"
 
 ###############################
 #####      Constants      #####
 ###############################
 
 LANGUAGE=""
+tuxi_pid="$$"
+[ ! "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
 
 ###############################
 #####      Functions      #####
 ###############################
 
-help_text () {
-    printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n"  "$G" "$N"  "$Y" "$N"  "$M" "$N"
+help_text() {
+    printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n" "$G" "$N" "$Y" "$N" "$M" "$N"
     printf "\n"
-    printf "%bOptions:%b\n"                             "$G" "$N"
+    printf "%bOptions:%b\n" "$G" "$N"
     printf "  -h                    Show this help message and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
+    printf "  -a                    Prints all valid answers.\n"
     printf "\n"
-    printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n"  "$G" "$N"  "$C" "$N"
+    printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n" "$G" "$N" "$C" "$N"
 }
 
 # Checks if dependencies are installed.
@@ -36,27 +41,84 @@ check_deps() {
 }
 
 info_msg() {
-    printf "%b>%b %s\n"  "$G" "$N" "$*"
+    printf "%b>%b %s\n" "$G" "$N" "$*"
 }
 
 error_msg() {
-    printf "%b%s%b\n"  "$R" "$*" "$N"
+    printf "%b%s%b\n" "$R" "$*" "$N"
 }
 
+# these are used by the processing loop to determine how and when to print info and exit
+catch_signal_usr1() {
+    answers_found=$(($answers_found + 1))
+}
+trap catch_signal_usr1 USR1
+catch_signal_usr2() {
+    printed=$(($printed + 1))
+}
+trap catch_signal_usr2 USR2
 
-#############################
-##### Dependency check  #####
-#############################
+# calculates execution time and number and answers processed
+debug_info() {
+    timer_stop=$(date +'%s %N')
+    timer_start_secs=$(echo $timer_start | cut -d ' ' -f1)
+    timer_stop_secs=$(echo $timer_stop | cut -d ' ' -f1)
+    timer_start_nano=$(echo $timer_start | cut -d ' ' -f2)
+    timer_start_nano=$(expr $timer_start_nano + 0)
+    timer_stop_nano=$(echo $timer_stop | cut -d ' ' -f2)
+    timer_stop_nano=$(expr $timer_stop_nano + 0)
+    timer_secs_math=$(($timer_stop_secs - $timer_start_secs))
+    if [ $timer_secs_math -lt 1 ]; then
+        timer_duration=$(($timer_stop_nano - $timer_start_nano))
+        timer_duration=$(($timer_duration / 1000))
+        if [ $timer_duration -gt 1999 ]; then
+            timer_duration=$(($timer_duration / 1000))
+            timer_unit='ms'
+        else
+            timer_unit='μs'
+        fi
+    elif [ $timer_secs_math -eq 1 ]; then
+        timer_duration=$((1000000000 - $timer_start_nano))
+        timer_duration=$(($timer_duration + $timer_stop_nano))
+        timer_duration=$(($timer_duration / 1000))
+        if [ $timer_duration -gt 1999 ]; then
+            timer_duration=$(($timer_duration / 1000))
+            timer_unit='ms'
+        else
+            timer_unit='μs'
+        fi
+    else
+        timer_duration="$timer_secs_math"
+        timer_unit='s'
+    fi
+    info_msg "$answers_found answer(s) found - post curl processing time ~$timer_duration $timer_unit"
+}
+
+# ensures > did you mean... (if applicable) is printed before any answers
+dym_delay() {
+    while kill -0 "$dym_pid" >/dev/null 2>&1; do [ true ]; done
+}
+
+# this file should only need removing if tuxi crashes or is ^C before finishing
+# ideally this should be a lock that doesn't have to access storage
+if [ -d "$XDG_CACHE_HOME"/tuxi.lock ]; then
+    error_msg "Tuxi lock file found (now removing) - Did it crash?"
+    printf "\n"
+    rmdir "$XDG_CACHE_HOME"/tuxi.lock
+fi
+
+######################################
+#####      Dependency check      #####
+######################################
 
 # pup : https://github.com/ericchiang/pup
 # recode : https://github.com/rrthomas/recode
 # jq : https://github.com/stedolan/jq
 check_deps "pup" "recode" "jq"
 
-
-###############################
-#####       Defaults      #####
-###############################
+##############################
+#####      Defaults      #####
+##############################
 
 # system language fallback
 LANG=$(echo $LANG | sed 's/\..*//')
@@ -72,162 +134,616 @@ C="\033[1;36m" # Cyan
 # options
 raw=false
 quiet=false
+all=false
+debug=false
+save_html=false
 
 # search result output format (changes if raw=true)
-output() { 
-    printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
+output() {
+    dym_delay
+    printf "%b---%b\n%s\n%b---%b\n" "$G" "$N" "$*" "$G" "$N"
+    $all || kill -USR2 "$tuxi_pid"
 }
 
-
 #############################
-#####     Getopts       #####
+#####      Getopts      #####
 #############################
 
 # -h : help
 # -r : raw search result
 # -q : silences greeting and did you mean
-while getopts "hrq" OPT; do
+# -a : print all answers
+# -d : print debug info
+# -s : save google HTML response
+while getopts "hrqads" OPT; do
     case "$OPT" in
     h)
         help_text
         exit 0
         ;;
-    r)  
+    r)
         raw=true
         ;;
-    q)  
+    q)
         quiet=true
+        ;;
+    a)
+        all=true
+        ;;
+    d)
+        debug=true
+        ;;
+    s)
+        save_html=true
         ;;
     *)
         help_text | head -n 1
         exit 1
+        ;;
     esac
 done
 # shifts to query
-shift $((OPTIND-1))
+shift $((OPTIND - 1))
 
-
-#############################
-#####   Raw formatting  #####
-#############################
+####################################
+#####      Raw formatting      #####
+####################################
 
 # If raw=true: No colors, No pretty output
 if $raw; then
-    N=""; R=""; G=""; Y=""; M=""; C="";
+    N=""
+    R=""
+    G=""
+    Y=""
+    M=""
+    C=""
 
-    output () { 
+    output() {
+        dym_delay
         printf "%s\n" "$*"
+        $all || kill -USR2 "$tuxi_pid"
     }
 fi
 
-
-#############################
-#####    Query check    #####
-#############################
+#################################
+#####      Query check      #####
+#################################
 
 # If query is empty: exit
 # If quiet=false: Prints greeting and usage
 if [ -z "$1" ]; then
-if [ $quiet = "false" ]; then
-    printf "Hi, I'm Tuxi. Ask me anything!\n"
-    help_text | head -n 1 
+    if ! $quiet; then
+        printf "Hi, I'm Tuxi. Ask me anything!\n"
+        help_text | head -n 1
+    fi
+    exit 0
 fi
-exit 0
-fi
-    
+
 # Else, all arguments are saved in $query
 query="$*"
 
-
-##############################
-##### Snippet extraction #####
-##############################
+########################################
+#####      Snippet extraction      #####
+########################################
 
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
-# Response from Google via cURL (-G: get, -s: silent) 
+# Response from Google via cURL (-G: get, -s: silent)
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
+[ -z "$google_html" ] && error_msg "No valid response from google!" && exit 1
 
+# save search results for debugging
+if $save_html; then
+    [ -d "$XDG_CACHE_HOME"/tuxi ] || mkdir -p "$XDG_CACHE_HOME/tuxi"
+    file_name="tuxi-$(date +%s)-$(printf %s "$query" | sed 's/ /_/g').html"
+    html_location="$XDG_CACHE_HOME/tuxi/$file_name"
+    printf "%s" "$google_html" >$html_location
+    info_msg "HTML for \"$query\" -> $html_location"
+fi
+
+# start timer for debug_info after receiving results from google
+$debug && timer_start=$(date +'%s %N')
 
 ## Snippet Priority ##
-# Did you mean
-# Math
-# Knowledge Graph - top
-# Basic Answers
-# Rich Answers
-# Featured Snippets
-# Lyrics
-# Weather
-# Units Convertion
-# Currency Convertion
-# Translate
-# Knowledge Graph - right
+# this variable determines the order the tests are started, they are processed in parallel
+# the first word should be the name of the a_function() followed by a space
+# you can disable tests by commenting out the line(s)
+priority="
+did_you_mean    # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
+define          # Define (eg: define Aggrandize)
+kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
+math            # Math ( eg: log_2(3) * pi^e )
+kno_top         # Knowledge Graph - top (list) ( eg: the office cast )
+basic           # Basic Answers ( eg: tuxi christmas day )
+richcast        # Rich Rich Answers ( eg: social network cast )
+lists           # Simple lists (eg Need for Speed Heat cars list)
+rich            # Rich Answers ( eg: elevation of mount everest )
+feat            # Featured Snippets ( eg: who is garfield )
+lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
+lyrics_us       # Lyrics for US users, above does not work for US
+weather         # Weather ( eg: weather new york)
+unit            # Units Conversion ( eg: 1m into 1 cm )
+currency        # Currency Conversion ( eg: 1 USD in rupee )
+trans           # Translate ( eg: Vais para cascais? em ingles )
+kno_right       # Knowledge Graph - right ( eg: the office )
+"
+priority=$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
+
+####################################
+####      Answer functions      ####
+####################################
+
+## NOTE: the order of these functions doesn't matter, priority is determined by the variable
+
+## FUNCTION TEMPLATE
+# just find & replace all NewAnswerName with the name used in $priority
+
+# # Answer description (and example)
+# a_NewAnswerName() {
+#     NewAnswerName="$(echo "$google_html" | pup ...)"
+#     if [ -n "$NewAnswerName" ]; then
+#         kill -USR1 "$tuxi_pid"
+#         if ! $all; then
+#             if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+#                 if $debug; then
+#                     dym_delay
+#                     info_msg "Answer selected: NewAnswerName"
+#                 fi
+#                 output "$NewAnswerName"
+#             fi
+#         else
+#             if $debug; then
+#                 dym_delay
+#                 info_msg "Answer selected: NewAnswerName"
+#             fi
+#             output "$NewAnswerName"
+#         fi
+#     fi
+# }
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 # silenced if quiet=true
-if [ $quiet = "false" ]; then
-    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
-    [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
-fi
+a_did_you_mean() {
+    if ! $quiet; then
+        # this needs re-working, there should be a way to do this with regular sed
+        # need to figure out how to properly escape the replace string
+        if [ $(command -v sd) ]; then
+            if ! $raw; then
+                corrections="$(echo "$google_html" | pup 'a.gL9Hy text{}')"
+                if [ -n "$corrections" ]; then
+                    err_hl="$(echo "$google_html" | pup 'a.gL9Hy > b text{}')"
+                    corrections="$(echo "$corrections" | sed ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
+                    for errors in $(echo "$err_hl"); do
+                        corrections=$(echo "$corrections" | sd -s "${errors}" "\033[1;96m${errors}\033[1;97m")
+                    done
+                    printf "%b>%b \033[3mI'm going to assume you meant\033[0m \033[95m--> \033[1;97m\"%b\"\033[0m\n" "$G" "$N" "$corrections"
+                fi
+            else
+                did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+                [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
+            fi
+        else
+            did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+            [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
+        fi
+    fi
+    kill -USR2 "$tuxi_pid"
+}
+
+# Define (eg: define Aggrandize)
+a_define() {
+    define="$(echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1)"
+    if [ -n "$define" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: define"
+                fi
+                output "$define"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: define"
+            fi
+            output "$define"
+        fi
+    fi
+}
+
+# Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
+#"what is the " seems to be required for some things
+a_kno_val() {
+    kno_val=$(echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' ')
+    if [ -n "$kno_val" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: kno_val"
+                fi
+                output "$kno_val"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: kno_val"
+            fi
+            output "$kno_val"
+        fi
+    fi
+}
 
 # Math ( eg: log_2(3) * pi^e )
-math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1)"
-[ -n "$math" ] && output "$math" && exit 0
-
+a_math() {
+    math="$(echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1)"
+    if [ -n "$math" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: math"
+                fi
+                output "$math"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: math"
+            fi
+            output "$math"
+        fi
+    fi
+}
 
 # Knowledge Graph - top (list) ( eg: the office cast )
-kno_top="$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1)"
-[ -n "$kno_top" ] && output "$kno_top" && exit 0
-
+a_kno_top() {
+    kno_top=$(echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1)
+    if [ -n "$kno_top" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: kno_top"
+                fi
+                output "$kno_top"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: kno_top"
+            fi
+            output "$kno_top"
+        fi
+    fi
+}
 
 # Basic Answers ( eg: tuxi christmas day )
-basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | sed 's/\n//g' | recode html..ISO-8859-1)"
-[ -n "$basic" ] && output "$basic" && exit 0
+a_basic() {
+    basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1)"
+    if [ -n "$basic" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: basic"
+                fi
+                output "$basic"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: basic"
+            fi
+            output "$basic"
+        fi
+    fi
+}
 
+# Rich Rich Answers ( eg: social network cast )
+a_richcast() {
+    richcast=$(echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recode html..ISO-8859-1)
+    if [ -n "$richcast" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: richcast"
+                fi
+                output "$richcast"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: richcast"
+            fi
+            output "$richcast"
+        fi
+    fi
+}
+
+# Simple lists (eg Need for Speed Heat cars list)
+a_lists() {
+    lists=$(echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1)
+    if [ -n "$lists" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: lists"
+                fi
+                output "$lists"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: lists"
+            fi
+            output "$lists"
+        fi
+    fi
+}
 
 # Rich Answers ( eg: elevation of mount everest )
-rich=$(echo "$google_html" | pup 'div.XcVN5d text{}' | recode html..ISO-8859-1)
-[ -n "$rich" ] && output "$rich" && exit 0
-
+a_rich() {
+    rich=$(echo "$google_html" | pup 'div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1)
+    if [ -n "$rich" ]; then
+        [ "$(echo "$rich" | head -n1)" = 'View all' ] && exit
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: rich"
+                fi
+                output "$rich"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: rich"
+            fi
+            output "$rich"
+        fi
+    fi
+}
 
 # Featured Snippets ( eg: who is garfield )
-feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$feat" ] && output "$feat" && exit 0
-
+a_feat() {
+    feat="$(echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+    if [ -n "$feat" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: feat"
+                fi
+                output "$feat"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: feat"
+            fi
+            output "$feat"
+        fi
+    fi
+}
 
 # Lyrics ( eg: gecgecgec lyrics )
-lyrics="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
-[ -n "$lyrics" ] && output "$lyrics" && exit 0
-
+a_lyrics_int() {
+    lyrics_int="$(echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1)"
+    if [ -n "$lyrics_int" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: lyrics_int"
+                fi
+                output "$lyrics_int"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: lyrics_int"
+            fi
+            output "$lyrics_int"
+        fi
+    fi
+}
 #Lyrics for US users, above does not work for US
-lyrics="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1)"
-[ -n "$lyrics" ] && output "$lyrics" && exit 0
+a_lyrics_us() {
+    lyrics_us="$(echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1)"
+    if [ -n "$lyrics_us" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: lyrics_us"
+                fi
+                output "$lyrics_us"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: lyrics_us"
+            fi
+            output "$lyrics_us"
+        fi
+    fi
+}
 
 # Weather ( eg: weather new york)
-weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
-[ -n "$weather" ] && output "$weather" && exit 0
-
+a_weather() {
+    weather="$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1)"
+    if [ -n "$weather" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: weather"
+                fi
+                output "$weather"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: weather"
+            fi
+            output "$weather"
+        fi
+    fi
+}
 
 # Units Conversion ( eg: 1m into 1 cm )
-unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1)"
-[ -n "$unit" ] && output "$unit" && exit
-
+a_unit() {
+    unit="$(echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1)"
+    if [ -n "$unit" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: unit"
+                fi
+                output "$unit"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: unit"
+            fi
+            output "$unit"
+        fi
+    fi
+}
 
 # Currency Conversion ( eg: 1 USD in rupee )
-currency="$(echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1)"
-[ -n "$currency" ] && output "$currency" && exit
-
+a_currency() {
+    currency="$(echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1)"
+    if [ -n "$currency" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: currency"
+                fi
+                output "$currency"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: currency"
+            fi
+            output "$currency"
+        fi
+    fi
+}
 
 # Translate ( eg: Vais para cascais? em ingles )
-trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
-[ -n "$trans" ] && output "$trans" && exit
-
+a_trans() {
+    trans="$(echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1)"
+    if [ -n "$trans" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: trans"
+                fi
+                output "$trans"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: trans"
+            fi
+            output "$trans"
+        fi
+    fi
+}
 
 # Knowledge Graph - right ( eg: the office )
-kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$kno_right" ] && output "$kno_right" && exit 0
+a_kno_right() {
+    kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
+    if [ -n "$kno_right" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: kno_right"
+                fi
+                output "$kno_right"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: kno_right"
+            fi
+            output "$kno_right"
+        fi
+    fi
+}
 
+##############################
+####      Processing      ####
+##############################
 
-# Else
-error_msg "No Result!" && exit 1
+# launches all the snippet functions and saves the pids for later
+pids=""
+answers_found=0
+printed=0
+for tests in $(echo "$priority"); do
+    "a_${tests}" 2>/dev/null &
+    if [ -z "$pids" ]; then
+        pids="$!"
+        dym_pid="$pids"
+    else
+        pids="${pids}\n${!}"
+    fi
+done
+
+# loops to spin wheels until an answer has been printed
+# if all the launched processes exit without an answer being printed
+# script exits with a "No Result!" message
+while [ $answers_found -eq 0 ]; do
+    for waiting1 in $(printf "%b\n" "$pids"); do
+        kill -0 "$waiting1" >/dev/null 2>&1
+        [ $? -eq 0 ] && break
+        for waiting2 in $(printf "%b\n" "$pids"); do
+            kill -0 "$waiting2" >/dev/null 2>&1
+            [ $? -eq 0 ] && break 2
+        done
+        error_msg "No Result!"
+        $debug && debug_info
+        exit 1
+    done
+done
+
+# once an answer has been printed and the -a flag isn't active
+# kills all remaining child processes, clears the lock and exits
+# if -a flag is active then it waits until every answer has been printed first
+if ! $all; then
+    until [ $printed -eq 2 ]; do [ true ]; done
+    printf "%b\n" "$pids" | xargs -P0 -I{} sh -c 'kill -9 {} >/dev/null 2>&1' >/dev/null 2>&1
+fi
+wait
+dym_delay
+$debug && debug_info
+[ -d "$XDG_CACHE_HOME"/tuxi.lock ] && rmdir "$XDG_CACHE_HOME"/tuxi.lock
+exit
