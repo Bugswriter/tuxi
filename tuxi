@@ -231,6 +231,7 @@ if [ $quiet = "false" ]; then
 fi
 
 
+
 # Basic Answers ( eg: tuxi christmas day )
 basic="$(echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recd)"
 snipcall "$basic"
@@ -297,6 +298,10 @@ snipcall "$weather"
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recd)
 snipcall "$kno_top"
 
+
+# Shows last or next fixture of a sports team ( eg. Chelsea next game ) 
+sport_fixture=$(echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recd)
+snipcall "$sport_fixture"
 
 # Knowledge Graph - right ( eg: the office )
 kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recd | tr ' ' '\0' | xargs -0 -n10)"
