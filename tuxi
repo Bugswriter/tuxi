@@ -24,6 +24,7 @@ define          # Define ( eg: define Aggrandize )
 kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen )
 math            # Math ( eg: log_2(3) * pi^e )
 kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
+quotes          # Quotes ( eg: mahatma gandhi quotes )
 basic           # Basic Answers ( eg: tuxi christmas day )
 richcast        # Rich Rich Answers ( eg: social network cast )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
@@ -270,6 +271,7 @@ if $pick_search; then
         *kno_val) priority="$(printf '%b\nkno_val\n' "$priority")" ;;
         *math) priority="$(printf '%b\nimath\n' "$priority")" ;;
         *kno_top) priority="$(printf '%b\nkno_top\n' "$priority")" ;;
+        *quotes) priority="$(printf '%b\nquotes\n' "$priority")" ;;
         *basic) priority="$(printf '%b\nbasic\n' "$priority")" ;;
         *richcast) priority="$(printf '%b\nrichcast\n' "$priority")" ;;
         *lists) priority="$(printf '%b\nlists\n' "$priority")" ;;
@@ -467,6 +469,29 @@ a_kno_top() {
                 info_msg "Answer selected: kno_top"
             fi
             output "$kno_top"
+        fi
+    fi
+}
+
+# Quotes ( eg: mahatma gandhi quotes )
+a_quotes() {
+    quotes="$(echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1)"
+    if [ -n "$quotes" ]; then
+        kill -USR1 "$tuxi_pid"
+        if ! $all; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                if $debug; then
+                    dym_delay
+                    info_msg "Answer selected: quotes"
+                fi
+                output "$quotes"
+            fi
+        else
+            if $debug; then
+                dym_delay
+                info_msg "Answer selected: quotes"
+            fi
+            output "$quotes"
         fi
     fi
 }
