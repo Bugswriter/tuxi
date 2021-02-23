@@ -84,10 +84,12 @@ a_lyrics_us() { echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recod
 # Weather ( eg: weather new york)
 a_weather() {
     weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
-    if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then
-        weather=$(printf '%b\n' "$weather" | sed -e 2','3'!b' -e ''2'h;'2'!H;'3'!d;x;s/^\([[:print:]'"$(printf '\001\002\003\004\005\006\007\010\011\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037\177')"']*\)\(.*\n\)\(.*\)/\3\2\1/')
+    if [ -n "$weather" ]; then
+        if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then
+            weather=$(printf '%b\n' "$weather" | sed -e 2','3'!b' -e ''2'h;'2'!H;'3'!d;x;s/^\([[:print:]'"$(printf '\001\002\003\004\005\006\007\010\011\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037\177')"']*\)\(.*\n\)\(.*\)/\3\2\1/')
+        fi
+        printf '%b\n' "$weather" | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1
     fi
-    printf '%b\n' "$weather" | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1
 }
 # Units Conversion ( eg: 1m into 1 cm )
 a_unit() { echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1; }
