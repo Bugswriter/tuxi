@@ -53,16 +53,16 @@ kno_right       # Knowledge Graph - right ( eg: the office )
 # # Answer description (and example)
 # a_NewAnswerName() { echo "$google_html" | pup ... [ SCRAPE METHOD HERE ] ...; }
 
-# Define (eg: define Aggrandize)
+# Define (eg: define Aggrandize) //credit @igaurab
 a_define() { echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1; }
 # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
-#"what is the " seems to be required for some things
+#"what is the " seems to be required for some things //credit @sudocanttype
 a_kno_val() { echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' '; }
-# Math ( eg: log_2(3) * pi^e )
+# Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
 a_math() { echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1; }
 # Knowledge Graph - top (list) ( eg: the office cast )
 a_kno_top() { echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1; }
-# Quotes ( eg: mahatma gandhi quotes )
+# Quotes ( eg: mahatma gandhi quotes ) //credit to @PoseidonCoder
 a_quotes() { echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1; }
 # Basic Answers ( eg: tuxi christmas day )
 a_basic() { echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1; }
@@ -70,18 +70,18 @@ a_basic() { echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode 
 a_richcast() { echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recode html..ISO-8859-1; }
 # Simple lists (eg Need for Speed Heat cars list)
 a_lists() { echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1; }
-# Rich Answers ( eg: elevation of mount everest )
+# Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun
 a_rich() {
     rich=$(echo "$google_html" | pup 'div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1)
     [ "$rich" = 'View all' ] || printf '%b\n' "$rich"
 }
 # Featured Snippets ( eg: who is garfield )
 a_feat() { echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10; }
-# Lyrics ( eg: gecgecgec lyrics )
+# Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
 a_lyrics_int() { echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1; }
-#Lyrics for US users, above does not work for US
+#Lyrics for US users, above does not work for US //credit @sudocanttype
 a_lyrics_us() { echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1; }
-# Weather ( eg: weather new york)
+# Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
 a_weather() {
     weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
     if [ -n "$weather" ]; then
@@ -95,11 +95,11 @@ a_weather() {
 a_unit() { echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1; }
 # Currency Conversion ( eg: 1 USD in rupee )
 a_currency() { echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1; }
-# Translate ( eg: Vais para cascais? em ingles )
+# Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
 a_trans() { echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1; }
 # Knowledge Graph - right ( eg: the office )
 a_kno_right() { echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10; }
-# Shows last or next fixture of a sports team ( eg. Chelsea next game )
+# Shows last or next fixture of a sports team ( eg. Chelsea next game ) //credit @ismayilkarimli
 a_sport_fixture() { echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recode html..ISO-8859-1; }
 
 ###############################
