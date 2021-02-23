@@ -213,9 +213,9 @@ test_answers() {
     # rest of the snippets are processed here
     z="$(a_${1})"
     if [ -n "$z" ]; then
-        kill -USR1 "$tuxi_pid"
         if ! $all; then
             if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+                kill -USR1 "$tuxi_pid"
                 if $debug; then
                     dym_delay
                     info_msg "Answer selected: $1"
@@ -223,6 +223,7 @@ test_answers() {
                 output "$z"
             fi
         else
+            kill -USR1 "$tuxi_pid"
             output "$z"
         fi
     fi
