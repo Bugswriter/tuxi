@@ -430,6 +430,7 @@ done
 # loops to spin wheels until an answer has been printed
 # if all the launched processes exit without an answer being printed
 # script exits with a "No Result!" message
+laps=0
 while [ $answers_found -eq 0 ]; do
     for waiting1 in $(printf "%b\n" "$pids"); do
         kill -0 "$waiting1" >/dev/null 2>&1
@@ -438,6 +439,8 @@ while [ $answers_found -eq 0 ]; do
             kill -0 "$waiting2" >/dev/null 2>&1
             [ $? -eq 0 ] && break 2
         done
+        laps=$(($laps + 1))
+        [ $laps -lt 2 ] && break
         error_msg "No Result!"
         $debug && debug_info
         exit 1
