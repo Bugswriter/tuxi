@@ -25,7 +25,6 @@ kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what 
 math            # Math ( eg: log_2(3) * pi^e )
 kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
 quotes          # Quotes ( eg: mahatma gandhi quotes )
-diseases        # Disease facts ( eg: common cold )
 basic           # Basic Answers ( eg: christmas day )
 richcast        # Rich Rich Answers ( eg: social network cast )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
@@ -264,36 +263,21 @@ query="$*"
 
 if $pick_search; then
     list_priority="$priority"
+    snippet_check=$(echo "$list_priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
+    matched=false
     priority="did_you_mean"
-    query="$(printf '%s\n' "$query" | sed 's/ /\\n/g')"
-    for words in $(printf '%b\n' "$query" | grep 'tuxi_'); do
-        case $words in
-        *define) priority="$(printf '%b\ndefine\n' "$priority")" ;;
-        *kno_val) priority="$(printf '%b\nkno_val\n' "$priority")" ;;
-        *math) priority="$(printf '%b\nimath\n' "$priority")" ;;
-        *kno_top) priority="$(printf '%b\nkno_top\n' "$priority")" ;;
-        *quotes) priority="$(printf '%b\nquotes\n' "$priority")" ;;
-        *diseases) priority="$(printf '%b\ndiseases\n' "$priority")" ;;
-        *basic) priority="$(printf '%b\nbasic\n' "$priority")" ;;
-        *richcast) priority="$(printf '%b\nrichcast\n' "$priority")" ;;
-        *lists) priority="$(printf '%b\nlists\n' "$priority")" ;;
-        *rich) priority="$(printf '%b\nrich\n' "$priority")" ;;
-        *feat) priority="$(printf '%b\nfeat\n' "$priority")" ;;
-        *lyrics_int) priority="$(printf '%b\nlyrics_int\n' "$priority")" ;;
-        *lyrics_us) priority="$(printf '%b\nlyrics_us\n' "$priority")" ;;
-        *weather) priority="$(printf '%b\nweather\n' "$priority")" ;;
-        *unit) priority="$(printf '%b\nunit\n' "$priority")" ;;
-        *currency) priority="$(printf '%b\ncurrency\n' "$priority")" ;;
-        *trans) priority="$(printf '%b\ntrans\n' "$priority")" ;;
-        *kno_right) priority="$(printf '%b\nkno_right\n' "$priority")" ;;
-        *)
-            printf "Sorry but %s is not a valid search type\nPlease retry your search using one of the following: tuxi_\n" "$words"
+    query="$(echo "$query" | sed 's/ /\\n/g')"
+    for pick_words in $(echo "$query" | grep 'tuxi_' | sed 's/tuxi_//g'); do
+        for check_pick_words in $(echo "$snippet_check"); do
+            [ "$check_pick_words" = "$pick_words" ] && priority="$(printf '%b\n%s\n' "$priority" "$pick_words")" && matched=true
+        done
+        if ! $matched; then
+            printf "Sorry but %s is not a valid search type\nPlease retry your search using one of the following: tuxi_\n" "$pick_words"
             printf "%b\n" "$(echo "$list_priority" | sed /did_you_mean/d)"
             printf "\n"
-            printf "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" "$(echo $words | sed 's/tuxi_//')"
+            printf "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" "$pick_words"
             exit 1
-            ;;
-        esac
+        fi
     done
     query="$(printf '%b\n' "$query" | grep -v "tuxi_" | sed 's/\\n/ /g')"
 fi
@@ -494,29 +478,6 @@ a_quotes() {
                 info_msg "Answer selected: quotes"
             fi
             output "$quotes"
-        fi
-    fi
-}
-
-# Disease facts ( eg: common cold )
-a_diseases() {
-    diseases="$(echo "$google_html" | pup 'div.os0Kkc > div.m6vS6b text{}' | recode html..ISO-8859-1)"
-    if [ -n "$diseases" ]; then
-        kill -USR1 "$tuxi_pid"
-        if ! $all; then
-            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
-                if $debug; then
-                    dym_delay
-                    info_msg "Answer selected: diseases"
-                fi
-                output "$diseases"
-            fi
-        else
-            if $debug; then
-                dym_delay
-                info_msg "Answer selected: diseases"
-            fi
-            output "$diseases"
         fi
     fi
 }
