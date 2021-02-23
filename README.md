@@ -15,7 +15,7 @@ In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed`
 to process and return results, and `recode` to unescape html.
 
 
-[Watch this video for more info](https://youtu.be/E0J_IVrn1dg)
+[Watch this video for more info](https://youtu.be/EtwWvMa8muU)
 > Also checkout BugsWriter's YouTube channel for more scripts like this.
 
 ## Requirements
@@ -85,6 +85,10 @@ Report bugs at https://github.com/Bugswriter/tuxi/issues.
 
 ## Features
 
+**Easily change query language**  
+Line [8](./tuxi#L8) in `tuxi` contains the language variable which can be changed according the user's preference.
+However, tuxi will use the system default langauge if none is set.
+
 **Gives corrections**
 ```sh
 $ tuxi linux torvalds birthday
@@ -139,4 +143,3 @@ This project is licensed under [GPL-3.0](./LICENSE).
 ## Contributing
 
 If you want to contribute, please see [CONTRIBUTING](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
-
