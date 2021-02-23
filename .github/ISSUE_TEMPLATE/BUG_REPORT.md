@@ -9,6 +9,7 @@ about: Report a problem in tuxi
 - `shell`
 - `Operating system/version`:
 - `Terminal name/version`:
+- `Location`:
 - `$TERM`
 
 ## Steps to Reproduce the Problem
