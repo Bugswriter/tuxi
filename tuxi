@@ -35,6 +35,7 @@ weather         # Weather ( eg: weather new york )
 unit            # Units Conversion ( eg: 1m into 1 cm )
 currency        # Currency Conversion ( eg: 1 USD in rupee )
 trans           # Translate ( eg: Vais para cascais? em ingles )
+sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
 rich            # Rich Answers ( eg: elevation of mount everest )
 kno_right       # Knowledge Graph - right ( eg: the office )
 "
@@ -86,6 +87,8 @@ a_currency() { echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0
 a_trans() { echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1; }
 # Knowledge Graph - right ( eg: the office )
 a_kno_right() { echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10; }
+# Shows last or next fixture of a sports team ( eg. Chelsea next game )
+a_sport_fixture() { echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recode html..ISO-8859-1; }
 
 ###############################
 #####      Functions      #####
