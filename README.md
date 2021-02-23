@@ -85,9 +85,8 @@ Report bugs at https://github.com/Bugswriter/tuxi/issues.
 
 ## Features
 
-**Easily change query language**
-Line 7 in `tuxi` contains the language variable which can be changed according the user's preference.
-However, tuxi will use the system default langauge if none is set.
+**Easily change query language**  
+Line [8](./tuxi#L8) in `tuxi` contains the language variable which can be changed according the user's preference. However, tuxi will use the system default langauge if none is set.
 
 **Gives corrections**
 ```sh
@@ -143,4 +142,3 @@ This project is licensed under [GPL-3.0](./LICENSE).
 ## Contributing
 
 If you want to contribute, please see [CONTRIBUTING](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
-
