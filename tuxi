@@ -62,13 +62,13 @@ a_kno_val() { echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' ';
 a_math() { echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1; }
 # Knowledge Graph - top (list) ( eg: the office cast )
 a_kno_top() { echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1; }
-# Quotes ( eg: mahatma gandhi quotes ) //credit to @PoseidonCoder
+# Quotes ( eg: mahatma gandhi quotes ) //credit @PoseidonCoder
 a_quotes() { echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1; }
 # Basic Answers ( eg: tuxi christmas day )
 a_basic() { echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1; }
-# Rich Rich Answers ( eg: social network cast )
+# Rich Rich Answers ( eg: social network cast ) //credit @BeyondMagic
 a_richcast() { echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recode html..ISO-8859-1; }
-# Simple lists (eg Need for Speed Heat cars list)
+# Simple lists (eg Need for Speed Heat cars list) //credit @BeyondMagic
 a_lists() { echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1; }
 # Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun
 a_rich() {
