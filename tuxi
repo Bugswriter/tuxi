@@ -106,6 +106,7 @@ help_text() {
     printf "\n"
     printf "%bOptions:%b\n" "$G" "$N"
     printf "  -h                    Show this help message and exit.\n"
+    printf "  -v                    Print Tuxi version info and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
