@@ -7,6 +7,7 @@ printf "\n"
 #####      Constants      #####
 ###############################
 
+version="Development"
 LANGUAGE=""
 tuxi_pid="$$"
 [ ! "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
@@ -281,16 +282,21 @@ output() {
 #############################
 
 # -h : help
+# -v : version info
 # -r : raw search result
 # -q : silences greeting and did you mean
 # -a : print all answers
 # -t : specify answer type
 # -d : print debug info
 # -s : save google HTML response
-while getopts "hrqatds" OPT; do
+while getopts "hvrqatds" OPT; do
     case "$OPT" in
     h)
         help_text
+        exit 0
+        ;;
+    v)
+        printf "tuxi %s\n" "$version"
         exit 0
         ;;
     r)
