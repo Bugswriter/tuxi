@@ -56,7 +56,7 @@ kno_right       # Knowledge Graph - right ( eg: the office )
 # Define (eg: define Aggrandize) //credit @igaurab
 a_define() { echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1; }
 # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
-#"what is the " seems to be required for some things //credit @sudocanttype
+# "what is the " seems to be required for some things //credit @sudocanttype
 a_kno_val() { echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' '; }
 # Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
 a_math() { echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1; }
@@ -79,7 +79,7 @@ a_rich() {
 a_feat() { echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10; }
 # Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
 a_lyrics_int() { echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1; }
-#Lyrics for US users, above does not work for US //credit @sudocanttype
+# Lyrics for US users, above does not work for US //credit @sudocanttype
 a_lyrics_us() { echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1; }
 # Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
 a_weather() {
@@ -476,4 +476,4 @@ wait
 dym_delay
 $debug && debug_info
 [ -d "$XDG_CACHE_HOME"/tuxi.lock ] && rmdir "$XDG_CACHE_HOME"/tuxi.lock
-exit
+exit 0
