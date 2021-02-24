@@ -14,6 +14,9 @@ tuxi_pid="$$"
 ######################################
 
 # this variable determines the order the tests are started, they are processed in parallel
+# even though these are started in order, by default, the first answer to resolve is the one printed
+# the order here only makes a very small difference
+
 # the first word should be the name of the a_function() followed by a space
 # you can disable tests by commenting out the line(s)
 # did_you_mean always needs to be active and top however!
@@ -115,6 +118,8 @@ help_text() {
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "  -a                    Prints all valid answers.\n"
+    printf "  -b                    Tries to select the best answer based on keywords at the start and end of your query.\n"
+    printf "                        (experimental - eg: define WORD, SONG lyrics, PERSON quotes, weather CITY, FILM cast)\n"
     printf "  -t                    Pick answers to test.\n"
     printf "                        (you can specify multiple answers using tuxi_NAME in your query)\n"
     printf "\n"
@@ -130,6 +135,11 @@ check_deps() {
         fi
         shift
     done
+}
+
+# the curl request to google, it's a function so we can fork it and do stuff while it fetches the response
+get_html() {
+    curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query" &
 }
 
 info_msg() {
@@ -235,7 +245,7 @@ test_answers() {
             fi
         else
             kill -USR1 "$tuxi_pid"
-            output "$z"
+            $debug && output "$(printf '%b\n\n%b\n' "$(info_msg "Answer selected: $1")" "$z")" || output "$z"
         fi
     fi
 }
@@ -276,6 +286,7 @@ C="\033[1;36m" # Cyan
 raw=false
 quiet=false
 all=false
+best_match=false
 pick_search=false
 debug=false
 save_html=false
@@ -296,10 +307,11 @@ output() {
 # -r : raw search result
 # -q : silences greeting and did you mean
 # -a : print all answers
+# -b : best match
 # -t : specify answer type
 # -d : print debug info
 # -s : save google HTML response
-while getopts "hvrqatds" OPT; do
+while getopts "hvrqabtds" OPT; do
     case "$OPT" in
     h)
         help_text
@@ -318,7 +330,12 @@ while getopts "hvrqatds" OPT; do
     a)
         all=true
         ;;
+    b)
+        $pick_search && printf "-t + -b are mutually exclusive, sorry" && exit 1
+        best_match=true
+        ;;
     t)
+        $best_match && printf "-t + -b are mutually exclusive, sorry" && exit 1
         pick_search=true
         ;;
     d)
@@ -408,8 +425,49 @@ fi
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
-# Response from Google via cURL (-G: get, -s: silent)
-google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
+# fetch response from Google via cURL (-G: get, -s: silent)
+google_html=$(get_html)
+
+# while we are waiting on google, if the -b flag has been passed
+# run our patented (honest!) "smrt search" algorithm
+
+# jokes aside, this is going to need some iterating on, I'll turn it into a tidy loop later
+if $best_match; then
+    j=6
+    use_quotes=false
+    use_lyrics=false
+    use_weather=false
+    use_cast=false
+    use_weather=false
+    use_define=false
+    use_list=false
+
+    query_check="$(echo "$query" | sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
+    first_word=$(echo "$query_check" | head -n1)
+    last_word=$(echo "$query_check" | tail -n1)
+
+    for keywords in printf '%s\n%s\n' "$first_word" "$last_word"; do
+        case "$keywords" in
+        quote | quotes) use_quotes=true ;;
+        lyrics) use_lyrics=true ;;
+        weather) use_weather=true ;;
+        cast) use_cast=true ;;
+        define | definition) use_define=true ;;
+        list) use_list=true ;;
+        esac
+    done
+
+    $use_quotes && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'quotes')" || j=$(($j - 1))
+    $use_lyrics && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'lyrics')" || j=$(($j - 1))
+    $use_weather && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'weather')" || j=$(($j - 1))
+    $use_cast && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
+    $use_define && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'define')" || j=$(($j - 1))
+    $use_list && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
+    [ $j -eq 0 ] && priority="$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
+fi
+
+# and now we...
+wait
 [ -z "$google_html" ] && error_msg "No valid response from google!" && exit 1
 
 # save search results for debugging
@@ -432,7 +490,9 @@ $debug && timer_start=$(date +'%s %N')
 pids=""
 answers_found=0
 printed=0
-priority=$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
+if ! $pick_search || ! $best_match; then
+    priority=$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\$s*$/d')
+fi
 for tests in $(echo "$priority"); do
     test_answers "$tests" 2>/dev/null &
     if [ -z "$pids" ]; then
@@ -467,7 +527,7 @@ done
 # kills all remaining child processes, clears the lock and exits
 # if -a flag is active then it waits until every answer has been printed first
 if ! $all; then
-    until [ $printed -eq 2 ]; do [ true ]; done
+    until [ $printed -eq 2 ]; do [ true ]; done #    haha cpu go brrrrr
     printf "%b\n" "$pids" | xargs -P0 -I{} sh -c 'kill -9 {} >/dev/null 2>&1' >/dev/null 2>&1
 fi
 wait
