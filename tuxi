@@ -221,6 +221,7 @@ fi
 # Knowledge Graph - right
 # Units Convertion
 # Currency Convertion
+# Learn to pronounce
 
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
@@ -296,6 +297,11 @@ snipcall "$weather"
 # Knowledge Graph - top (list) ( eg: the office cast )
 kno_top=$(echo "$google_html" | pup 'div.dAassd json{}'  | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g' | sed 's/null/\n/g' | awk '{$1=$1;print "* " $0}' | sed '/^* $/d'| recd)
 snipcall "$kno_top"
+
+
+# Learn to pronounce ( eg: pronounce linux )
+pronounce=$(echo "$google_html" | pup "div.fQ02Rb.eDzgme span.seLqNc text{}" | paste -s -d ' ' | sed 's/\s/∙/g')
+snipcall "$pronounce"
 
 
 # Knowledge Graph - right ( eg: the office )
