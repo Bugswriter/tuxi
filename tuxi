@@ -1,7 +1,4 @@
-#!/bin/sh
-
-# adapted from https://github.com/Bugswriter/tuxi
-printf "\n"
+#!/usr/bin/env sh
 
 ###############################
 #####      Constants      #####
@@ -19,8 +16,10 @@ tuxi_pid="$$"
 # this variable determines the order the tests are started, they are processed in parallel
 # the first word should be the name of the a_function() followed by a space
 # you can disable tests by commenting out the line(s)
+# did_you_mean always needs to be active and top however!
 priority="
 did_you_mean    # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
+kno_right       # Knowledge Graph - right ( eg: the office )
 define          # Define ( eg: define Aggrandize )
 kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen )
 math            # Math ( eg: log_2(3) * pi^e )
@@ -38,7 +37,6 @@ currency        # Currency Conversion ( eg: 1 USD in rupee )
 trans           # Translate ( eg: Vais para cascais? em ingles )
 sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
 rich            # Rich Answers ( eg: elevation of mount everest )
-kno_right       # Knowledge Graph - right ( eg: the office )
 "
 
 ######################################
@@ -245,7 +243,7 @@ test_answers() {
 # this file should only need removing if tuxi crashes or is ^C before finishing
 # ideally this should be a lock that doesn't have to access storage
 if [ -d "$XDG_CACHE_HOME"/tuxi.lock ]; then
-    error_msg "Tuxi lock file found (now removing) - Did it crash last run?"
+    error_msg "Tuxi lock file found (now removing) - Did it crash last run? (if you used ^C, please ignore this.)"
     printf "\n"
     rmdir "$XDG_CACHE_HOME"/tuxi.lock
 fi
