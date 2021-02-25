@@ -241,7 +241,7 @@ test_answers() {
     z="$(a_${1})"
     if [ -n "$z" ]; then
         if ! $all; then
-            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock 1>/dev/null 2>&1; then
                 kill -USR1 "$tuxi_pid"
                 if $debug; then
                     dym_delay
