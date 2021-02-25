@@ -168,6 +168,7 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Units Convertion
 # Currency Convertion
 # Translate
+# Learn to pronounce
 # Knowledge Graph - right
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
@@ -213,6 +214,10 @@ snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.clas
 
 # Translate ( eg: Vais para cascais? em ingles )
 snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!=\"BCGytf\")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1"
+
+# Learn to pronounce ( eg: pronounce linux )
+pronounce=$(echo "$google_html" | pup "div.fQ02Rb.eDzgme span.seLqNc text{}" | paste -s -d ' ' | sed 's/\s/∙/g')
+snipcall "$pronounce"
 
 # Knowledge Graph - right ( eg: the office )
 snipcall "pup 'div.kno-rdesc span' | sed -n '2p' | awk '{\$1=\$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10"
