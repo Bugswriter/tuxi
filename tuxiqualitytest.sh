@@ -9,7 +9,7 @@ run=""
 
 while getopts "r" o; do
     case "${o}" in
-    r)  
+    r)
         raw=true
         ;;
     *)
@@ -20,7 +20,7 @@ done
 #this took to long for me to figure out
 
 if $raw; then
-    red="" 
+    red=""
     run="-r"
 fi
 
@@ -90,7 +90,7 @@ printf "Testing Translate¬\n" && ./tuxi $run "Vais para cascais? em ingles" 1>>
 printf "Testing Translate¬\n" && ./tuxi $run "برمجة in english" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 printf "Testing Translate¬\n" && ./tuxi $run "mañana in english?" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 printf "Testing Translate¬\n" && ./tuxi $run "what is mananeo in english" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
-#it looks like you can only convert to english without error 
+#it looks like you can only convert to english without error
 
 
 printf "Testing Weather¬\n" && ./tuxi $run "weather new york" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"

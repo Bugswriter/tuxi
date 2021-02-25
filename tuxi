@@ -80,7 +80,7 @@ raw=false
 quiet=false
 
 # search result output format (changes if raw=true)
-output() { 
+output() {
     printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
 }
 
@@ -98,10 +98,10 @@ while getopts "hrq" OPT; do
         help_text
         exit 0
         ;;
-    r)  
+    r)
         raw=true
         ;;
-    q)  
+    q)
         quiet=true
         ;;
     *)
@@ -121,7 +121,7 @@ shift $((OPTIND-1))
 if $raw; then
     N=""; R=""; G=""; Y=""; M=""; C="";
 
-    output () { 
+    output () {
         printf "%s\n" "$*"
     }
 fi
@@ -136,11 +136,11 @@ fi
 if [ -z "$1" ]; then
 if [ $quiet = "false" ]; then
     printf "Hi, I'm Tuxi. Ask me anything!\n"
-    help_text | head -n 1 
+    help_text | head -n 1
 fi
 exit 0
 fi
-    
+
 # Else, all arguments are saved in $query
 query="$*"
 
@@ -152,7 +152,7 @@ query="$*"
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
-# Response from Google via cURL (-G: get, -s: silent) 
+# Response from Google via cURL (-G: get, -s: silent)
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 

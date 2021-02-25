@@ -1,17 +1,17 @@
 <h1 align="center">TUXI</h1>
 <p align="center">A CLI tool that scrapes Google search results and SERPs that provides instant and concise answers</p>
 
-##  
+##
 
 <img src="https://i.ibb.co/sCwYpZ8/general.gif" alt="Video Preview Gif" align="right" width="500px"/>
 
 ### How does this work?
 
 The script uses `pup` to scrape Google search results and SERPs.
-If the query returns several results, Tuxi will choose the most 
+If the query returns several results, Tuxi will choose the most
 relevant result on the basis of priority.
 
-In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed` 
+In addition to scraping, `tuxi` also uses `jq`, `awk` and `sed`
 to process and return results, and `recode` to unescape html.
 
 
@@ -33,7 +33,7 @@ cURL **tuxi** to your **$PATH** and give execute permissions.
 $ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
 $ sudo chmod +x /usr/local/bin/tuxi
 ```
-> To update, just do `curl` again, no need to `chmod` anymore.  
+> To update, just do `curl` again, no need to `chmod` anymore.
 > To uninstall, simply remove `tuxi` from your **$PATH**, for example `sudo rm -f /usr/local/bin/tuxi`.
 
 ### Make
@@ -41,7 +41,7 @@ $ sudo chmod +x /usr/local/bin/tuxi
 $ git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
 $ sudo make install
 ```
-> To update, just `git pull` on your local tuxi repository and reinstall with `sudo make install`.  
+> To update, just `git pull` on your local tuxi repository and reinstall with `sudo make install`.
 > To uninstall, simply run `sudo make uninstall`.
 
 ### Arch Linux AUR
@@ -85,7 +85,7 @@ Report bugs at https://github.com/Bugswriter/tuxi/issues.
 
 ## Features
 
-**Easily change query language**  
+**Easily change query language**
 Line [8](./tuxi#L8) in `tuxi` contains the language variable which can be changed according the user's preference. However, tuxi will use the system default langauge if none is set.
 
 **Gives corrections**
