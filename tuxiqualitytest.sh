@@ -38,6 +38,10 @@ printf "${red}##################################################################
 if ! $raw; then
     printf "Testing help message¬\n" && ./tuxi -h 1>>testoutputs.txt && printf "\tpassed.\n"|| printf "\tFailed...\n"
 fi
+
+#FORMATTING:
+# test_code name_of_function_being_tested test_case
+
 #Help message cant be sent as raw, tuxi -r -h does not work
 test_code "Testing error corrrectionn" "Linux Tarvalds"
 test_code "Testing error corrrectionn" "waht is the office" 
