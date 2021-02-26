@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
 if ! [ -f testqueries.txt ]; then
     printf "Y'all got anymore of those testqueries(.txt)?"
