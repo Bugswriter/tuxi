@@ -72,7 +72,7 @@ until [ $cycle -eq 3 ]; do
     passed=0
     failed=0
     good=true
-    while read x; do
+    cat testqueries.txt | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | while read -r x; do
         reason=""
         target=$(printf '%s' "$x" | cut -d ' ' -f1)
         query=$(printf '%s' "$x" | sed 's/^ *[^ ][^ ]*  *//')
@@ -115,7 +115,7 @@ until [ $cycle -eq 3 ]; do
             printf '|-->> FAILED! | Reason: %b\n\n' "$reason" | tee -a testoutputs.txt
         fi
         sleep $sleep_timer
-    done <<<"$query_source"
+    done
     printf '\n-->> END RUN %s | Results: PASSED=%s FAILED=%s\n' $cycle $passed $failed | tee -a testoutputs.txt
     cycle=$(($cycle + 1))
 done
