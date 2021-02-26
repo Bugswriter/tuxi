@@ -1,4 +1,4 @@
-*.txt
+/tests/testoutputs.txt
 *.log
 *.bak
 

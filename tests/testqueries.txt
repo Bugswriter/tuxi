@@ -1,0 +1,110 @@
+## format: target query
+# tests can be disabled by commenting out the lines
+
+## target list:
+# did_you_mean
+# define
+# kno_val
+# math
+# kno_top
+# quotes
+# basic
+# richcast
+# lists
+# feat
+# lyrics
+# weather
+# unit
+# currency
+# trans
+# sport_fixture
+# rich
+# kno_right
+
+did_you_mean Linux Tarvalds
+did_you_mean waht is the office
+did_you_mean hwo much is btc wroth
+
+math log(30)
+math 72^43/12(44+1)-3124
+math (40/3)+4*6
+math 45/sqrt(4)*3
+
+basic christmas day
+basic summer solstice
+basic shortest day of the year
+
+kno_top the office cast
+kno_top legends of runeterra
+kno_top reddit
+kno_top twitter
+
+rich elevation of mt everest
+rich what is elevation of mt rainier
+rich how big is the grand canyon
+rich how long is the yellow river?
+
+feat the meaning of life the universe and everything else
+feat shotgun doom eternal
+feat what is tenacity in league of legends
+feat rusty cage bio
+
+lyrics the motans inainte sa ne fi nascut lyrics
+lyrics lyrics of hello adele
+lyrics Toosie slide lyrics
+lyrics Sigues con el lyrics
+lyrics my truck breland lyrics
+lyrics maniac conan gray lyrics
+lyrics dealer RMR lyrics
+
+unit 100 cm to m
+unit 100 c to f
+unit convert 100 c to f
+unit what is 10 feet to meters
+
+currency 100 GBP to USD
+currency what is 10000 GBP in USD
+currency how much is 1 btc in USD
+
+trans Vais para cascais? em ingles
+trans برمجة in english
+trans mañana in english?
+trans what is mananeo in english
+
+weather weather new york
+weather how hot is it in india?
+weather how cold is it in alaska?
+weather temp of mexico right now?
+weather how cold is it in canada right now?
+
+kno_right lorem ipsum
+kno_right the office
+kno_right what is a firefighter
+kno_right what is the american bill of rights
+
+define define humor
+define definition of free
+define meaning of serendipity
+define computer definition
+define programmer meaning
+
+sport_fixture man u next match
+sport_fixture score of last el classico
+sport_fixture next epl fixture
+sport_fixture results of manchester derby
+sport_fixture spurs vs gunners
+
+quotes linus torvalds quotes
+quotes quotes from gandhi
+quotes inspirational quotes
+
+kno_val density of silver
+kno_val density of hydrogen
+kno_val what is the triple point of oxygen
+
+richcast cast of event horizon
+richcast cast of equalibrium
+richcast GoT stars
+richcast avengers actors
+
+lists Need for Speed Heat cars list

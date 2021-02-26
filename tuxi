@@ -1,11 +1,14 @@
-#!/bin/sh
-
-# adapted from https://github.com/Bugswriter/tuxi
-printf "\n"
+#!/usr/bin/env sh
 
 ###############################
 #####      Constants      #####
 ###############################
+
+# my alternative did you mean, requires sd right now, need to tweak it
+alt_dym=true
+if $alt_dym; then
+    [ ! "$(command -v sd)" ] && alt_dym=false
+fi
 
 version="Development"
 LANGUAGE=""
@@ -17,8 +20,12 @@ tuxi_pid="$$"
 ######################################
 
 # this variable determines the order the tests are started, they are processed in parallel
+# even though these are started in order, by default, the first answer to resolve is the one printed
+# the order here only makes a very small difference
+
 # the first word should be the name of the a_function() followed by a space
 # you can disable tests by commenting out the line(s)
+# did_you_mean always needs to be active and top however!
 priority="
 did_you_mean    # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
 define          # Define ( eg: define Aggrandize )
@@ -53,42 +60,53 @@ kno_right       # Knowledge Graph - right ( eg: the office )
 # # Answer description (and example)
 # a_NewAnswerName() { echo "$google_html" | pup ... [ SCRAPE METHOD HERE ] ...; }
 
-# Define (eg: define Aggrandize)
+# Define (eg: define Aggrandize) //credit @igaurab
 a_define() { echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1; }
 # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
-#"what is the " seems to be required for some things
+# "what is the " seems to be required for some things //credit @sudocanttype
 a_kno_val() { echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' '; }
-# Math ( eg: log_2(3) * pi^e )
+# Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
 a_math() { echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1; }
-# Knowledge Graph - top (list) ( eg: the office cast )
+# Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
 a_kno_top() { echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1; }
-# Quotes ( eg: mahatma gandhi quotes )
+# Quotes ( eg: mahatma gandhi quotes ) //credit @PoseidonCoder
 a_quotes() { echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1; }
-# Basic Answers ( eg: tuxi christmas day )
+# Basic Answers ( eg: tuxi christmas day ) // @Bugswriter
 a_basic() { echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1; }
-# Rich Rich Answers ( eg: social network cast )
+# Rich Rich Answers ( eg: social network cast ) //credit @BeyondMagic
 a_richcast() { echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recode html..ISO-8859-1; }
-# Simple lists (eg Need for Speed Heat cars list)
+# Simple lists (eg Need for Speed Heat cars list) //credit @BeyondMagic
 a_lists() { echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1; }
-# Rich Answers ( eg: elevation of mount everest )
-a_rich() { echo "$google_html" | pup 'div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1; }
-# Featured Snippets ( eg: who is garfield )
+# Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun + @Bugswriter
+a_rich() {
+    rich=$(echo "$google_html" | pup 'div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1)
+    [ "$(printf '%b\n' "$rich" | head -n1)" = 'View all' ] || printf '%b\n' "$rich"
+}
+# Featured Snippets ( eg: who is garfield ) //credit @Bugswriter
 a_feat() { echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10; }
-# Lyrics ( eg: gecgecgec lyrics )
+# Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
 a_lyrics_int() { echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1; }
-#Lyrics for US users, above does not work for US
+# Lyrics for US users, above does not work for US //credit @sudocanttype
 a_lyrics_us() { echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1; }
-# Weather ( eg: weather new york)
-a_weather() { echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1; }
-# Units Conversion ( eg: 1m into 1 cm )
+# Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
+a_weather() {
+    weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
+    if [ -n "$weather" ]; then
+        if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then
+            weather=$(printf '%b\n' "$weather" | sed -e 2','3'!b' -e ''2'h;'2'!H;'3'!d;x;s/^\([[:print:]'"$(printf '\001\002\003\004\005\006\007\010\011\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037\177')"']*\)\(.*\n\)\(.*\)/\3\2\1/')
+        fi
+        printf '%b\n' "$weather" | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1
+    fi
+}
+# Units Conversion ( eg: 1m into 1 cm ) //credit @karthink
 a_unit() { echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1; }
-# Currency Conversion ( eg: 1 USD in rupee )
+# Currency Conversion ( eg: 1 USD in rupee ) //credit @karthink
 a_currency() { echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1; }
-# Translate ( eg: Vais para cascais? em ingles )
+# Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
 a_trans() { echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1; }
-# Knowledge Graph - right ( eg: the office )
+# Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
 a_kno_right() { echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10; }
-# Shows last or next fixture of a sports team ( eg. Chelsea next game )
+# Shows last or next fixture of a sports team ( eg. Chelsea next game ) //credit @ismayilkarimli
 a_sport_fixture() { echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recode html..ISO-8859-1; }
 
 ###############################
@@ -100,11 +118,14 @@ help_text() {
     printf "\n"
     printf "%bOptions:%b\n" "$G" "$N"
     printf "  -h                    Show this help message and exit.\n"
+    printf "  -v                    Print Tuxi version info and exit.\n"
     printf "  -r                    Raw search results.\n"
     printf "                        (no pretty output, no colors)\n"
     printf "  -q                    Only output search results.\n"
     printf "                        (silences \"Did you mean?\", greeting, usage)\n"
     printf "  -a                    Prints all valid answers.\n"
+    printf "  -b                    Tries to select the best answer based on keywords at the start and end of your query.\n"
+    printf "                        (experimental - eg: define WORD, SONG lyrics, PERSON quotes, weather CITY, FILM cast)\n"
     printf "  -t                    Pick answers to test.\n"
     printf "                        (you can specify multiple answers using tuxi_NAME in your query)\n"
     printf "\n"
@@ -120,6 +141,11 @@ check_deps() {
         fi
         shift
     done
+}
+
+# the curl request to google, it's a function so we can fork it and do stuff while it fetches the response
+get_html() {
+    curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query" &
 }
 
 info_msg() {
@@ -178,7 +204,7 @@ debug_info() {
 
 # ensures > did you mean... (if applicable) is printed before any answers
 dym_delay() {
-    while kill -0 "$dym_pid" >/dev/null 2>&1; do [ true ]; done
+    while kill -0 "$dym_pid" 1>/dev/null 2>&1; do [ true ]; done #    haha cpu go brrrrr
 }
 
 # this calls the various snippet functions and checks for valid answers
@@ -189,14 +215,14 @@ test_answers() {
         if ! $quiet; then
             # this needs re-working, there should be a way to do this with regular sed
             # need to figure out how to properly escape the replace string
-            if [ $(command -v sd) ]; then
+            if $alt_dym; then
                 if ! $raw; then
                     corrections="$(echo "$google_html" | pup 'a.gL9Hy text{}')"
                     if [ -n "$corrections" ]; then
                         err_hl="$(echo "$google_html" | pup 'a.gL9Hy > b text{}')"
-                        corrections="$(echo "$corrections" | sed ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
-                        for errors in $(echo "$err_hl"); do
-                            corrections=$(echo "$corrections" | sd -s "${errors}" "\033[1;96m${errors}\033[1;97m")
+                        corrections="$(printf '%b\n' "$corrections" | sed ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
+                        for errors in $(printf '%b\n' "$err_hl"); do
+                            corrections=$(printf '%b\n' "$corrections" | sd -s "${errors}" "\033[1;96m${errors}\033[1;97m")
                         done
                         printf "%b>%b \033[3mI'm going to assume you meant\033[0m \033[95m--> \033[1;97m\"%b\"\033[0m\n" "$G" "$N" "$corrections"
                     fi
@@ -215,7 +241,7 @@ test_answers() {
     z="$(a_${1})"
     if [ -n "$z" ]; then
         if ! $all; then
-            if mkdir "$XDG_CACHE_HOME"/tuxi.lock >/dev/null 2>&1; then
+            if mkdir "$XDG_CACHE_HOME"/tuxi.lock 1>/dev/null 2>&1; then
                 kill -USR1 "$tuxi_pid"
                 if $debug; then
                     dym_delay
@@ -225,7 +251,7 @@ test_answers() {
             fi
         else
             kill -USR1 "$tuxi_pid"
-            output "$z"
+            $debug && output "$(printf '%b\n\n%b\n' "$(info_msg "Answer selected: $1")" "$z")" || output "$z"
         fi
     fi
 }
@@ -233,7 +259,7 @@ test_answers() {
 # this file should only need removing if tuxi crashes or is ^C before finishing
 # ideally this should be a lock that doesn't have to access storage
 if [ -d "$XDG_CACHE_HOME"/tuxi.lock ]; then
-    error_msg "Tuxi lock file found (now removing) - Did it crash?"
+    error_msg "Tuxi lock file found (now removing) - Did it crash last run? (if you used ^C, please ignore this.)"
     printf "\n"
     rmdir "$XDG_CACHE_HOME"/tuxi.lock
 fi
@@ -266,6 +292,7 @@ C="\033[1;36m" # Cyan
 raw=false
 quiet=false
 all=false
+best_match=false
 pick_search=false
 debug=false
 save_html=false
@@ -286,10 +313,11 @@ output() {
 # -r : raw search result
 # -q : silences greeting and did you mean
 # -a : print all answers
+# -b : best match
 # -t : specify answer type
 # -d : print debug info
 # -s : save google HTML response
-while getopts "hvrqatds" OPT; do
+while getopts "hvrqabtds" OPT; do
     case "$OPT" in
     h)
         help_text
@@ -308,7 +336,12 @@ while getopts "hvrqatds" OPT; do
     a)
         all=true
         ;;
+    b)
+        $pick_search && printf "-t + -b are mutually exclusive, sorry" && exit 1
+        best_match=true
+        ;;
     t)
+        $best_match && printf "-t + -b are mutually exclusive, sorry" && exit 1
         pick_search=true
         ;;
     d)
@@ -372,17 +405,20 @@ query="$*"
 # looking for tuxi_ and updates the priority variable to use only those snippets
 if $pick_search; then
     list_priority="$priority"
-    snippet_check=$(echo "$list_priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
+    snippet_check=$(printf '%b\n' "$list_priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
     matched=false
     priority="did_you_mean"
-    query="$(echo "$query" | sed 's/ /\\n/g')"
-    for pick_words in $(echo "$query" | grep 'tuxi_' | sed 's/tuxi_//g'); do
-        for check_pick_words in $(echo "$snippet_check"); do
-            [ "$check_pick_words" = "$pick_words" ] && priority="$(printf '%b\n%s\n' "$priority" "$pick_words")" && matched=true
+    query="$(printf '%b\n' "$query" | sed 's/ /\\n/g')"
+    for pick_words in $(printf '%b\n' "$query" | grep 'tuxi_' | sed 's/tuxi_//g'); do
+        for check_pick_words in $(printf '%b\n' "$snippet_check"); do
+            if [ "$check_pick_words" = "$pick_words" ]; then
+                priority="$(printf '%b\n%s\n' "$priority" "$pick_words")"
+                matched=true
+            fi
         done
         if ! $matched; then
             printf "Sorry but %s is not a valid search type\nPlease retry your search using one of the following: tuxi_\n" "$pick_words"
-            printf "%b\n" "$(echo "$list_priority" | sed /did_you_mean/d)"
+            printf "%b\n" "$(printf '%b\n' "$list_priority" | sed /did_you_mean/d)"
             printf "\n"
             printf "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" "$pick_words"
             exit 1
@@ -398,8 +434,49 @@ fi
 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
-# Response from Google via cURL (-G: get, -s: silent)
-google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
+# fetch response from Google via cURL (-G: get, -s: silent)
+google_html=$(get_html)
+
+# while we are waiting on google, if the -b flag has been passed
+# run our patented (honest!) "smrt search" algorithm
+
+# jokes aside, this is going to need some iterating on, I'll turn it into a tidy loop later
+if $best_match; then
+    j=6
+    use_quotes=false
+    use_lyrics=false
+    use_weather=false
+    use_cast=false
+    use_weather=false
+    use_define=false
+    use_list=false
+
+    query_check="$(printf '%b\n' "$query" | sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
+    first_word=$(printf '%b\n' "$query_check" | head -n1)
+    last_word=$(printf '%b\n' "$query_check" | tail -n1)
+
+    for keywords in printf '%s\n%s\n' "$first_word" "$last_word"; do
+        case "$keywords" in
+        quote | quotes) use_quotes=true ;;
+        lyrics) use_lyrics=true ;;
+        weather) use_weather=true ;;
+        cast) use_cast=true ;;
+        define | definition) use_define=true ;;
+        list) use_list=true ;;
+        esac
+    done
+
+    $use_quotes && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'quotes')" || j=$(($j - 1))
+    $use_lyrics && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'lyrics')" || j=$(($j - 1))
+    $use_weather && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'weather')" || j=$(($j - 1))
+    $use_cast && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
+    $use_define && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'define')" || j=$(($j - 1))
+    $use_list && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'did_you_mean' -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
+    [ $j -eq 0 ] && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
+fi
+
+# and now we...
+wait
 [ -z "$google_html" ] && error_msg "No valid response from google!" && exit 1
 
 # save search results for debugging
@@ -422,8 +499,11 @@ $debug && timer_start=$(date +'%s %N')
 pids=""
 answers_found=0
 printed=0
-priority=$(echo "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
-for tests in $(echo "$priority"); do
+if ! $pick_search || ! $best_match; then
+    priority=$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d')
+fi
+
+for tests in $(printf '%b\n' "$priority"); do
     test_answers "$tests" 2>/dev/null &
     if [ -z "$pids" ]; then
         pids="$!"
@@ -439,10 +519,10 @@ done
 laps=0
 while [ $answers_found -eq 0 ]; do
     for waiting1 in $(printf "%b\n" "$pids"); do
-        kill -0 "$waiting1" >/dev/null 2>&1
+        kill -0 "$waiting1" 1>/dev/null 2>&1
         [ $? -eq 0 ] && break
         for waiting2 in $(printf "%b\n" "$pids"); do
-            kill -0 "$waiting2" >/dev/null 2>&1
+            kill -0 "$waiting2" 1>/dev/null 2>&1
             [ $? -eq 0 ] && break 2
         done
         laps=$(($laps + 1))
@@ -457,11 +537,14 @@ done
 # kills all remaining child processes, clears the lock and exits
 # if -a flag is active then it waits until every answer has been printed first
 if ! $all; then
-    until [ $printed -eq 2 ]; do [ true ]; done
-    printf "%b\n" "$pids" | xargs -P0 -I{} sh -c 'kill -9 {} >/dev/null 2>&1' >/dev/null 2>&1
+    until [ $printed -ge 2 ]; do [ true ]; done #    haha cpu go brrrrr
+    for kids in $(printf '%b\n' "$pids"); do
+        kill -0 "$kids" 1>/dev/null 2>&1
+        [ $? -ne 0 ] && kill -9 "$kids" 1>/dev/null 2>&1
+    done
 fi
 wait
 dym_delay
 $debug && debug_info
 [ -d "$XDG_CACHE_HOME"/tuxi.lock ] && rmdir "$XDG_CACHE_HOME"/tuxi.lock
-exit
+exit 0
