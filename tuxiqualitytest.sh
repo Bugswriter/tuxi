@@ -105,9 +105,15 @@ printf "Testing Knowledge Graph - right¬\n" && ./tuxi $run "the office" 1>>test
 printf "Testing Knowledge Graph - right¬\n" && ./tuxi $run "what is a firefighter" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 printf "Testing Knowledge Graph - right¬\n" && ./tuxi $run "what is the american bill of rights" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 
+
+printf "Testing How to Pronounce¬\n" && ./tuxi $run "how to pronounce supercalifragilisticexpialidocious" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing How to Pronounce¬\n" && ./tuxi $run "pronunciation of worcestershire" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+printf "Testing How to Pronounce¬\n" && ./tuxi $run "pronounce almond" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+#THIS DOES NOT WORK FOR SOME WORDS ON MY END, i.e. gnocchi, charcuterie
 ########################################
 #not yet implemented in dev2
 ########################################
+
 # printf "Testing Define¬\n" && ./tuxi "define humor" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 # printf "Testing Debug¬\n" && ./tuxi -d "linus torvalds age" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
 # printf "Testing Rich List" && ./tuxi "elephant height" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
