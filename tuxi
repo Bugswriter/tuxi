@@ -538,7 +538,10 @@ done
 # if -a flag is active then it waits until every answer has been printed first
 if ! $all; then
     until [ $printed -ge 2 ]; do [ true ]; done #    haha cpu go brrrrr
-    printf "%b\n" "$pids" | xargs -P0 -I{} sh -c 'kill -0 {} 1>/dev/null 2>&1 && kill -9 {} 1>/dev/null 2>&1' 1>/dev/null 2>&1
+    for kids in $(printf '%b\n' "$pids"); do
+        kill -0 "$kids" 1>/dev/null 2>&1
+        [ $? -ne 0 ] && kill -9 "$kids" 1>/dev/null 2>&1
+    done
 fi
 wait
 dym_delay
