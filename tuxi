@@ -201,7 +201,15 @@ snipcall "pup 'div.bbVIQb text{}' | recode html..ISO-8859-1"
 snipcall "pup 'span[jsname=\"YS01Ge\"] text{}' | recode html..ISO-8859-1"
 
 # Weather ( eg: weather new york)
-snipcall "pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '\$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,\${N;s/\n/\t/;};3s/.*/&ºF/;\$s/\t/\t\t/' | recode html..ISO-8859-1"
+# snipcall "pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?'| sed '/null/d' |  sed '\$!N; /^\(.*\)\n\1$/!P; D' | sed '4,5d;2s/.*/&ºC/;2,\${N;s/\n/\t/;};3s/.*/&ºF/;\$s/\t/\t\t/' | recode html..ISO-8859-1"
+weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
+    if [ -n "$weather" ]; then
+        if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then 
+            weather="$(printf '%b\n' "$weather" | sed -e 2','3'!b' -e ''2'h;'2'!H;'3'!d;x;s/^\([[:print:]'"$(printf '\001\002\003\004\005\006\007\010\011\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037\177')"']*\)\(.*\n\)\(.*\)/\3\2\1/')"
+        fi
+        printf '%b\n' "$weather" | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1 && exit 0
+    fi
+
 
 # Units Conversion ( eg: 1m into 1 cm )
 snipcall "pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1"
@@ -216,8 +224,7 @@ snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.clas
 snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!=\"BCGytf\")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1"
 
 # Learn to pronounce ( eg: pronounce linux )
-pronounce=$(echo "$google_html" | pup "div.fQ02Rb.eDzgme span.seLqNc text{}" | paste -s -d ' ' | sed 's/\s/∙/g')
-snipcall "$pronounce"
+snipcall "pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'"
 
 # Knowledge Graph - right ( eg: the office )
 snipcall "pup 'div.kno-rdesc span' | sed -n '2p' | awk '{\$1=\$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10"
