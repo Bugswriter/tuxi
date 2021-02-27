@@ -179,6 +179,9 @@ if [ $quiet = "false" ]; then
 fi
 
 
+# IP ( eg: what is my ip )
+snipcall "pup 'div.NEM4H text{}' | recode html..ISO-8859-1"
+
 # Math ( eg: log_2(3) * pi^e )
 snipcall "pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1"
 
