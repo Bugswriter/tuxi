@@ -120,7 +120,8 @@ test_code "Testing How to Pronounce" "pronunciation of worcestershire"
 test_code "Testing How to Pronounce" "pronounce almond" 
 #THIS DOES NOT WORK FOR SOME WORDS ON MY END, i.e. gnocchi, charcuterie
 
-
+#works for ipv4, someone else do ipv6
+printf "Testing IP search¬\n" && ( echo "$(./tuxi ${run} "my ip address?")" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) && printf "\tpassed.\n" || printf "\tFailed...\n"
 
 ########################################
 #not yet implemented in dev2

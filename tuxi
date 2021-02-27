@@ -178,6 +178,7 @@ if [ $quiet = "false" ]; then
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
+snipcall "pup 'div.NEM4H.VL3Jfb.BmP5tf:first-child text{}' | recode html..ISO-8859-1"
 
 # Math ( eg: log_2(3) * pi^e )
 snipcall "pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1"
