@@ -52,7 +52,6 @@ fi
 # test_code name_of_function_being_tested test_case
 
 #Help message cant be sent as raw, tuxi -r -h does not work
-test_code "Fail" "aklsdfj;aslfjowifjodjisfiasfj"
 test_code "Testing error corrrectionn" "Linux Tarvalds"
 test_code "Testing error corrrectionn" "waht is the office" 
 test_code "Testing error corrrectionn" "hwo much is btc wroth" 
