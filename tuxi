@@ -468,8 +468,7 @@ debug_info() {
     info_msg "$answers_found answer(s) found - post curl processing time ~$timer_duration $timer_unit"
 }
 
-# save the google response on crash for faster re-search
-# can also be enabled with the -s flag
+# enabled with the -s flag
 dump_html() {
     [ -d "$XDG_CACHE_HOME"/tuxi ] || mkdir -p "$XDG_CACHE_HOME/tuxi"
     file_name="$(date +%s%N)-$(printf %s "$query" | sed 's/ /_/g').html"
