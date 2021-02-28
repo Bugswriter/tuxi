@@ -178,7 +178,6 @@ if [ $quiet = "false" ]; then
     [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
 fi
 
-snipcall "pup 'div.NEM4H.VL3Jfb.BmP5tf:first-child text{}' | recode html..ISO-8859-1"
 
 # Math ( eg: log_2(3) * pi^e )
 snipcall "pup 'span.qv3Wpe text{}' | sed 's/\n\ //g' | recode html..ISO-8859-1"
@@ -230,6 +229,8 @@ snipcall "pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/
 # Knowledge Graph - right ( eg: the office )
 snipcall "pup 'div.kno-rdesc span' | sed -n '2p' | awk '{\$1=\$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10"
 
+# IP ( eg: what is my ip )
+snipcall "pup 'div.NEM4H.VL3Jfb.BmP5tf:first-child text{}' | recode html..ISO-8859-1"
 
 # Else
 error_msg "No Result!" && exit 1
