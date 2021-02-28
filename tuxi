@@ -610,7 +610,6 @@ fi
 # kills all remaining child processes in LIFO order
 # if -a flag is active then it waits until every answer has been printed first
 if ! $all; then
-    while [ $printed -lt 1 ]; do [ true ]; done #    haha cpu go brrrrr
     kill_pids="$(printf '%b\n' "$pids" | sort -r)"
     for kids in $(printf '%b\n' "$kill_pids"); do
         kill -0 "$kids" 1>/dev/null 2>&1
