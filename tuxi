@@ -249,28 +249,6 @@ check_deps() {
 # jq : https://github.com/stedolan/jq
 check_deps "pup" "recode" "jq"
 
-#########################################
-#####      macOS compatibility      #####
-#########################################
-
-# credit to @Zhann, submitted in PR #149
-
-sed() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        gsed "${@}"
-    else
-        sed "${@}"
-    fi
-}
-
-paste() {
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        gpaste "${@}"
-    else
-        paste "${@}"
-    fi
-}
-
 ########################################
 #####      Query manipulation      #####
 ########################################
