@@ -92,6 +92,7 @@ C="\033[1;36m" # Cyan
 
 help_text() {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n" "$G" "$N" "$Y" "$N" "$M" "$N"
+    printf "%bOR:%b %bquery source%b | tuxi %b[options]%b\n" "$G" "$N" "$M" "$N" "$Y" "$N"
     printf "\n"
     printf "%bOptions:%b\n" "$G" "$N"
     printf "  -h                    Show this help message and exit.\n"
