@@ -120,8 +120,9 @@ test_code "Testing How to Pronounce" "pronunciation of worcestershire"
 test_code "Testing How to Pronounce" "pronounce almond" 
 #THIS DOES NOT WORK FOR SOME WORDS ON MY END, i.e. gnocchi, charcuterie
 
-#works for ipv4, someone else do ipv6
-printf "Testing IP search¬\n" && ( echo "$(./tuxi ${run} "my ip address?")" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) && printf "\tpassed.\n" || printf "\tFailed...\n"
+#now works for ipv6, god regex is so simple yet so hard
+printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "my ip address?") && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "\tFailed...\n"
+printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "what is my ip address?") && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "\tFailed...\n"
 
 ########################################
 #not yet implemented in dev2
