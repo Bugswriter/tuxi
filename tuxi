@@ -169,6 +169,7 @@ google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --d
 # Currency Convertion
 # Translate
 # Learn to pronounce
+# Public Holidays
 # Knowledge Graph - right
 
 # did you mean ( eg: linux torvalds ) Because we all know his real name is linux, not linus.
@@ -225,6 +226,9 @@ snipcall "pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.clas
 
 # Learn to pronounce ( eg: pronounce linux )
 snipcall "pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'"
+
+# Public Holidays ( eg: holiday in swiss)
+snipcall "pup 'div.ifw9Ub text{}' | sed '/^\s*$/d' | recode html..ISO-8859-1"
 
 # Knowledge Graph - right ( eg: the office )
 snipcall "pup 'div.kno-rdesc span' | sed -n '2p' | awk '{\$1=\$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10"
