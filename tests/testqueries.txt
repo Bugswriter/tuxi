@@ -89,10 +89,8 @@ define computer definition
 define programmer meaning
 
 sport_fixture man u next match
-sport_fixture score of last el classico
-sport_fixture next epl fixture
-sport_fixture results of manchester derby
-sport_fixture spurs vs gunners
+sport_fixture score of last el clasico
+sport_fixture results of last chelsea match
 
 quotes linus torvalds quotes
 quotes quotes from gandhi
