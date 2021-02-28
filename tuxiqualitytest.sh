@@ -130,8 +130,8 @@ test_code "Testing How to Pronounce" "pronounce almond"
 #THIS DOES NOT WORK FOR SOME WORDS ON MY END, i.e. gnocchi, charcuterie
 
 #now works for ipv6, god regex is so simple yet so hard
-printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "my ip address?") && echo $BRUH >> testoutputs.txt && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "${failcolor}\tFailed...\n${clear}"
-printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "what is my ip address?") && echo $BRUH >> testoutputs.txt && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "${failcolor}\tFailed...\n${clear}"
+printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "my ip address?") && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "${failcolor}\tFailed...\n${clear}"
+printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "what is my ip address?") && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "${failcolor}\tFailed...\n${clear}"
 "\tFailed...\n"
 
 ########################################
