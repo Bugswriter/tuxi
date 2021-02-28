@@ -3,7 +3,16 @@
 rm -f testoutputs.txt
 
 raw=false
+
+
+#Colors
 red=$(tput setaf 1)
+failcolor=$(tput setaf 1)$(tput bold)
+clear=$(tput setaf 7)$(tput sgr0)
+
+
+
+
 run=""
 #defaults if raw != true
 
@@ -26,7 +35,7 @@ fi
 test_code () {
     # echo ${1}  "\"${2}\"" \n \n
     # printf "${1}¬\n" && ./tuxi ${run} \""${2}"\" 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
-    printf "${1}¬\n" && ./tuxi ${run} ${2} 1>>testoutputs.txt && printf "\tpassed.\n" || printf "\tFailed...\n"
+    printf "${1}¬\n" && ./tuxi ${run} ${2} 1>>testoutputs.txt && printf "\tpassed.\n" || printf "${failcolor}\tFailed...\n${clear}"
 
 }
 
@@ -120,7 +129,10 @@ test_code "Testing How to Pronounce" "pronunciation of worcestershire"
 test_code "Testing How to Pronounce" "pronounce almond" 
 #THIS DOES NOT WORK FOR SOME WORDS ON MY END, i.e. gnocchi, charcuterie
 
-
+#now works for ipv6, god regex is so simple yet so hard
+printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "my ip address?") && echo $BRUH >> testoutputs.txt && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "${failcolor}\tFailed...\n${clear}"
+printf "Testing IP search¬\n" && BRUH=$(./tuxi ${run} "what is my ip address?") && echo $BRUH >> testoutputs.txt && ( echo "$BRUH" | grep -Eq "^([0-9]{1,3}\.){3}[0-9]{1,3}$" ) || ( echo "$BRUH" | grep -Eq "^([0-9a-z]{1,4}\:){7}([0-9a-z]{1,4})$" ) && printf "\tpassed. "$BRUH"\n" || printf "${failcolor}\tFailed...\n${clear}"
+"\tFailed...\n"
 
 ########################################
 #not yet implemented in dev2
