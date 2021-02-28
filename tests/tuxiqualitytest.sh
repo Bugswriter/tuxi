@@ -4,9 +4,9 @@ if ! [ -f testqueries.txt ]; then
     printf "Y'all got anymore of those testqueries(.txt)?"
     exit 1
 fi
-rm testoutputs.txt
+rm testoutputs.txt 2>/dev/null
+rm totals.txt 2>/dev/null
 
-sleep_timer=0 # delay between runs, can be 0 for no delay - change to 0.1 to avoid lockups
 raw=false
 use_tee=false
 red=$(tput setaf 1)
@@ -30,7 +30,7 @@ done
 
 $raw && red=""
 
-t_did_you_mean() { printf "Testing error corrrection¬\n" | tee -a testoutputs.txt; }
+t_did_you_mean() { printf "Testing error correction¬\n" | tee -a testoutputs.txt; }
 t_define() { printf "Testing word definition¬\n" | tee -a testoutputs.txt; }
 t_kno_val() { printf "Testing chemistry snippets¬\n" | tee -a testoutputs.txt; }
 t_math() { printf "Testing Math¬\n" | tee -a testoutputs.txt; }
@@ -60,17 +60,14 @@ fi
 #Help message cant be sent as raw, tuxi -r -h does not work
 
 cycle=1
-query_source=$(cat testqueries.txt | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d')
 until [ $cycle -eq 3 ]; do
     case $cycle in
-    1) run="-d" ;;    # default search with debug info
-    2) run="-d -b" ;; # smart search
+    1) run="-d -p" ;;    # default search with debug info and pipe disabled
+    2) run="-d -p -b" ;; # same as above but also with smart search
     *) exit 1 ;;
     esac
     $raw && run="-r ${run}"
     printf "\n--> Starting run: %s | flags in use: %s\n\n" "$cycle" "$run" | tee -a testoutputs.txt
-    passed=0
-    failed=0
     good=true
     cat testqueries.txt | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | while read -r x; do
         reason=""
@@ -79,27 +76,29 @@ until [ $cycle -eq 3 ]; do
         printf "\n" && "t_${target}"
         printf "target: %b | query: %b\n" "$target" "$query" | tee -a testoutputs.txt
         result="$(../tuxi $run "$query")"
-        if printf '%b\n' "$result" | grep 'No Result!'; then
-            failed=$(($failed + 1))
+        nr_check="$(printf '%b\n' "$result" | grep 'No Result!')"
+        if [ -n "$nr_check" ]; then
+            echo "FAILED" >>totals.txt
             good=false
             reason="no results"
         elif [ "$target" = 'did_you_mean' ]; then
-            if printf '%b\n' "$result" | head -n1 | grep ' you mean'; then
-                passed=$(($passed + 1))
+            dym_check="$(printf '%b\n' "$result" | head -n1 | grep ' you mean')"
+            if [ -n "$dym_check" ]; then
+                echo "PASSED" >>totals.txt
                 good=true
             else
-                failed=$(($failed + 1))
+                echo "FAILED" >>totals.txt
                 good=false
-                reason="no corrrection"
+                reason="no correction"
             fi
         else
             answer=$(printf '%b\n' "$result" | grep "Answer selected: " | awk '{print $NF}')
             [ "$answer" = 'lyrics_int' ] || [ "$answer" = 'lyrics_us' ] && answer='lyrics'
             if [ "$answer" = "$target" ]; then
-                passed=$(($passed + 1))
+                echo "PASSED" >>totals.txt
                 good=true
             else
-                failed=$(($failed + 1))
+                echo "FAILED" >>totals.txt
                 good=false
                 reason="wrong answer"
             fi
@@ -114,10 +113,12 @@ until [ $cycle -eq 3 ]; do
         else
             printf '|-->> FAILED! | Reason: %b\n\n' "$reason" | tee -a testoutputs.txt
         fi
-        sleep $sleep_timer
     done
-    printf '\n-->> END RUN %s | Results: PASSED=%s FAILED=%s\n' $cycle $passed $failed | tee -a testoutputs.txt
+    passed=$(cat totals.txt | grep -c PASSED)
+    failed=$(cat totals.txt | grep -c FAILED)
+    printf '\n-->> END RUN %s | Results: PASSED %s FAILED %s\n' $cycle $passed $failed | tee -a testoutputs.txt
     cycle=$(($cycle + 1))
+    rm totals.txt
 done
 
 if ! $raw; then
