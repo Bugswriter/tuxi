@@ -32,7 +32,12 @@ MAIN_PID="$$"
 #####      macOS compatibility      #####
 #########################################
 
-# one day...
+sed() {
+    [ "$OSTYPE" = 'darwin'* ] && gsed "$@" || $(whereis sed | awk '{print $2}') "$@"
+}
+paste() {
+    [ "$OSTYPE" = 'darwin'* ] && gpaste "$@" || $(whereis paste | awk '{print $2}') "$@"
+}
 
 ######################################
 #####      Snippet priority      #####
