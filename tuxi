@@ -32,10 +32,7 @@ MAIN_PID="$$"
 #####      macOS compatibility      #####
 #########################################
 
-# credit to @Zhann and @BeyondMagic (I actually have no idea how this works)
-
-[ "$OSTYPE" = "darwin" ] && gsed "$@" && sed "$@"
-[ "$OSTYPE" = "darwin" ] && gpaste "$@" && paste "$@"
+# one day...
 
 ######################################
 #####      Snippet priority      #####
