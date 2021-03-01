@@ -568,7 +568,7 @@ if ! $quiet; then
             replacement=$(printf '%s\n' "$replacement" | sed -e 's/[\/&]/\\&/g')
             did_you_mean=$(printf '%b\n' "$did_you_mean" | sed "s/${errors}/${replacement}/g")
         done
-        info_msg "$(printf 'did you mean %b"%b"%b ?\n' "$B" "$did_you_mean" "$N")"
+        info_msg "$(printf 'did you mean "%b%b%b" ?\n' "$B" "$did_you_mean" "$N")"
     fi
 fi
 
