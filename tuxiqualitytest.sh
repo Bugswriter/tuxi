@@ -120,7 +120,10 @@ test_code "Testing How to Pronounce" "pronunciation of worcestershire"
 test_code "Testing How to Pronounce" "pronounce almond" 
 #THIS DOES NOT WORK FOR SOME WORDS ON MY END, i.e. gnocchi, charcuterie
 
-
+test_code "Testing Public Holidays" "Mexican holidays"
+test_code "Testing Public Holidays" "what holidays does mexico celebrate?"
+test_code "Testing Public Holidays" "holidays in the US"
+test_code "Testing Public Holidays" "celebrated holidays in india"
 
 ########################################
 #not yet implemented in dev2
