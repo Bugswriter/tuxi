@@ -32,12 +32,16 @@ MAIN_PID="$$"
 #####      macOS compatibility      #####
 #########################################
 
-sed() {
-    [ "$OSTYPE" = 'darwin'* ] && gsed "$@" || $(whereis sed | awk '{print $2}') "$@"
-}
-paste() {
-    [ "$OSTYPE" = 'darwin'* ] && gpaste "$@" || $(whereis paste | awk '{print $2}') "$@"
-}
+# credit to @Zhann in #149
+
+if [ "$OSTYPE" = 'darwin'* ]; then
+    sed() {
+        gsed "$@"
+    }
+    paste() {
+        gpaste "$@"
+    }
+fi
 
 ######################################
 #####      Snippet priority      #####
