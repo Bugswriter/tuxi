@@ -179,11 +179,9 @@ while getopts "rvhqabtldscp" OPT; do
         all=true
         ;;
     b)
-        $pick_search && printf "-t + -b are mutually exclusive, sorry" && exit 1
         best_match=true
         ;;
     t)
-        $best_match && printf "-t + -b are mutually exclusive, sorry" && exit 1
         pick_search=true
         ;;
     d)
@@ -209,6 +207,8 @@ while getopts "rvhqabtldscp" OPT; do
 done
 # shifts to query
 shift $((OPTIND - 1))
+
+$pick_search && $best_match && echo "sorry but -b and -t mutually exclusive" && exit 1
 
 # question | tuxi [-flags] --> answer :)
 if ! $no_pipe; then
