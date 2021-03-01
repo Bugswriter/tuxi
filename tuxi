@@ -32,18 +32,10 @@ MAIN_PID="$$"
 #####      macOS compatibility      #####
 #########################################
 
-# this is a really ugly hack
+# credit to @Zhann and @BeyondMagic (I actually have no idea how this works)
 
-case "$OSTYPE" in
-darwin*)
-    said='gsed'
-    paced='gpaste'
-    ;;
-*)
-    said='sed'
-    paced='paste'
-    ;;
-esac
+[ "$OSTYPE" = "darwin" ] && gsed "$@" && sed "$@"
+[ "$OSTYPE" = "darwin" ] && gpaste "$@" && paste "$@"
 
 ######################################
 #####      Snippet priority      #####
@@ -82,7 +74,7 @@ kno_right       # Knowledge Graph - right ( eg: the office )
 ##############################
 
 # system language fallback
-LANG=$(echo $LANG | $said 's/\..*//')
+LANG=$(echo $LANG | sed 's/\..*//')
 
 # options
 raw=false
@@ -281,7 +273,7 @@ if [ -z "$1" ] && [ -z "$query" ]; then
         fi
         exit 0
     else
-        query=$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1 | $said -e 's/tuxi-*[0-9]*-//' -e 's/.html//' -e 's/_/ /g')
+        query=$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1 | sed -e 's/tuxi-*[0-9]*-//' -e 's/.html//' -e 's/_/ /g')
     fi
 fi
 
@@ -292,9 +284,9 @@ fi
 # language specified on the command line overwrites both
 # the variable set at the top of this script and the system language
 if $pick_lang; then
-    query="$(printf '%b\n' "$query" | $said 's/ /\\n/g')"
-    LANGUAGE="$(printf '%b\n' "$query" | grep 'LANG_' | $said 's/LANG_//g')"
-    query="$(printf '%b\n' "$query" | grep -v "LANG_" | $said 's/\\n/ /g')"
+    query="$(printf '%b\n' "$query" | sed 's/ /\\n/g')"
+    LANGUAGE="$(printf '%b\n' "$query" | grep 'LANG_' | sed 's/LANG_//g')"
+    query="$(printf '%b\n' "$query" | grep -v "LANG_" | sed 's/\\n/ /g')"
 fi
 
 # Custom answers: the -t flag
@@ -302,11 +294,11 @@ fi
 # then loops through the query looking for tuxi_ and updates the priority variable to use only those snippets
 if $pick_search; then
     list_priority="$priority"
-    snippet_check=$(printf '%b\n' "$list_priority" | cut -d ' ' -f1 | $said -e '/^\s*#.*$/d' -e '/^\s*$/d')
+    snippet_check=$(printf '%b\n' "$list_priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
     matched=false
     priority=""
-    query="$(printf '%b\n' "$query" | $said 's/ /\\n/g')"
-    for pick_words in $(printf '%b\n' "$query" | grep 'tuxi_' | $said 's/tuxi_//g'); do
+    query="$(printf '%b\n' "$query" | sed 's/ /\\n/g')"
+    for pick_words in $(printf '%b\n' "$query" | grep 'tuxi_' | sed 's/tuxi_//g'); do
         for check_pick_words in $(printf '%b\n' "$snippet_check"); do
             if [ "$check_pick_words" = "$pick_words" ]; then
                 [ -z "$priority" ] && priority="$(printf '%s\n' "$pick_words")" \
@@ -322,7 +314,7 @@ if $pick_search; then
             exit 1
         fi
     done
-    query="$(printf '%b\n' "$query" | grep -v "tuxi_" | $said 's/\\n/ /g')"
+    query="$(printf '%b\n' "$query" | grep -v "tuxi_" | sed 's/\\n/ /g')"
 fi
 
 # our patented (honest!) "smrt search" algorithm: the -b flag
@@ -338,7 +330,7 @@ if $best_match; then
     use_list=false
     use_pronounce=false
 
-    query_check="$(printf '%b\n' "$query" | $said 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
+    query_check="$(printf '%b\n' "$query" | sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
     first_word=$(printf '%b\n' "$query_check" | head -n1)
     last_word=$(printf '%b\n' "$query_check" | tail -n1)
 
@@ -361,7 +353,7 @@ if $best_match; then
     $use_define && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'define')" || j=$(($j - 1))
     $use_pronounce && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'pronounce')" || j=$(($j - 1))
     $use_list && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
-    [ $j -eq 0 ] && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | $said -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
+    [ $j -eq 0 ] && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
 fi
 
 ######################################
@@ -377,7 +369,7 @@ fi
 
 ## NOTE: the order of these functions doesn't matter, priority is determined by the variable
 a_define() { # Define (eg: define Aggrandize) //credit @igaurab
-    echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | $said -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1
 }
 a_kno_val() { # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
     # "what is the " seems to be required for some things //credit @sudocanttype
@@ -387,7 +379,7 @@ a_math() { # Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
     echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1
 }
 a_kno_top() { # Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
-    echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | $said ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | $said '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1
 }
 a_quotes() { # Quotes ( eg: mahatma gandhi quotes ) //credit @PoseidonCoder
     echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1
@@ -396,13 +388,13 @@ a_basic() { # Basic Answers ( eg: tuxi christmas day ) // @Bugswriter
     echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1
 }
 a_richcast() { # Rich Rich Answers ( eg: social network cast ) //credit @BeyondMagic
-    echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | $said 's/^/* /' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recode html..ISO-8859-1
 }
 a_lists() { # Simple lists (eg Need for Speed Heat cars list) //credit @BeyondMagic
-    echo "$google_html" | pup 'li.TrT0Xe text{}' | $said -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1
 }
 a_rich() { # Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun + @Bugswriter
-    rich=$(echo "$google_html" | pup 'div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | $said 's/^ //' | recode html..ISO-8859-1)
+    rich=$(echo "$google_html" | pup 'div.ujudUb, div.mR2gOd, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1)
     [ "$(printf '%b\n' "$rich" | head -n1)" = 'View all' ] || printf '%b\n' "$rich"
 }
 a_feat() { # Featured Snippets ( eg: who is garfield ) //credit @Bugswriter
@@ -415,31 +407,31 @@ a_lyrics_us() { # Lyrics for US users, above does not work for US //credit @sudo
     echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1
 }
 a_weather() { # Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
-    weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | $said '/null/d' | $said '$!N; /^\(.*\)\n\1$/!P; D')
+    weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
     if [ -n "$weather" ]; then
-        if [ $(echo "$weather" | $said -n 2p) -gt $(echo "$weather" | $said -n 3p) ]; then
-            weather=$(printf '%b\n' "$weather" | $said -e 2','3'!b' -e ''2'h;'2'!H;'3'!d;x;s/^\([[:print:]'"$(printf '\001\002\003\004\005\006\007\010\011\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037\177')"']*\)\(.*\n\)\(.*\)/\3\2\1/')
+        if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then
+            weather=$(printf '%b\n' "$weather" | sed -e 2','3'!b' -e ''2'h;'2'!H;'3'!d;x;s/^\([[:print:]'"$(printf '\001\002\003\004\005\006\007\010\011\013\014\015\016\017\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037\177')"']*\)\(.*\n\)\(.*\)/\3\2\1/')
         fi
-        printf '%b\n' "$weather" | $said '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1
+        printf '%b\n' "$weather" | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1
     fi
 }
 a_unit() { # Units Conversion ( eg: 1m into 1 cm ) //credit @karthink
     echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1
 }
 a_currency() { # Currency Conversion ( eg: 1 USD in rupee ) //credit @karthink
-    echo "$google_html" | pup '.SwHCTb text{}' | $said 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1
+    echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1
 }
 a_trans() { # Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
-    echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | $said 's/null//g' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1
 }
 a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
-    echo "$google_html" | pup 'div.kno-rdesc span' | $said -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
+    echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
 a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //credit @ismayilkarimli
     echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recode html..ISO-8859-1
 }
 a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
-    echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | $paced -s -d ' ' | $said 's/\s/∙/g'
+    echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
 
 ###############################
@@ -495,7 +487,7 @@ debug_info() {
 # enabled with the -s flag
 dump_html() {
     [ -d "$XDG_CACHE_HOME"/tuxi ] || mkdir -p "$XDG_CACHE_HOME/tuxi"
-    file_name="$(date +%s%N)-$(printf %s "$query" | $said 's/ /_/g').html"
+    file_name="$(date +%s%N)-$(printf %s "$query" | sed 's/ /_/g').html"
     html_location="$XDG_CACHE_HOME/tuxi/$file_name"
     printf "%s" "$google_html" >$html_location
     info_msg "HTML for \"$query\" -> $html_location"
@@ -557,7 +549,7 @@ pids=""
 answers_found=0
 printed=0
 if ! $pick_search || ! $best_match; then
-    priority=$(printf '%b\n' "$priority" | cut -d ' ' -f1 | $said -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d')
+    priority=$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d')
 fi
 # loops through $priority forking all the tests in order
 for tests in $(printf '%b\n' "$priority"); do
@@ -575,18 +567,18 @@ if ! $quiet; then
             corrections="$(echo "$google_html" | pup 'a.gL9Hy text{}')"
             if [ -n "$corrections" ]; then
                 err_hl="$(echo "$google_html" | pup 'a.gL9Hy > b text{}')"
-                corrections="$(printf '%b\n' "$corrections" | $said ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
+                corrections="$(printf '%b\n' "$corrections" | sed ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
                 for errors in $(printf '%b\n' "$err_hl"); do
                     corrections=$(printf '%b\n' "$corrections" | sd -s "${errors}" "\033[1;96m${errors}\033[1;97m")
                 done
                 info_msg "$(printf "\033[3mI'm going to assume you meant\033[0m \033[95m--> \033[1;97m\"%b\"\033[0m\n" "$corrections")"
             fi
         else
-            did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | $said ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+            did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
             [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
         fi
     else
-        did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | $said ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
+        did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
         [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
     fi
 fi
