@@ -28,6 +28,21 @@ VERSION="dev 2.0"
 MAIN_PID="$$"
 [ ! "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
 
+#########################################
+#####      macOS compatibility      #####
+#########################################
+
+# credit to @Zhann in #149
+
+if [ "$OSTYPE" = 'darwin'* ]; then
+    sed() {
+        gsed "$@"
+    }
+    paste() {
+        gpaste "$@"
+    }
+fi
+
 ######################################
 #####      Snippet priority      #####
 ######################################
@@ -55,6 +70,7 @@ lists           # Simple lists ( eg Need for Speed Heat cars list )
 unit            # Units Conversion ( eg: 1m into 1 cm )
 currency        # Currency Conversion ( eg: 1 USD in rupee )
 trans           # Translate ( eg: Vais para cascais? em ingles )
+pronounce       # Learn to pronounce ( eg: pronounce linux )
 sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
 kno_right       # Knowledge Graph - right ( eg: the office )
 "
@@ -161,11 +177,9 @@ while getopts "rvhqabtldscp" OPT; do
         all=true
         ;;
     b)
-        $pick_search && printf "-t + -b are mutually exclusive, sorry" && exit 1
         best_match=true
         ;;
     t)
-        $best_match && printf "-t + -b are mutually exclusive, sorry" && exit 1
         pick_search=true
         ;;
     d)
@@ -191,6 +205,8 @@ while getopts "rvhqabtldscp" OPT; do
 done
 # shifts to query
 shift $((OPTIND - 1))
+
+$pick_search && $best_match && echo "sorry but -b and -t mutually exclusive" && exit 1
 
 # question | tuxi [-flags] --> answer :)
 if ! $no_pipe; then
@@ -310,7 +326,7 @@ fi
 # our patented (honest!) "smrt search" algorithm: the -b flag
 # jokes aside, this is going to need some iterating on, I'll turn it into a tidy loop later
 if $best_match; then
-    j=6
+    j=7
     use_quotes=false
     use_lyrics=false
     use_weather=false
@@ -318,6 +334,7 @@ if $best_match; then
     use_weather=false
     use_define=false
     use_list=false
+    use_pronounce=false
 
     query_check="$(printf '%b\n' "$query" | sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
     first_word=$(printf '%b\n' "$query_check" | head -n1)
@@ -331,6 +348,7 @@ if $best_match; then
         cast) use_cast=true ;;
         define | definition) use_define=true ;;
         list) use_list=true ;;
+        pronounce | pronunciation) use_pronounce=true ;;
         esac
     done
 
@@ -339,6 +357,7 @@ if $best_match; then
     $use_weather && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'weather')" || j=$(($j - 1))
     $use_cast && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
     $use_define && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'define')" || j=$(($j - 1))
+    $use_pronounce && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'pronounce')" || j=$(($j - 1))
     $use_list && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'rich' -e 'lists' -e 'kno_')" || j=$(($j - 1))
     [ $j -eq 0 ] && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
 fi
@@ -416,6 +435,9 @@ a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswrite
 }
 a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //credit @ismayilkarimli
     echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recode html..ISO-8859-1
+}
+a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
+    echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
 
 ###############################
