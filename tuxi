@@ -4,16 +4,6 @@
 #####      Constants      #####
 ###############################
 
-#//dev stuff - this is a temp placement
-
-# my alternative did you mean, requires sd right now, need to tweak it
-alt_dym=true
-if $alt_dym; then
-    [ ! "$(command -v sd)" ] && alt_dym=false
-fi
-
-#//end of dev stuff
-
 # setting this overrides the system language variable
 # this can also be set in your shell environment with TUXI_LANG=
 # the -l commandline flag overrides everything
@@ -96,6 +86,7 @@ no_pipe=false
 
 # color codes
 N="\033[0m"    # Reset
+B="\033[1m"    # Bold
 R="\033[1;31m" # Red
 G="\033[1;32m" # Green
 Y="\033[1;33m" # Yellow
@@ -205,9 +196,9 @@ while getopts "rvhqabtldscp" OPT; do
 done
 # shifts to query
 shift $((OPTIND - 1))
-
 $pick_search && $best_match && echo "sorry but -b and -t mutually exclusive" && exit 1
 
+#//TODO this may need reworking later to use read instead and only capture the first line
 # question | tuxi [-flags] --> answer :)
 if ! $no_pipe; then
     [ -p /dev/stdin ] && query=$(cat)
@@ -225,6 +216,7 @@ output() {
 # If raw=true: No colors, No pretty output
 if $raw; then
     N=""
+    B=""
     R=""
     G=""
     Y=""
@@ -565,27 +557,18 @@ done
 
 # did you mean is processed here to make controling the order things get printed easier
 # forking the tests makes things faster (hopefully) but makes passing information around harder
-# this bit will get a tidy up once I redo my dym method to use sed rather than sd
 if ! $quiet; then
     # silenced if quiet=true
-    if $alt_dym; then
-        if ! $raw; then
-            corrections="$(echo "$google_html" | pup 'a.gL9Hy text{}')"
-            if [ -n "$corrections" ]; then
-                err_hl="$(echo "$google_html" | pup 'a.gL9Hy > b text{}')"
-                corrections="$(printf '%b\n' "$corrections" | sed ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
-                for errors in $(printf '%b\n' "$err_hl"); do
-                    corrections=$(printf '%b\n' "$corrections" | sd -s "${errors}" "\033[1;96m${errors}\033[1;97m")
-                done
-                info_msg "$(printf "\033[3mI'm going to assume you meant\033[0m \033[95m--> \033[1;97m\"%b\"\033[0m\n" "$corrections")"
-            fi
-        else
-            did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
-            [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
-        fi
-    else
-        did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy > b text{}' | sed ':a;N;$!ba;s/\n/ /g' | recode html..ISO-8859-1)"
-        [ -n "$did_you_mean" ] && info_msg "Did you mean $did_you_mean?"
+    did_you_mean="$(echo "$google_html" | pup 'a.gL9Hy text{}')"
+    if [ -n "$did_you_mean" ]; then
+        err_hl="$(echo "$google_html" | pup 'a.gL9Hy > b text{}')"
+        did_you_mean="$(printf '%b\n' "$did_you_mean" | sed ':a;N;$!ba;s/\n//g' | recode html..ISO-8859-1)"
+        for errors in $(printf '%b\n' "$err_hl"); do
+            replacement="${C}${errors}${N}${B}"
+            replacement=$(printf '%s\n' "$replacement" | sed -e 's/[\/&]/\\&/g')
+            did_you_mean=$(printf '%b\n' "$did_you_mean" | sed "s/${errors}/${replacement}/g")
+        done
+        info_msg "$(printf 'did you mean %b"%b"%b ?\n' "$B" "$did_you_mean" "$N")"
     fi
 fi
 
