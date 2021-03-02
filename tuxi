@@ -618,5 +618,12 @@ if ! $all; then
     done
 fi
 $all && wait
+# another small delay as wait sometimes doesn't seem to wait quite long enough
+# for the last answer to be printed before exiting.
+l=0
+until [ $l -eq $(($MICRO_DELAY * 2)) ]; do
+    [ true ]
+    l=$(($l + 1))
+done
 $debug && debug_info
 exit 0

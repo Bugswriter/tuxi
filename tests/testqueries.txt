@@ -21,14 +21,14 @@
 # rich
 # kno_right
 
-# did_you_mean Linux Tarvalds
-# did_you_mean waht is the office
-# did_you_mean hwo much is btc wroth
-# 
-# math log(30)
-# math 72^43/12(44+1)-3124
-# math (40/3)+4*6
-# math 45/sqrt(4)*3
+did_you_mean Linux Tarvalds
+did_you_mean waht is the office
+did_you_mean hwo much is btc wroth
+
+math log(30)
+math 72^43/12(44+1)-3124
+math (40/3)+4*6
+math 45/sqrt(4)*3
 
 basic/kno_val christmas day
 basic/kno_val summer solstice
