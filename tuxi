@@ -12,7 +12,7 @@
 # if you find more than one answer is being printed (and you're not using -a)
 # increase this number by a little (you want it to be as low as possible)
 # this can also be set in your shell environment with TUXI_DELAY=
-[ -n "$TUXI_DELAY" ] && MICRO_DELAY="$TUXI_DELAY" || MICRO_DELAY=100
+[ -n "$TUXI_DELAY" ] && MICRO_DELAY="$TUXI_DELAY" || MICRO_DELAY=150
 
 VERSION="dev 2.0"
 MAIN_PID="$$"
@@ -44,25 +44,25 @@ fi
 # the first word should be the name of the a_function() followed by a space
 # you can disable tests by commenting out the line(s)
 priority="
+richcast        # Rich Rich Answers ( eg: social network cast )
+basic           # Basic Answers ( eg: christmas day )
 math            # Math ( eg: log_2(3) * pi^e )
+feat            # Featured Snippets ( eg: who is garfield )
 kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen )
 kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
-richcast        # Rich Rich Answers ( eg: social network cast )
+kno_right       # Knowledge Graph - right ( eg: the office )
 define          # Define ( eg: define Aggrandize )
+pronounce       # Learn to pronounce ( eg: pronounce linux )
 weather         # Weather ( eg: weather new york )
-lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
-lyrics_us       # Lyrics for US users, above does not work for US
-quotes          # Quotes ( eg: mahatma gandhi quotes )
-basic           # Basic Answers ( eg: christmas day )
-rich            # Rich Answers ( eg: elevation of mount everest )
-feat            # Featured Snippets ( eg: who is garfield )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
 unit            # Units Conversion ( eg: 1m into 1 cm )
 currency        # Currency Conversion ( eg: 1 USD in rupee )
 trans           # Translate ( eg: Vais para cascais? em ingles )
-pronounce       # Learn to pronounce ( eg: pronounce linux )
 sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
-kno_right       # Knowledge Graph - right ( eg: the office )
+quotes          # Quotes ( eg: mahatma gandhi quotes )
+lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
+lyrics_us       # Lyrics for US users, above does not work for US
+rich            # Rich Answers ( eg: elevation of mount everest )
 "
 
 ##############################
@@ -575,7 +575,6 @@ fi
 # loops to spin wheels until an answer has been found
 # if all the launched processes exit without an answer being found
 # script exits with a "No Result!" message
-laps=0
 while [ $answers_found -eq 0 ]; do
     for waiting1 in $(printf '%b\n' "$pids"); do
         kill -0 "$waiting1" 1>/dev/null 2>&1
@@ -584,8 +583,6 @@ while [ $answers_found -eq 0 ]; do
             kill -0 "$waiting2" 1>/dev/null 2>&1
             [ $? -eq 0 ] && break 2
         done
-        laps=$(($laps + 1))
-        [ $laps -lt 1 ] && break
         error_msg "No Result!"
         $debug && debug_info
         exit 1
@@ -612,11 +609,10 @@ if ! $all; then
 fi
 
 # once an answer has been printed and the -a flag isn't active
-# kills all remaining child processes in LIFO order
+# kills all remaining child processes
 # if -a flag is active then it waits until every answer has been printed first
 if ! $all; then
-    kill_pids="$(printf '%b\n' "$pids" | sort -r)"
-    for kids in $(printf '%b\n' "$kill_pids"); do
+    for kids in $(printf '%b\n' "$pids"); do
         kill -0 "$kids" 1>/dev/null 2>&1
         [ $? -eq 0 ] && kill "$kids" 1>/dev/null 2>&1
     done

@@ -1,4 +1,4 @@
-## format: target query
+## format: target/target query
 # tests can be disabled by commenting out the lines
 
 ## target list:
@@ -21,28 +21,28 @@
 # rich
 # kno_right
 
-did_you_mean Linux Tarvalds
-did_you_mean waht is the office
-did_you_mean hwo much is btc wroth
+# did_you_mean Linux Tarvalds
+# did_you_mean waht is the office
+# did_you_mean hwo much is btc wroth
+# 
+# math log(30)
+# math 72^43/12(44+1)-3124
+# math (40/3)+4*6
+# math 45/sqrt(4)*3
 
-math log(30)
-math 72^43/12(44+1)-3124
-math (40/3)+4*6
-math 45/sqrt(4)*3
-
-basic christmas day
-basic summer solstice
-basic shortest day of the year
+basic/kno_val christmas day
+basic/kno_val summer solstice
+basic/kno_val shortest day of the year
 
 kno_top the office cast
 kno_top legends of runeterra
 kno_top reddit
 kno_top twitter
 
-rich elevation of mt everest
-rich what is elevation of mt rainier
-rich how big is the grand canyon
-rich how long is the yellow river?
+rich/kno_val elevation of mt everest
+rich/kno_val what is elevation of mt rainier
+rich/kno_val how big is the grand canyon
+rich/kno_val how long is the yellow river?
 
 feat the meaning of life the universe and everything else
 feat shotgun doom eternal
@@ -104,5 +104,3 @@ richcast cast of event horizon
 richcast cast of equalibrium
 richcast GoT stars
 richcast avengers actors
-
-lists Need for Speed Heat cars list

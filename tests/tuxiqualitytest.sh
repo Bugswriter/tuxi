@@ -7,19 +7,27 @@ fi
 rm testoutputs.txt 2>/dev/null
 rm totals.txt 2>/dev/null
 
+cycle=1
+max_run=3
 raw=false
 use_tee=false
 red=$(tput setaf 1)
 run=""
 #defaults if raw != true
 
-while getopts "rt" o; do
+while getopts "rtdb" o; do
     case "${o}" in
     r)
         raw=true
         ;;
     t)
         use_tee=true
+        ;;
+    d)
+        max_run=2 # only do run 1 - the default tuxi output
+        ;;
+    b)
+        cycle=2 # only do run 2 - the "smart search" -b flag
         ;;
     *)
         exit 1
@@ -29,25 +37,6 @@ done
 #this took to long for me to figure out
 
 $raw && red=""
-
-t_did_you_mean() { printf "Testing error correction¬\n" | tee -a testoutputs.txt; }
-t_define() { printf "Testing word definition¬\n" | tee -a testoutputs.txt; }
-t_kno_val() { printf "Testing chemistry snippets¬\n" | tee -a testoutputs.txt; }
-t_math() { printf "Testing Math¬\n" | tee -a testoutputs.txt; }
-t_kno_top() { printf "Testing Knowledge Graph - top¬\n" | tee -a testoutputs.txt; }
-t_quotes() { printf "Testing Quotes¬\n" | tee -a testoutputs.txt; }
-t_basic() { printf "Testing basic answers¬\n" | tee -a testoutputs.txt; }
-t_richcast() { printf "Testing cast list¬\n" | tee -a testoutputs.txt; }
-t_lists() { printf "Testing simple lists¬\n" | tee -a testoutputs.txt; }
-t_feat() { printf "Testing featured snippets¬\n" | tee -a testoutputs.txt; }
-t_lyrics() { printf "Testing song lyrics¬\n" | tee -a testoutputs.txt; }
-t_weather() { printf "Testing weather information¬\n" | tee -a testoutputs.txt; }
-t_unit() { printf "Testing unit conversion¬\n" | tee -a testoutputs.txt; }
-t_currency() { printf "Testing currency conversion¬\n" | tee -a testoutputs.txt; }
-t_trans() { printf "Testing translation¬\n" | tee -a testoutputs.txt; }
-t_sport_fixture() { printf "Testing sports fixtures¬\n" | tee -a testoutputs.txt; }
-t_rich() { printf "Testing Rich Answer¬\n" | tee -a testoutputs.txt; }
-t_kno_right() { printf "Testing Knowledge Graph - right¬\n" | tee -a testoutputs.txt; }
 
 printf "${red}Test Output - If you don't know what you're doing here, hit h to figure out controls, or q if you aren't developing\n" >>testoutputs.txt
 printf "${red}###################################################################################################################\n" >>testoutputs.txt
@@ -59,8 +48,7 @@ if ! $raw; then
 fi
 #Help message cant be sent as raw, tuxi -r -h does not work
 
-cycle=1
-until [ $cycle -eq 3 ]; do
+until [ $cycle -eq $max_run ]; do
     case $cycle in
     1) run="-d -p" ;;    # default search with debug info and pipe disabled
     2) run="-d -p -b" ;; # same as above but also with smart search
@@ -72,9 +60,11 @@ until [ $cycle -eq 3 ]; do
     cat testqueries.txt | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | while read -r x; do
         reason=""
         target=$(printf '%s' "$x" | cut -d ' ' -f1)
+        multi_target="$(printf '%b\n' "$(printf '%b\n' "$target" | sed 's/\//\\n/g')")"
+        q=$(printf '%b\n' "$multi_target" | wc -l)
+        [ $q -gt 1 ] || unset multi_target
         query=$(printf '%s' "$x" | sed 's/^ *[^ ][^ ]*  *//')
-        printf "\n" && "t_${target}"
-        printf "target: %b | query: %b\n" "$target" "$query" | tee -a testoutputs.txt
+        printf "target(s): %b | query: %b\n" "$target" "$query" | tee -a testoutputs.txt
         result="$(../tuxi $run "$query")"
         nr_check="$(printf '%b\n' "$result" | grep 'No Result!')"
         if [ -n "$nr_check" ]; then
@@ -82,7 +72,7 @@ until [ $cycle -eq 3 ]; do
             good=false
             reason="no results"
         elif [ "$target" = 'did_you_mean' ]; then
-            dym_check="$(printf '%b\n' "$result" | head -n1 | grep ' you mean')"
+            dym_check="$(printf '%b\n' "$result" | head -n1 | grep 'did you mean "')"
             if [ -n "$dym_check" ]; then
                 echo "PASSED" >>totals.txt
                 good=true
@@ -92,15 +82,37 @@ until [ $cycle -eq 3 ]; do
                 reason="no correction"
             fi
         else
-            answer=$(printf '%b\n' "$result" | grep "Answer selected: " | awk '{print $NF}')
-            [ "$answer" = 'lyrics_int' ] || [ "$answer" = 'lyrics_us' ] && answer='lyrics'
-            if [ "$answer" = "$target" ]; then
-                echo "PASSED" >>totals.txt
-                good=true
-            else
+            answer=$(printf '%b\n' "$result" | grep "Answer selected: ")
+            if [ $(printf '%b\n' "$answer" | wc -l) -gt 1 ]; then
                 echo "FAILED" >>totals.txt
                 good=false
-                reason="wrong answer"
+                reason="multiple answers printed"
+            else
+                answer=$(printf '%b\n' "$answer" | awk '{print $NF}')
+                [ "$answer" = 'lyrics_int' ] || [ "$answer" = 'lyrics_us' ] && answer='lyrics'
+                if [ -n "$multi_target" ]; then
+                    for z in $(printf '%b\n' "$multi_target"); do
+                        if [ "$answer" = "$z" ]; then
+                            echo "PASSED" >>totals.txt
+                            good=true
+                            break
+                        else
+                            good=false
+                        fi
+                    done
+                    if ! $good; then
+                        echo "FAILED" >>totals.txt
+                        good=false
+                        reason="wrong answer"
+                    fi
+                elif [ "$answer" = "$target" ]; then
+                    echo "PASSED" >>totals.txt
+                    good=true
+                else
+                    echo "FAILED" >>totals.txt
+                    good=false
+                    reason="wrong answer"
+                fi
             fi
         fi
         if $use_tee; then
