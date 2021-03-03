@@ -124,7 +124,7 @@ help_text() {
     printf "\n"
     printf "%bdeveloper flags:%b\n" "$G" "$N"
     printf "  -d                    prints debug info along with results\n"
-    printf "  -s                    saves HTML for this query to $XDG_CACHE_HOME/tuxi/tuxi-[date]-[query].html\n"
+    printf "  -s                    saves HTML for this query to $XDG_CACHE_HOME/tuxi/[date]-[query].html\n"
     printf "  -c                    use most recent cached result and query\n"
     printf "                        this can be combined with -t flag to more quickly test for different answers\n"
     printf "  -p                    disable pipe support (it can break some scripts including our own test script)\n"
@@ -154,7 +154,7 @@ while getopts "rvhqabtldscp" OPT; do
         raw=true
         ;;
     v)
-        printf "tuxi %s\n" "$version"
+        printf "tuxi %s\n" "$VERSION"
         exit 0
         ;;
     h)
@@ -425,8 +425,39 @@ a_trans() { # Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
 a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
     echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
-a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //credit @ismayilkarimli
-    echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span,div.imso_mh__r-tm-sc, div.imso_mh__l-tm-sc text{}' | recode html..ISO-8859-1
+a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
+    sport_fixture="$(echo "$google_html" | pup 'div.imso_mh__tm-scr text{}' | recode html..ISO-8859-1)"
+    if [ -n "$sport_fixture" ]; then
+        sfi=1
+        printf '%b\n' "$sport_fixture" | {
+            while IFS= read -r sfx; do
+                eval sf${sfi}=\"\${sfx}\"
+                sfi=$(($sfi + 1))
+                [ $sfi -eq 10 ] && break
+            done
+            # check if the match has happened or is upcomming
+            if [ -n "$sf9" ]; then
+                # match is ongoing? (not tested for this yet, should work though) or finished
+                if [ $sf6 -eq $sf8 ]; then
+                    # scores are even
+                    printf '%s%s%s\n%b%s\t%s\n%s\t%s%b\n%s %s\n' \
+                        "$sf4" "$sf3" "$sf2" "$B" "$sf6" "$sf5" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
+                elif [ $sf6 -gt $sf8 ]; then
+                    # team one is winning / has won
+                    printf '%s%s%s\n%b%b%s\t%s%b%b\n%s\t%s%b\n%s %s\n' \
+                        "$sf4" "$sf3" "$sf2" "$B" "$C" "$sf6" "$sf5" "$N" "$B" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
+                else
+                    # team two is winning / has won
+                    printf '%s%s%s\n%b%s\t%s\n%b%s\t%s%b\n%s %s\n' \
+                        "$sf4" "$sf3" "$sf2" "$B" "$sf6" "$sf5" "$C" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
+                fi
+            else
+                # match is upcomming
+                printf '%b%b%b\n%b%b%b %b %b%b%b\n' \
+                    "$sf3" "$sf2" "$sf1" "$B" "$sf4" "$N" "$sf5" "$B" "$sf6" "$N"
+            fi
+        }
+    fi
 }
 a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
