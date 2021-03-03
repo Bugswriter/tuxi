@@ -426,7 +426,7 @@ a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswrite
     echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
 a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
-    sport_fixture="$(echo "$google_html" | pup 'div.imso_mh__tm-scr text{}' | recode html..ISO-8859-1)"
+    sport_fixture="$(echo "$google_html" | pup 'div.imso_mh__tm-scr text{}')"
     if [ -n "$sport_fixture" ]; then
         sfi=1
         printf '%b\n' "$sport_fixture" | {
