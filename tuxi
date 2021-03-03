@@ -374,7 +374,7 @@ a_kno_val() { # Chem facts ( eg: density of silver, density of hydrogen, what is
     echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' '
 }
 a_math() { # Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
-    echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d ' '
 }
 a_kno_top() { # Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
     echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1
