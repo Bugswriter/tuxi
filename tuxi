@@ -426,28 +426,78 @@ a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswrite
     echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
 a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
-    sport_fixture="$(echo "$google_html" | pup 'div.imso_mh__tm-scr text{}')"
-    if [ -n "$sport_fixture" ]; then
-        sfi=1
-        printf '%b\n' "$sport_fixture" | {
-            while IFS= read -r sfx; do
-                eval sf${sfi}=\"\${sfx}\"
-                sfi=$(($sfi + 1))
-                [ $sfi -eq 10 ] && break
-            done
+    sport_fixture="$(echo "$google_html" | pup 'div.imso_mh__tm-scr text{}' | recode html..ISO-8859-1)"
+
+    if [ -n "$sport_fixture" ]; then # if pup doesn't find anything then skip to the end and exit, else...
+
+        sfi=1 # <-- this is used as both a loop counter and name for our new variables
+
+        printf '%b\n' "$sport_fixture" | { # <-- the braces are needed because while/read is executed in a subshell...
+            # this means that as soon as the loop has finished it will exit the new process and "forget" everything
+            # if we encapsulate the whole loop and processing code in the braces, we get to use the data
+
+            while IFS= read -r sfx; do # read the contents of $sport_fixture line by line...
+                # ...saving the text from each line in the variable $sfx and *do*ing the following:
+
+                eval sf${sfi}=\"\${sfx}\" # use eval to declare a new variable using two different variables...
+                # we use sf and then the line number for that text string for the name of the variable (eg: $sf1)
+                # and the value of the new variable is going to be the current value of $sfx
+                # when using eval this way the value side of the declaration has to be properly escaped
+
+                sfi=$(($sfi + 1)) # i++ - increment the loop counter and more importantly the next variable name
+
+                [ $sfi -eq 10 ] && break # we don't need any of the information after the ninth line...
+                # so we can just use break to exit the loop when the counter hits ten
+
+            done # <-- normally after this point everything processed above would be gone...
+            # but because we are still within the braces we get to do some checks on the data we have
+
+            # check if match is in progress
+            if [ "$sf3" != ' · ' ]; then
+                # match is underway
+                if [ "$sf2" = "'" ]; then
+                    # match is underway, score is a draw
+                    if [ $sf5 -eq $sf7 ]; then
+                        printf '%s\n%b%s\t%s\n%s\t%s%b\n%s %b%s%s%b\n' \
+                            "$sf3" "$B" "$sf5" "$sf4" "$sf7" "$sf8" "$N" "$sf6" "$G" "$sf1" "$sf2" "$N"
+                    # match is underway, team one is winning
+                    elif [ $sf5 -gt $sf7 ]; then
+                        printf '%s\n%b%s\t%s\n%b%b%s\t%s%b\n%s %b%s%s%b\n' \
+                            "$sf3" "$C" "$sf5" "$sf4" "$N" "$B" "$sf7" "$sf8" "$N" "$sf6" "$G" "$sf1" "$sf2" "$N"
+                    # match is underway, team two is winning
+                    else
+                        printf '%s\n%b%s\t%s\n%b%s\t%s%b\n%s %b%s%s%b\n' \
+                            "$sf3" "$B" "$sf5" "$sf4" "$C" "$sf7" "$sf8" "$N" "$sf6" "$G" "$sf1" "$sf2" "$N"
+                    fi
+                # half time
+                else
+                    # match is even
+                    if [ $sf4 -eq $sf6 ]; then
+                        printf '%s\n%b%s\t%s\n%s\t%s\n%b%s %b%s%b\n' \
+                            "$sf2" "$B" "$sf4" "$sf3" "$sf6" "$sf7" "$N" "$sf5" "$R" "$sf1" "$N"
+                    # team one winning
+                    elif [ $sf4 -gt $sf6 ]; then
+                        printf '%s\n%b%s\t%s\n%b%b%s\t%s\n%b%s %b%s%b\n' \
+                            "$sf2" "$C" "$sf4" "$sf3" "$N" "$B" "$sf6" "$sf7" "$N" "$sf5" "$R" "$sf1" "$N"
+                    # team two winning
+                    else
+                        printf '%s\n%b%s\t%s\n%b%s\t%s\n%b%s %b%s%b\n' \
+                            "$sf2" "$B" "$sf4" "$sf3" "$C" "$sf6" "$sf7" "$N" "$sf5" "$R" "$sf1" "$N"
+                    fi
+                fi
             # check if the match has happened or is upcomming
-            if [ -n "$sf9" ]; then
-                # match is ongoing? (not tested for this yet, should work though) or finished
+            elif [ -n "$sf9" ]; then
+                # match has finished
                 if [ $sf6 -eq $sf8 ]; then
                     # scores are even
                     printf '%s%s%s\n%b%s\t%s\n%s\t%s%b\n%s %s\n' \
                         "$sf4" "$sf3" "$sf2" "$B" "$sf6" "$sf5" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
                 elif [ $sf6 -gt $sf8 ]; then
-                    # team one is winning / has won
-                    printf '%s%s%s\n%b%b%s\t%s%b%b\n%s\t%s%b\n%s %s\n' \
-                        "$sf4" "$sf3" "$sf2" "$B" "$C" "$sf6" "$sf5" "$N" "$B" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
+                    # team one has won
+                    printf '%s%s%s\n%b%s\t%s%b%b\n%s\t%s%b\n%s %s\n' \
+                        "$sf4" "$sf3" "$sf2" "$C" "$sf6" "$sf5" "$N" "$B" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
                 else
-                    # team two is winning / has won
+                    # team two has won
                     printf '%s%s%s\n%b%s\t%s\n%b%s\t%s%b\n%s %s\n' \
                         "$sf4" "$sf3" "$sf2" "$B" "$sf6" "$sf5" "$C" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
                 fi
@@ -456,7 +506,7 @@ a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea 
                 printf '%b%b%b\n%b%b%b %b %b%b%b\n' \
                     "$sf3" "$sf2" "$sf1" "$B" "$sf4" "$N" "$sf5" "$B" "$sf6" "$N"
             fi
-        }
+        } # <-- and here is where the subshell ends and the rest of the snippet code falls through to exit
     fi
 }
 a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
