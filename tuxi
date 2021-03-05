@@ -12,7 +12,7 @@
 # if you find more than one answer is being printed (and you're not using -a)
 # increase this number by a little (you want it to be as low as possible)
 # this can also be set in your shell environment with TUXI_DELAY=
-[ -n "$TUXI_DELAY" ] && MICRO_DELAY="$TUXI_DELAY" || MICRO_DELAY=150
+[ -n "$TUXI_DELAY" ] && MICRO_DELAY="$TUXI_DELAY" || MICRO_DELAY=250
 
 VERSION="dev 2.0"
 MAIN_PID="$$"
@@ -43,26 +43,30 @@ fi
 
 # the first word should be the name of the a_function() followed by a space
 # you can disable tests by commenting out the line(s)
+# IMPORTANT! - richcast must remain top and active
+# it's slower to process than the other scrapes that get a cast list so it needs to start first
+# also I've put a small delay between starting that and the other scrapes
+# this is a temporary hack until I get a chance to look at speeding up the snippet
 priority="
 richcast        # Rich Rich Answers ( eg: social network cast )
-basic           # Basic Answers ( eg: christmas day )
-math            # Math ( eg: log_2(3) * pi^e )
-feat            # Featured Snippets ( eg: who is garfield )
+rich            # Rich Answers ( eg: elevation of mount everest )
+lists           # Simple lists ( eg Need for Speed Heat cars list )
 kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen )
-kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
 define          # Define ( eg: define Aggrandize )
 pronounce       # Learn to pronounce ( eg: pronounce linux )
+lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
 weather         # Weather ( eg: weather new york )
-lists           # Simple lists ( eg Need for Speed Heat cars list )
+math            # Math ( eg: log_2(3) * pi^e )
 unit            # Units Conversion ( eg: 1m into 1 cm )
 currency        # Currency Conversion ( eg: 1 USD in rupee )
+kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
+basic           # Basic Answers ( eg: christmas day )
+feat            # Featured Snippets ( eg: who is garfield )
+quotes          # Quotes ( eg: mahatma gandhi quotes )
 trans           # Translate ( eg: Vais para cascais? em ingles )
 sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
-quotes          # Quotes ( eg: mahatma gandhi quotes )
-lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
 lyrics_us       # Lyrics for US users, above does not work for US
 kno_right       # Knowledge Graph - right ( eg: the office )
-rich            # Rich Answers ( eg: elevation of mount everest )
 "
 
 ##############################
@@ -395,7 +399,16 @@ a_rich() { # Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun +
     # I've removed div.mR2gOd from this scrape as it seems to only be providing redundant information
     # if it is needed for some information not provided elsewhere, I'll make it a function
     rich=$(echo "$google_html" | pup 'div.ujudUb, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1)
-    [ "$(printf '%b\n' "$rich" | head -n1)" = 'View all' ] || printf '%b\n' "$rich"
+    if [ $(printf '%b\n' "$rich" | wc -w) -gt 1 ]; then
+        if [ "$(printf '%b\n' "$rich" | head -n1)" = 'View all' ]; then
+            unset rich
+            exit
+        else
+            printf '%b\n' "$rich"
+        fi
+    else
+        unset rich
+    fi
 }
 a_feat() { # Featured Snippets ( eg: who is garfield ) //credit @Bugswriter
     echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
@@ -536,6 +549,19 @@ output_printed_signal() {
 }
 trap output_printed_signal USR2
 
+short_delay() {
+    [ ! $1 ] && runs=1 || runs=$1
+    foo=0
+    until [ $foo -eq $runs ]; do
+        l=0
+        until [ $l -eq $MICRO_DELAY ]; do
+            [ true ]
+            l=$(($l + 1))
+        done
+        foo=$(($foo + 1))
+    done
+}
+
 # calculates execution time and number of answers processed
 debug_info() {
     timer_stop=$(date +'%s %N')
@@ -642,7 +668,12 @@ fi
 # loops through $priority forking all the tests in order
 for tests in $(printf '%b\n' "$priority"); do
     test_answers "$tests" 2>/dev/null &
-    [ -z "$pids" ] && pids="$!" || pids="${pids}\n${!}"
+    if [ -z "$pids" ]; then
+        pids="$!"
+        short_delay 2
+    else
+        pids="${pids}\n${!}"
+    fi
 done
 
 # did you mean is processed here to make controling the order things get printed easier
@@ -688,12 +719,7 @@ if ! $all; then
         kill -0 "$lucky_winner" 1>/dev/null 2>&1
         if [ $? -eq 0 ]; then
             kill -USR1 "$lucky_winner" 1>/dev/null 2>&1
-            # this is just to kill time and give $printed a chance to update
-            l=0
-            until [ $l -eq $MICRO_DELAY ]; do
-                [ true ]
-                l=$(($l + 1))
-            done
+            short_delay
         fi
     done
 fi
@@ -710,10 +736,6 @@ fi
 $all && wait
 # another small delay as wait sometimes doesn't seem to wait quite long enough
 # for the last answer to be printed before exiting.
-l=0
-until [ $l -eq $(($MICRO_DELAY * 2)) ]; do
-    [ true ]
-    l=$(($l + 1))
-done
+short_delay 2
 $debug && debug_info
 exit 0

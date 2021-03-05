@@ -30,14 +30,14 @@ math 72^43/12(44+1)-3124
 math (40/3)+4*6
 math 45/sqrt(4)*3
 
-basic/kno_val christmas day
+rich/basic/kno_val christmas day
 basic/kno_val summer solstice
 basic/kno_val shortest day of the year
 
-kno_top the office cast
-kno_top legends of runeterra
-kno_top reddit
-kno_top twitter
+richcast/kno_top the office cast
+kno_top/kno_right legends of runeterra
+kno_top/kno_right reddit
+kno_top/kno_right twitter
 
 rich/kno_val elevation of mt everest
 rich/kno_val what is elevation of mt rainier
@@ -49,13 +49,13 @@ feat shotgun doom eternal
 feat what is tenacity in league of legends
 feat rusty cage bio
 
-lyrics the motans inainte sa ne fi nascut lyrics
-lyrics lyrics of hello adele
-lyrics Toosie slide lyrics
-lyrics Sigues con el lyrics
-lyrics my truck breland lyrics
-lyrics maniac conan gray lyrics
-lyrics dealer RMR lyrics
+lyrics/rich the motans inainte sa ne fi nascut lyrics
+lyrics/rich lyrics of hello adele
+lyrics/rich Toosie slide lyrics
+lyrics/rich Sigues con el lyrics
+lyrics/rich my truck breland lyrics
+lyrics/rich maniac conan gray lyrics
+lyrics/rich dealer RMR lyrics
 
 unit 100 cm to m
 unit 100 c to f
@@ -79,7 +79,7 @@ weather how cold is it in canada right now?
 
 kno_right lorem ipsum
 kno_right the office
-kno_right what is a firefighter
+kno_right/define what is a firefighter
 kno_right what is the american bill of rights
 
 define define humor
@@ -94,13 +94,12 @@ sport_fixture results of last chelsea match
 
 quotes linus torvalds quotes
 quotes quotes from gandhi
-quotes inspirational quotes
 
-kno_val density of silver
-kno_val density of hydrogen
-kno_val what is the triple point of oxygen
+kno_val/rich density of silver
+kno_val/rich density of hydrogen
+kno_val/rich what is the triple point of oxygen
 
 richcast cast of event horizon
 richcast cast of equalibrium
-richcast GoT stars
-richcast avengers actors
+richcast/kno_top GoT stars
+richcast/kno_top avengers actors
