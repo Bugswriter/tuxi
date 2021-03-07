@@ -440,6 +440,8 @@ a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
                 elif $dfn_start; then
                     if [ "$dfn_foo" = 'informal' ]; then
                         printf '(informal) '
+                    elif [ "$dfn_foo" = 'British' ]; then
+                        printf '(British) '
                     else
                         printf '%s ' "$dfn_foo"
                         dfn_append=true
