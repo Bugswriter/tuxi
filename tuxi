@@ -410,6 +410,7 @@ a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
         dfn_append=false
         dfn_marker=false
         dfn_sim_op=false
+        dfn_skip=false
         printf '%s\n' "$define" | while IFS= read -r dfn_foo; do
             if $dfn_append; then
                 printf '%b%s%b\n' "$C" "$dfn_foo" "$N"
@@ -417,6 +418,10 @@ a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
             elif [ $dfn_foo -eq $dfn_foo ] 2>/dev/null; then
                 printf '\n'
                 $dfn_sim_op && dfn_sim_op=false
+            elif [ "$dfn_foo" = '/' ]; then
+                $dfn_skip && dfn_skip=false || dfn_skip=true
+            elif $dfn_skip; then
+                continue
             elif [ "$dfn_foo" = '. ' ]; then
                 $dfn_sim_op && dfn_sim_op=false
             elif [ "$dfn_foo" = '.' ]; then
