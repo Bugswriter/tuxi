@@ -712,7 +712,8 @@ a_sport_fixture() {
     fi
 }
 
-a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
+# Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
+a_pronounce() { 
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
 
@@ -721,16 +722,23 @@ a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushanth
 ###############################
 
 # these are used by the processing loop to determine how and when to print info and exit
+#   USR1
 found_answer_signal() {
     answers_found=$(($answers_found + 1))
 }
-
 trap found_answer_signal USR1
+
+#   USR2
 output_printed_signal() {
     printed=$(($printed + 1))
 }
-
 trap output_printed_signal USR2
+
+# waiting signals to continue
+#   without this the main script assumes that fork doesn't have an answer ready
+#   because it checks the printed variable too fast and sends the signal to print
+#   to another fork and that's how you get multiple answers bein printed out
+#   so be careful with this
 short_delay() {
     [ ! $1 ] && runs=1 || runs=$1
     foo=0
