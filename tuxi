@@ -49,10 +49,9 @@ fi
 # this is a temporary hack until I get a chance to look at speeding up the snippet
 priority="
 richcast        # Rich Rich Answers ( eg: social network cast )
-rich            # Rich Answers ( eg: elevation of mount everest )
+define          # Define ( eg: define Aggrandize )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
 kno_val         # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen )
-define          # Define ( eg: define Aggrandize )
 pronounce       # Learn to pronounce ( eg: pronounce linux )
 lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
 weather         # Weather ( eg: weather new york )
@@ -60,6 +59,7 @@ math            # Math ( eg: log_2(3) * pi^e )
 unit            # Units Conversion ( eg: 1m into 1 cm )
 currency        # Currency Conversion ( eg: 1 USD in rupee )
 kno_top         # Knowledge Graph - top ( list ) ( eg: the office cast )
+rich            # Rich Answers ( eg: elevation of mount everest )
 basic           # Basic Answers ( eg: christmas day )
 feat            # Featured Snippets ( eg: who is garfield )
 quotes          # Quotes ( eg: mahatma gandhi quotes )
@@ -131,7 +131,7 @@ help_text() {
     printf "\n"
     printf "  TUXI_DELAY=[int]      if you find more than one answer is being printed (and you're not using -a)\n"
     printf "                        increase this number by a little (you want it to be as low as possible)\n"
-    printf "                        default value is 100 (eg: TUXI_DELAY=120)\n"
+    printf "                        default value is 250 (eg: TUXI_DELAY=270)\n"
     printf "\n"
     printf "%bdeveloper flags:%b\n" "$G" "$N"
     printf "  -d                    prints debug info along with results\n"
@@ -371,6 +371,8 @@ fi
 #####      Answer functions      #####
 ######################################
 
+## NOTE: the order of these functions doesn't matter, priority is determined by the variable
+
 ## FUNCTION TEMPLATE
 # NewAnswerName should be the word used in $priority
 
@@ -378,9 +380,80 @@ fi
 #     echo "$google_html" | pup ... [ SCRAPE METHOD HERE ] ...
 # }
 
-## NOTE: the order of these functions doesn't matter, priority is determined by the variable
-a_define() { # Define (eg: define Aggrandize) //credit @igaurab
-    echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1
+a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
+    define="$(echo "$google_html" | pup 'div.VpH2eb.dZd3De.vmod text{}' | sed '/^[[:space:]]*$/d' | recode html..ISO-8859-1)"
+    if [ -n "$define" ]; then
+        printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 '/' | tail -n1)" "$N"
+        printf '%s\n' "$define" | {
+            dfn_counter=1
+            while IFS= read -r dfn_trim; do
+                case "$dfn_trim" in
+                noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
+                    dfn_counter=$(($dfn_counter + 1))
+                    break
+                    ;;
+                *) dfn_counter=$(($dfn_counter + 1)) ;;
+                esac
+            done
+            return $dfn_counter
+        }
+        dfn_trim=$(($? - 1))
+        define="$(printf '%s\n' "$define" | tail -n +${dfn_trim})"
+        printf '%s\n' "$define" | sed -n 2p | grep -q ':'
+        if [ $? -eq 0 ]; then
+            dfn_start=true
+        else
+            printf '%b%s%b\n' "$Y" "$(printf '%s\n' "$define" | head -n1)" "$N"
+            dfn_start=false
+        fi
+        define="$(printf '%s\n' "$define" | tail -n +2)"
+        dfn_append=false
+        dfn_marker=false
+        dfn_sim_op=false
+        printf '%s\n' "$define" | while IFS= read -r dfn_foo; do
+            if $dfn_append; then
+                printf '%b%s%b\n' "$C" "$dfn_foo" "$N"
+                dfn_append=false
+            elif [ $dfn_foo -eq $dfn_foo ] 2>/dev/null; then
+                printf '\n'
+                $dfn_sim_op && dfn_sim_op=false
+            elif [ "$dfn_foo" = '. ' ]; then
+                $dfn_sim_op && dfn_sim_op=false
+            elif $dfn_marker; then
+                [ "$dfn_foo" = 'Similar:' ] && dfn_hl="$G" || dfn_hl="$R"
+                printf '%b%s%b\n' "$dfn_hl" "$dfn_foo" "$N"
+                dfn_marker=false
+                dfn_sim_op=true
+            elif $dfn_start; then
+                if [ "$dfn_foo" = 'informal' ]; then
+                    printf '(informal) '
+                else
+                    printf '%s ' "$dfn_foo"
+                    dfn_append=true
+                    dfn_start=false
+                fi
+            else
+                case "$dfn_foo" in
+                "; "*)
+                    printf '%s ' "$dfn_foo"
+                    dfn_append=true
+                    ;;
+                " h ")
+                    dfn_marker=true
+                    ;;
+                noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
+                    printf '\n'
+                    $dfn_sim_op && dfn_sim_op=false
+                    dfn_start=true
+                    ;;
+                *)
+                    $dfn_sim_op && printf '\t%s\n' "$dfn_foo" \
+                        || printf '\t%b%s%b\n' "$B" "$dfn_foo" "$N"
+                    ;;
+                esac
+            fi
+        done
+    fi
 }
 a_kno_val() { # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
     # "what is the " seems to be required for some things //credit @sudocanttype
@@ -452,94 +525,6 @@ a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswrite
 a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //credit @ismayilkarimli
     echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span, div.imso_mh__l-tm-sc, div.imso_mh__r-tm-sc text{}' | recode html..ISO-8859-1
 }
-
-#//TODO - this is disabled until I finish the formatting for sports other than football (or soccer for the americans)
-
-# a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
-#     sport_fixture="$(echo "$google_html" | pup 'div.imso_mh__tm-scr text{}' | recode html..ISO-8859-1)"
-
-#     if [ -n "$sport_fixture" ]; then # if pup doesn't find anything then skip to the end and exit, else...
-
-#         sfi=1 # <-- this is used as both a loop counter and name for our new variables
-
-#         printf '%b\n' "$sport_fixture" | { # <-- the braces are needed because while/read is executed in a subshell...
-#             # this means that as soon as the loop has finished it will exit the new process and "forget" everything
-#             # if we encapsulate the whole loop and processing code in the braces, we get to use the data
-
-#             while IFS= read -r sfx; do # read the contents of $sport_fixture line by line...
-#                 # ...saving the text from each line in the variable $sfx and *do*ing the following:
-
-#                 eval sf${sfi}=\"\${sfx}\" # use eval to declare a new variable using two different variables...
-#                 # we use sf and then the line number for that text string for the name of the variable (eg: $sf1)
-#                 # and the value of the new variable is going to be the current value of $sfx
-#                 # when using eval this way the value side of the declaration has to be properly escaped
-
-#                 sfi=$(($sfi + 1)) # i++ - increment the loop counter and more importantly the next variable name
-
-#                 [ $sfi -eq 10 ] && break # we don't need any of the information after the ninth line...
-#                 # so we can just use break to exit the loop when the counter hits ten
-
-#             done # <-- normally after this point everything processed above would be gone...
-#             # but because we are still within the braces we get to do some checks on the data we have
-
-#             # check if match is in progress
-#             if [ "$sf3" != ' · ' ]; then
-#                 # match is underway
-#                 if [ "$sf2" = "'" ]; then
-#                     # match is underway, score is a draw
-#                     if [ $sf5 -eq $sf7 ]; then
-#                         printf '%s\n%b%s\t%s\n%s\t%s%b\n%s %b%s%s%b\n' \
-#                             "$sf3" "$B" "$sf5" "$sf4" "$sf7" "$sf8" "$N" "$sf6" "$G" "$sf1" "$sf2" "$N"
-#                     # match is underway, team one is winning
-#                     elif [ $sf5 -gt $sf7 ]; then
-#                         printf '%s\n%b%s\t%s\n%b%b%s\t%s%b\n%s %b%s%s%b\n' \
-#                             "$sf3" "$C" "$sf5" "$sf4" "$N" "$B" "$sf7" "$sf8" "$N" "$sf6" "$G" "$sf1" "$sf2" "$N"
-#                     # match is underway, team two is winning
-#                     else
-#                         printf '%s\n%b%s\t%s\n%b%s\t%s%b\n%s %b%s%s%b\n' \
-#                             "$sf3" "$B" "$sf5" "$sf4" "$C" "$sf7" "$sf8" "$N" "$sf6" "$G" "$sf1" "$sf2" "$N"
-#                     fi
-#                 # half time
-#                 else
-#                     # match is even
-#                     if [ $sf4 -eq $sf6 ]; then
-#                         printf '%s\n%b%s\t%s\n%s\t%s\n%b%s %b%s%b\n' \
-#                             "$sf2" "$B" "$sf4" "$sf3" "$sf6" "$sf7" "$N" "$sf5" "$R" "$sf1" "$N"
-#                     # team one winning
-#                     elif [ $sf4 -gt $sf6 ]; then
-#                         printf '%s\n%b%s\t%s\n%b%b%s\t%s\n%b%s %b%s%b\n' \
-#                             "$sf2" "$C" "$sf4" "$sf3" "$N" "$B" "$sf6" "$sf7" "$N" "$sf5" "$R" "$sf1" "$N"
-#                     # team two winning
-#                     else
-#                         printf '%s\n%b%s\t%s\n%b%s\t%s\n%b%s %b%s%b\n' \
-#                             "$sf2" "$B" "$sf4" "$sf3" "$C" "$sf6" "$sf7" "$N" "$sf5" "$R" "$sf1" "$N"
-#                     fi
-#                 fi
-#             # check if the match has happened or is upcomming
-#             elif [ -n "$sf9" ]; then
-#                 # match has finished
-#                 if [ $sf6 -eq $sf8 ]; then
-#                     # scores are even
-#                     printf '%s%s%s\n%b%s\t%s\n%s\t%s%b\n%s %s\n' \
-#                         "$sf4" "$sf3" "$sf2" "$B" "$sf6" "$sf5" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
-#                 elif [ $sf6 -gt $sf8 ]; then
-#                     # team one has won
-#                     printf '%s%s%s\n%b%s\t%s%b%b\n%s\t%s%b\n%s %s\n' \
-#                         "$sf4" "$sf3" "$sf2" "$C" "$sf6" "$sf5" "$N" "$B" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
-#                 else
-#                     # team two has won
-#                     printf '%s%s%s\n%b%s\t%s\n%b%s\t%s%b\n%s %s\n' \
-#                         "$sf4" "$sf3" "$sf2" "$B" "$sf6" "$sf5" "$C" "$sf8" "$sf9" "$N" "$sf7" "$sf1"
-#                 fi
-#             else
-#                 # match is upcomming
-#                 printf '%b%b%b\n%b%b%b %b %b%b%b\n' \
-#                     "$sf3" "$sf2" "$sf1" "$B" "$sf4" "$N" "$sf5" "$B" "$sf6" "$N"
-#             fi
-#         } # <-- and here is where the subshell ends and the rest of the snippet code falls through to exit
-#     fi
-# }
-
 a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
