@@ -381,91 +381,99 @@ fi
 # }
 
 a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
-    define="$(echo "$google_html" | pup 'div.VpH2eb.dZd3De.vmod text{}' | sed '/^[[:space:]]*$/d' | recode html..ISO-8859-1)"
-    if [ -n "$define" ]; then
-        printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 '/' | tail -n1)" "$N"
-        printf '%s\n' "$define" | {
-            dfn_counter=1
-            while IFS= read -r dfn_trim; do
-                case "$dfn_trim" in
-                noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
-                    dfn_counter=$(($dfn_counter + 1))
-                    break
-                    ;;
-                *) dfn_counter=$(($dfn_counter + 1)) ;;
-                esac
-            done
-            return $dfn_counter
-        }
-        dfn_trim=$(($? - 1))
-        define="$(printf '%s\n' "$define" | tail -n +${dfn_trim})"
-        printf '%s\n' "$define" | sed -n 2p | grep -q ':'
-        if [ $? -eq 0 ]; then
-            dfn_start=true
-        else
-            printf '%b%s%b\n' "$Y" "$(printf '%s\n' "$define" | head -n1)" "$N"
-            dfn_start=false
-        fi
-        define="$(printf '%s\n' "$define" | tail -n +2)"
-        dfn_append=false
-        dfn_marker=false
-        dfn_sim_op=false
-        dfn_skip=false
-        printf '%s\n' "$define" | while IFS= read -r dfn_foo; do
-            if $dfn_append; then
-                printf '%b%s%b\n' "$C" "$dfn_foo" "$N"
-                dfn_append=false
-            elif [ $dfn_foo -eq $dfn_foo ] 2>/dev/null; then
-                printf '\n'
-                $dfn_sim_op && dfn_sim_op=false
-            elif [ "$dfn_foo" = '/' ]; then
-                $dfn_skip && dfn_skip=false || dfn_skip=true
-            elif $dfn_skip; then
-                continue
-            elif [ "$dfn_foo" = '. ' ]; then
-                $dfn_sim_op && dfn_sim_op=false
-            elif [ "$dfn_foo" = '.' ]; then
-                printf '\n'
-                $dfn_sim_op && dfn_sim_op=false
-            elif $dfn_marker; then
-                [ "$dfn_foo" = 'Similar:' ] && dfn_hl="$G" || dfn_hl="$R"
-                printf '%b%s%b\n' "$dfn_hl" "$dfn_foo" "$N"
-                dfn_marker=false
-                dfn_sim_op=true
-            elif $dfn_start; then
-                if [ "$dfn_foo" = 'informal' ]; then
-                    printf '(informal) '
-                else
-                    printf '%s ' "$dfn_foo"
-                    dfn_append=true
-                    dfn_start=false
-                fi
+    case "$LANGUAGE" in
+    en_*) dfn_use_new=true ;;
+    *) dfn_use_new=false ;;
+    esac
+    if $dfn_use_new; then
+        define="$(echo "$google_html" | pup 'div.VpH2eb.dZd3De.vmod text{}' | sed '/^[[:space:]]*$/d' | recode html..ISO-8859-1)"
+        if [ -n "$define" ]; then
+            printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 '/' | tail -n1)" "$N"
+            printf '%s\n' "$define" | {
+                dfn_counter=1
+                while IFS= read -r dfn_trim; do
+                    case "$dfn_trim" in
+                    noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
+                        dfn_counter=$(($dfn_counter + 1))
+                        break
+                        ;;
+                    *) dfn_counter=$(($dfn_counter + 1)) ;;
+                    esac
+                done
+                return $dfn_counter
+            }
+            dfn_trim=$(($? - 1))
+            define="$(printf '%s\n' "$define" | tail -n +${dfn_trim})"
+            printf '%s\n' "$define" | sed -n 2p | grep -q ':'
+            if [ $? -eq 0 ]; then
+                dfn_start=true
             else
-                case "$dfn_foo" in
-                "; "*)
-                    printf '%s ' "$dfn_foo"
-                    dfn_append=true
-                    ;;
-                *"noun: " | *"verb: " | *"adjective: " | *"adverb: " | *"pronoun: " | *"preposition: " | *"conjunction: " | *"determiner: " | *"exclamation: ")
-                    printf '\n%s ' "$dfn_foo"
-                    $dfn_sim_op && dfn_sim_op=false
-                    dfn_append=true
-                    ;;
-                " h ")
-                    dfn_marker=true
-                    ;;
-                noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
+                printf '%b%s%b\n' "$Y" "$(printf '%s\n' "$define" | head -n1)" "$N"
+                dfn_start=false
+            fi
+            define="$(printf '%s\n' "$define" | tail -n +2)"
+            dfn_append=false
+            dfn_marker=false
+            dfn_sim_op=false
+            dfn_skip=false
+            printf '%s\n' "$define" | while IFS= read -r dfn_foo; do
+                if $dfn_append; then
+                    printf '%b%s%b\n' "$C" "$dfn_foo" "$N"
+                    dfn_append=false
+                elif [ $dfn_foo -eq $dfn_foo ] 2>/dev/null; then
                     printf '\n'
                     $dfn_sim_op && dfn_sim_op=false
-                    dfn_start=true
-                    ;;
-                *)
-                    $dfn_sim_op && printf '\t%s\n' "$dfn_foo" \
-                        || printf '\t%b%s%b\n' "$B" "$dfn_foo" "$N"
-                    ;;
-                esac
-            fi
-        done
+                elif [ "$dfn_foo" = '/' ]; then
+                    $dfn_skip && dfn_skip=false || dfn_skip=true
+                elif $dfn_skip; then
+                    continue
+                elif [ "$dfn_foo" = '. ' ]; then
+                    $dfn_sim_op && dfn_sim_op=false
+                elif [ "$dfn_foo" = '.' ]; then
+                    printf '\n'
+                    $dfn_sim_op && dfn_sim_op=false
+                elif $dfn_marker; then
+                    [ "$dfn_foo" = 'Similar:' ] && dfn_hl="$G" || dfn_hl="$R"
+                    printf '%b%s%b\n' "$dfn_hl" "$dfn_foo" "$N"
+                    dfn_marker=false
+                    dfn_sim_op=true
+                elif $dfn_start; then
+                    if [ "$dfn_foo" = 'informal' ]; then
+                        printf '(informal) '
+                    else
+                        printf '%s ' "$dfn_foo"
+                        dfn_append=true
+                        dfn_start=false
+                    fi
+                else
+                    case "$dfn_foo" in
+                    "; "*)
+                        printf '%s ' "$dfn_foo"
+                        dfn_append=true
+                        ;;
+                    *"noun: " | *"verb: " | *"adjective: " | *"adverb: " | *"pronoun: " | *"preposition: " | *"conjunction: " | *"determiner: " | *"exclamation: ")
+                        printf '\n%s ' "$dfn_foo"
+                        $dfn_sim_op && dfn_sim_op=false
+                        dfn_append=true
+                        ;;
+                    " h ")
+                        dfn_marker=true
+                        ;;
+                    noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
+                        printf '\n'
+                        $dfn_sim_op && dfn_sim_op=false
+                        dfn_start=true
+                        ;;
+                    *)
+                        $dfn_sim_op && printf '\t%s\n' "$dfn_foo" \
+                            || printf '\t%b%s%b\n' "$B" "$dfn_foo" "$N"
+                        ;;
+                    esac
+                fi
+            done
+        fi
+    else
+        echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1
     fi
 }
 a_kno_val() { # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
