@@ -382,8 +382,6 @@ fi
 
 a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
     define="$(echo "$google_html" | pup 'div.VpH2eb.dZd3De.vmod text{}' | sed '/^[[:space:]]*$/d' | recode html..ISO-8859-1)"
-    # echo "$define"
-    # exit
     if [ -n "$define" ]; then
         printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 '/' | tail -n1)" "$N"
         printf '%s\n' "$define" | {
