@@ -382,6 +382,8 @@ fi
 
 a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
     define="$(echo "$google_html" | pup 'div.VpH2eb.dZd3De.vmod text{}' | sed '/^[[:space:]]*$/d' | recode html..ISO-8859-1)"
+    # echo "$define"
+    # exit
     if [ -n "$define" ]; then
         printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 '/' | tail -n1)" "$N"
         printf '%s\n' "$define" | {
@@ -419,6 +421,9 @@ a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
                 $dfn_sim_op && dfn_sim_op=false
             elif [ "$dfn_foo" = '. ' ]; then
                 $dfn_sim_op && dfn_sim_op=false
+            elif [ "$dfn_foo" = '.' ]; then
+                printf '\n'
+                $dfn_sim_op && dfn_sim_op=false
             elif $dfn_marker; then
                 [ "$dfn_foo" = 'Similar:' ] && dfn_hl="$G" || dfn_hl="$R"
                 printf '%b%s%b\n' "$dfn_hl" "$dfn_foo" "$N"
@@ -436,6 +441,11 @@ a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
                 case "$dfn_foo" in
                 "; "*)
                     printf '%s ' "$dfn_foo"
+                    dfn_append=true
+                    ;;
+                *"noun: " | *"verb: " | *"adjective: " | *"adverb: " | *"pronoun: " | *"preposition: " | *"conjunction: " | *"determiner: " | *"exclamation: ")
+                    printf '\n%s ' "$dfn_foo"
+                    $dfn_sim_op && dfn_sim_op=false
                     dfn_append=true
                     ;;
                 " h ")
