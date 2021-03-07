@@ -1,29 +1,42 @@
 #!/usr/bin/env sh
+#
+# tuxi is a cli assistant created by Bugswriter
+# to get answers of your questions instantly.
+# tuxi is currently developed by many collaborators
+# you can get more information on our repo :)
+#
+# https://github.com/Bugswriter/tuxi © GPL-3.0 License  
 
+#
 ###############################
 #####      Constants      #####
 ###############################
+#
 
-# setting this overrides the system language variable
-# this can also be set in your shell environment with TUXI_LANG=
-# the -l commandline flag overrides everything
+# setting this overrides getting the system language variable
+#   the -l commandline flag overrides everything
+#   this can also be set in your shell environment with
+#   TUXI_LANG=
 [ -n "$TUXI_LANG" ] && LANGUAGE="$TUXI_LANG" || LANGUAGE=""
 
 # if you find more than one answer is being printed (and you're not using -a)
-# increase this number by a little (you want it to be as low as possible)
-# this can also be set in your shell environment with TUXI_DELAY=
+#   increase this number by a little (you want it to be as low as possible)
+#   this can also be set in your shell environment with
+#   TUXI_DELAY=
 [ -n "$TUXI_DELAY" ] && MICRO_DELAY="$TUXI_DELAY" || MICRO_DELAY=250
 
 VERSION="dev 2.0"
 MAIN_PID="$$"
 [ ! "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
 
+#
 #########################################
 #####      macOS compatibility      #####
 #########################################
+#
 
 # credit to @Zhann in #149
-
+#   to use it, you will need to have GNU core utils installed
 if [ "$OSTYPE" = 'darwin'* ]; then
     sed() {
         gsed "$@"
@@ -33,20 +46,24 @@ if [ "$OSTYPE" = 'darwin'* ]; then
     }
 fi
 
+#
 ######################################
 #####      Snippet priority      #####
 ######################################
+#
 
-# this variable determines the order the tests are started, they are processed in parallel
-# even though these are started in order, by default, the first answer to resolve is the one printed
-# the order here might only make a very small difference
+# priority importance
+#   this variable determines the order the tests are started, they are processed in parallel
+#   even though these are started in order, by default, the first answer to resolve is the one printed
+#   the order here might only make a very small difference
 
-# the first word should be the name of the a_function() followed by a space
-# you can disable tests by commenting out the line(s)
-# IMPORTANT! - richcast must remain top and active
-# it's slower to process than the other scrapes that get a cast list so it needs to start first
-# also I've put a small delay between starting that and the other scrapes
-# this is a temporary hack until I get a chance to look at speeding up the snippet
+# priority order
+#   the first word should be the name of the a_function() followed by a space
+#   you can disable tests by commenting out the line(s)
+#   IMPORTANT! - richcast must remain top and active
+#   it's slower to process than the other scrapes that get a cast list so it needs to start first
+#   also I've put a small delay between starting that and the other scrapes
+#   this is a temporary hack until I get a chance to look at speeding up the snippet
 priority="
 richcast        # Rich Rich Answers ( eg: social network cast )
 define          # Define ( eg: define Aggrandize )
@@ -69,9 +86,11 @@ lyrics_us       # Lyrics for US users, above does not work for US
 kno_right       # Knowledge Graph - right ( eg: the office )
 "
 
+#
 ##############################
 #####      Defaults      #####
 ##############################
+#
 
 # system language fallback
 LANG=$(echo $LANG | sed 's/\..*//')
@@ -97,9 +116,11 @@ Y="\033[1;33m" # Yellow
 M="\033[1;35m" # Magenta
 C="\033[1;36m" # Cyan
 
+#
 ##################################
 #####      Help message      #####
 ##################################
+#
 
 help_text() {
     printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n" "$G" "$N" "$Y" "$N" "$M" "$N"
@@ -145,9 +166,11 @@ help_text() {
     printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n" "$G" "$N" "$C" "$N"
 }
 
+#
 #############################
 #####      Getopts      #####
 #############################
+#
 
 # -r : raw output
 # -v : version info
@@ -206,20 +229,23 @@ while getopts "rvhqabtldscp" OPT; do
         exit 1
         ;;
     esac
-done
+  done
+
 # shifts to query
 shift $((OPTIND - 1))
 $pick_search && $best_match && echo "sorry but -b and -t mutually exclusive" && exit 1
 
-#//TODO this may need reworking later to use read instead and only capture the first line
-# question | tuxi [-flags] --> answer :)
+# TODO this may need reworking later to use read instead and only capture the first line
+#   question | tuxi [-flags] --> answer :)
 if ! $no_pipe; then
     [ -p /dev/stdin ] && query=$(cat)
 fi
 
+#
 #######################################
 #####      Output formatting      #####
 #######################################
+#
 
 # search result output format (changes if raw=true)
 output() {
@@ -249,9 +275,11 @@ error_msg() {
     printf "%b%s%b\n" "$R" "$*" "$N"
 }
 
+#
 ######################################
 #####      Dependency check      #####
 ######################################
+#
 
 # Checks if dependencies are installed.
 check_deps() {
@@ -264,18 +292,22 @@ check_deps() {
     done
 }
 
-# pup : https://github.com/ericchiang/pup
-# recode : https://github.com/rrthomas/recode
-# jq : https://github.com/stedolan/jq
+# Dependencies
+#   pup : https://github.com/ericchiang/pup
+#   recode : https://github.com/rrthomas/recode
+#   jq : https://github.com/stedolan/jq
 check_deps "pup" "recode" "jq"
 
+#
 ########################################
 #####      Query manipulation      #####
 ########################################
+#
 
-# If query is empty and -c is passed: use query from cached result
-# If query is empty (no -c): exit
-# If quiet=false: Prints greeting and usage
+# Conditions to Query
+#   If query is empty and -c is passed: use query from cached result
+#   If query is empty (no -c): exit
+#   If quiet=false: Prints greeting and usage
 if [ -z "$1" ] && [ -z "$query" ]; then
     if ! $use_cache; then
         if ! $quiet; then
@@ -292,8 +324,8 @@ fi
 [ -z "$query" ] && query="$*"
 
 # language select: the -l flag
-# language specified on the command line overwrites both
-# the variable set at the top of this script and the system language
+#   language specified on the command line overwrites both
+#   the variable set at the top of this script and the system language
 if $pick_lang; then
     query="$(printf '%b\n' "$query" | sed 's/ /\\n/g')"
     LANGUAGE="$(printf '%b\n' "$query" | grep 'LANG_' | sed 's/LANG_//g')"
@@ -301,8 +333,8 @@ if $pick_lang; then
 fi
 
 # Custom answers: the -t flag
-# clears the list of snippets to check (saving the original list to print out if a mistake is made)
-# then loops through the query looking for tuxi_ and updates the priority variable to use only those snippets
+#   clears the list of snippets to check (saving the original list to print out if a mistake is made)
+#   then loops through the query looking for tuxi_ and updates the priority variable to use only those snippets
 if $pick_search; then
     list_priority="$priority"
     snippet_check=$(printf '%b\n' "$list_priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
@@ -367,20 +399,27 @@ if $best_match; then
     [ $j -eq 0 ] && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
 fi
 
+#
 ######################################
 #####      Answer functions      #####
 ######################################
+#
 
-## NOTE: the order of these functions doesn't matter, priority is determined by the variable
-
-## FUNCTION TEMPLATE
+#
+# FUNCTION TEMPLATE
+#
 # NewAnswerName should be the word used in $priority
 
 # a_NewAnswerName() { # Answer description (and example)
 #     echo "$google_html" | pup ... [ SCRAPE METHOD HERE ] ...
 # }
 
-a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
+#
+# NOTE: the order of these functions doesn't matter, priority is determined by the variable
+#
+
+# Define (eg: define Aggrandize) //original snippet credit @igaurab
+a_define() { 
     case "$LANGUAGE" in
     en_*) dfn_use_new=true ;;
     *) dfn_use_new=false ;;
@@ -477,32 +516,48 @@ a_define() { # Define (eg: define Aggrandize) //original snippet credit @igaurab
     else
         echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1
     fi
-}
-a_kno_val() { # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
-    # "what is the " seems to be required for some things //credit @sudocanttype
+  }
+
+# Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
+#   "what is the " seems to be required for some things //credit @sudocanttype
+a_kno_val() {
     echo "$google_html" | pup 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' '
 }
-a_math() { # Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
+
+# Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
+a_math() { 
     echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1
 }
-a_kno_top() { # Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
+
+# Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
+a_kno_top() {
     echo "$google_html" | pup 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | sed '1s/.*/* &/;2,$s/.*/*&/;$d' | recode html..ISO-8859-1
 }
-a_quotes() { # Quotes ( eg: mahatma gandhi quotes ) //credit @PoseidonCoder
+
+# Quotes ( eg: mahatma gandhi quotes ) //credit @PoseidonCoder
+a_quotes() {
     echo "$google_html" | pup 'div.Qynugf text{}' | recode html..ISO-8859-1
 }
-a_basic() { # Basic Answers ( eg: tuxi christmas day ) // @Bugswriter
+
+# Basic Answers ( eg: tuxi christmas day ) // @Bugswriter
+a_basic() {
     echo "$google_html" | pup 'div.zCubwf text{}' | tr -d '\n' | recode html..ISO-8859-1
 }
-a_richcast() { # Rich Rich Answers ( eg: social network cast ) //credit @BeyondMagic
+
+# Rich Rich Answers ( eg: social network cast ) //credit @BeyondMagic
+a_richcast() {
     echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recode html..ISO-8859-1
 }
-a_lists() { # Simple lists (eg Need for Speed Heat cars list) //credit @BeyondMagic
+
+# Simple lists (eg Need for Speed Heat cars list) //credit @BeyondMagic
+a_lists() {
     echo "$google_html" | pup 'li.TrT0Xe text{}' | sed -e 's/^ //' -e 's/^/* /' -e 's/\.$//' | recode html..ISO-8859-1
 }
-a_rich() { # Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun + @Bugswriter
-    # I've removed div.mR2gOd from this scrape as it seems to only be providing redundant information
-    # if it is needed for some information not provided elsewhere, I'll make it a function
+
+# Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun + @Bugswriter
+#   I've removed div.mR2gOd from this scrape as it seems to only be providing redundant information
+#   if it is needed for some information not provided elsewhere, I'll make it a function
+a_rich() {
     rich=$(echo "$google_html" | pup 'div.ujudUb, div.XcVN5d text{}' | sed 's/^ //' | recode html..ISO-8859-1)
     if [ $(printf '%b\n' "$rich" | wc -w) -gt 1 ]; then
         if [ "$(printf '%b\n' "$rich" | head -n1)" = 'View all' ]; then
@@ -515,16 +570,24 @@ a_rich() { # Rich Answers ( eg: elevation of mount everest ) //credit @d-shaun +
         unset rich
     fi
 }
-a_feat() { # Featured Snippets ( eg: who is garfield ) //credit @Bugswriter
+
+# Featured Snippets ( eg: who is garfield ) //credit @Bugswriter
+a_feat() {
     echo "$google_html" | pup 'span.hgKElc text{}' | tr -d '\n' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
-a_lyrics_int() { # Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
+
+# Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
+a_lyrics_int() { 
     echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1
 }
-a_lyrics_us() { # Lyrics for US users, above does not work for US //credit @sudocanttype
+
+# Lyrics for US users, above does not work for US //credit @sudocanttype
+a_lyrics_us() { 
     echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1
 }
-a_weather() { # Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
+
+# Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
+a_weather() { 
     weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
     if [ -n "$weather" ]; then
         if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then
@@ -533,19 +596,29 @@ a_weather() { # Weather ( eg: weather new york) //credit @jhagas + @Genghius + @
         printf '%b\n' "$weather" | sed '4,5d;2s/.*/&ºC/;2,${N;s/\n/\t/;};3s/.*/&ºF/;$s/\t/\t\t/' | recode html..ISO-8859-1
     fi
 }
-a_unit() { # Units Conversion ( eg: 1m into 1 cm ) //credit @karthink
+
+# Units Conversion ( eg: 1m into 1 cm ) //credit @karthink
+a_unit() { 
     echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1
 }
-a_currency() { # Currency Conversion ( eg: 1 USD in rupee ) //credit @karthink
+
+# Currency Conversion ( eg: 1 USD in rupee ) //credit @karthink
+a_currency() { 
     echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1
 }
-a_trans() { # Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
+
+# Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
+a_trans() { 
     echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1
 }
-a_kno_right() { # Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
+
+# Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
+a_kno_right() { 
     echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
-a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
+
+# Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
+a_sport_fixture() { 
     sport_fixture="$(echo "$google_html" | pup 'span[jscontroller="f9W5M"] text{}' | recode html..ISO-8859-1)"
     if [ -n "$sport_fixture" ]; then
         case "$sport_fixture" in
@@ -638,6 +711,7 @@ a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea 
         echo "$google_html" | pup 'span.imso_mh__lr-dt-ds, span[jscontroller="f9W5M"], div.liveresults-sports-immersive__team-name-width span, div.imso_mh__l-tm-sc, div.imso_mh__r-tm-sc text{}' | recode html..ISO-8859-1
     fi
 }
+
 a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
@@ -650,12 +724,13 @@ a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushanth
 found_answer_signal() {
     answers_found=$(($answers_found + 1))
 }
+
 trap found_answer_signal USR1
 output_printed_signal() {
     printed=$(($printed + 1))
 }
-trap output_printed_signal USR2
 
+trap output_printed_signal USR2
 short_delay() {
     [ ! $1 ] && runs=1 || runs=$1
     foo=0
@@ -740,9 +815,11 @@ test_answers() {
     fi
 }
 
+#
 ######################################
 #####      Getting the HTML      #####
 ######################################
+#
 
 # fetch response from Google via cURL (-G: get, -s: silent) unless -c flag is passed
 # in which case we use the most recent cached html from $XDG_CACHE_HOME/tuxi
@@ -761,9 +838,11 @@ $save_html && dump_html
 # start timer for debug_info after receiving results from google
 $debug && timer_start=$(date +'%s %N')
 
+#
 ################################
 #####      Processing      #####
 ################################
+#
 
 # launches all the snippet functions and saves the pids for later
 pids=""
@@ -841,6 +920,7 @@ if ! $all; then
     done
 fi
 $all && wait
+
 # another small delay as wait sometimes doesn't seem to wait quite long enough
 # for the last answer to be printed before exiting.
 short_delay 2

@@ -24,12 +24,14 @@ to process and return results, and `recode` to unescape html.
 * [recode](https://github.com/rrthomas/recode) - Charset converter tool and library.
 * [jq](https://github.com/stedolan/jq) - Command-line JSON processor.
 
+If you use macOS, you'll need to have GNU Core utils installed.
+
 ## Installation
 
 ### cURL
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
-```sh
+```
 $ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
 $ sudo chmod +x /usr/local/bin/tuxi
 ```
@@ -37,7 +39,7 @@ $ sudo chmod +x /usr/local/bin/tuxi
 > To uninstall, simply remove `tuxi` from your **$PATH**, for example `sudo rm -f /usr/local/bin/tuxi`.
 
 ### Make
-```sh
+```
 $ git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
 $ sudo make install
 ```
@@ -46,13 +48,13 @@ $ sudo make install
 
 ### Arch Linux AUR
 Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
-```sh
+```
 $ yay -S tuxi-git
 ```
 
 ## Usage
 
-```sh
+```
 $ tuxi "Is Linux better than Windows?"
 ---
 Linux has a reputation for being fast and smooth while
@@ -69,7 +71,7 @@ operating system while windows are slow on older hardware.
 
 Use `-h` to display the help message.
 
-```sh
+```
 $ tuxi -h
 Usage: tuxi [options] query
 
@@ -90,7 +92,7 @@ Line 7 in `tuxi` contains the language variable which can be changed according t
 However, tuxi will use the system default langauge if none is set.
 
 **Gives corrections**
-```sh
+```
 $ tuxi linux torvalds birthday
 > Did you mean linus?
 ---
@@ -99,7 +101,7 @@ $ tuxi linux torvalds birthday
 ```
 
 **When you know it's actually linux torvalds** <kbd>-q option</kbd>
-```sh
+```
 $ tuxi -q linux torvalds birthday
 ---
 28 December 1969
@@ -108,14 +110,14 @@ $ tuxi -q linux torvalds birthday
 
 **Raw formatting for output (no colors)** <kbd>-r option</kbd>
 > Useful for e.g scripting `notify-send`.
-```sh
+```
 $ tuxi -r linux torvalds birthday
 > Did you mean linus?
 28 December 1969
 ```
 
 **Math operations**
-```sh
+```
 $ tuxi "log(30)"
 ---
 1.4771212547196624
@@ -123,7 +125,7 @@ $ tuxi "log(30)"
 ```
 
 **Translate**
-```sh
+```
 $ tuxi "I love you in japanese"
 ---
 わたしは、あなたを愛しています
