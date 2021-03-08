@@ -18,7 +18,6 @@
 # currency
 # trans
 # sport_fixture
-# rich
 # kno_right
 
 did_you_mean Linux Tarvalds
@@ -30,7 +29,7 @@ math 72^43/12(44+1)-3124
 math (40/3)+4*6
 math 45/sqrt(4)*3
 
-rich/basic/kno_val christmas day
+kno_val christmas day
 basic/kno_val summer solstice
 basic/kno_val shortest day of the year
 
@@ -39,23 +38,23 @@ kno_top/kno_right legends of runeterra
 kno_top/kno_right reddit
 kno_top/kno_right twitter
 
-rich/kno_val elevation of mt everest
-rich/kno_val what is elevation of mt rainier
-rich/kno_val how big is the grand canyon
-rich/kno_val how long is the yellow river?
+kno_val elevation of mt everest
+kno_val what is elevation of mt rainier
+kno_val how big is the grand canyon
+kno_val how long is the yellow river?
 
 feat the meaning of life the universe and everything else
 feat shotgun doom eternal
 feat what is tenacity in league of legends
 feat rusty cage bio
 
-lyrics/rich the motans inainte sa ne fi nascut lyrics
-lyrics/rich lyrics of hello adele
-lyrics/rich Toosie slide lyrics
-lyrics/rich Sigues con el lyrics
-lyrics/rich my truck breland lyrics
-lyrics/rich maniac conan gray lyrics
-lyrics/rich dealer RMR lyrics
+lyrics the motans inainte sa ne fi nascut lyrics
+lyrics lyrics of hello adele
+lyrics Toosie slide lyrics
+lyrics Sigues con el lyrics
+lyrics my truck breland lyrics
+lyrics maniac conan gray lyrics
+lyrics dealer RMR lyrics
 
 unit 100 cm to m
 unit 100 c to f
@@ -95,9 +94,9 @@ sport_fixture results of last chelsea match
 quotes linus torvalds quotes
 quotes quotes from gandhi
 
-kno_val/rich density of silver
-kno_val/rich density of hydrogen
-kno_val/rich what is the triple point of oxygen
+kno_val density of silver
+kno_val density of hydrogen
+kno_val what is the triple point of oxygen
 
 richcast cast of event horizon
 richcast cast of equalibrium
