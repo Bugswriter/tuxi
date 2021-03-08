@@ -478,15 +478,16 @@ a_define() {
                     dfn_marker=false
                     dfn_sim_op=true
                 elif $dfn_start; then
-                    if [ "$dfn_foo" = 'informal' ]; then
-                        printf '(informal) '
-                    elif [ "$dfn_foo" = 'British' ]; then
-                        printf '(British) '
-                    else
+                    case "$dfn_foo" in
+                    informal) printf '(informal) ' ;;
+                    British) printf '(British) ' ;;
+                    rare) printf '(rare) ' ;;
+                    *)
                         printf '%s ' "$dfn_foo"
                         dfn_append=true
                         dfn_start=false
-                    fi
+                        ;;
+                    esac
                 else
                     case "$dfn_foo" in
                     "; "*)
