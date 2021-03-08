@@ -435,7 +435,6 @@ a_define() {
                 while IFS= read -r dfn_trim; do
                     case "$dfn_trim" in
                     noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
-                        dfn_counter=$(($dfn_counter + 1))
                         break
                         ;;
                     *) dfn_counter=$(($dfn_counter + 1)) ;;
@@ -443,7 +442,7 @@ a_define() {
                 done
                 return $dfn_counter
             }
-            dfn_trim=$(($? - 1))
+            dfn_trim=$?
             define="$(printf '%s\n' "$define" | tail -n +${dfn_trim})"
             printf '%s\n' "$define" | sed -n 2p | grep -q ':'
             if [ $? -eq 0 ]; then
