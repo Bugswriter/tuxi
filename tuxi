@@ -1,11 +1,11 @@
 #!/usr/bin/env sh
 #
 # tuxi is a cli assistant created by Bugswriter
-# to get answers of your questions instantly.
+# to get answers for your questions instantly.
 # tuxi is currently developed by many collaborators
 # you can get more information on our repo :)
 #
-# https://github.com/Bugswriter/tuxi © GPL-3.0 License  
+# https://github.com/Bugswriter/tuxi © GPL-3.0 License
 
 #
 ###############################
@@ -37,14 +37,16 @@ MAIN_PID="$$"
 
 # credit to @Zhann in #149
 #   to use it, you will need to have GNU core utils installed
-if [ "$OSTYPE" = 'darwin'* ]; then
+case "$OSTYPE" in
+darwin*)
     sed() {
         gsed "$@"
     }
     paste() {
         gpaste "$@"
     }
-fi
+    ;;
+esac
 
 #
 ######################################
@@ -229,7 +231,7 @@ while getopts "rvhqabtldscp" OPT; do
         exit 1
         ;;
     esac
-  done
+done
 
 # shifts to query
 shift $((OPTIND - 1))
@@ -419,7 +421,7 @@ fi
 #
 
 # Define (eg: define Aggrandize) //original snippet credit @igaurab
-a_define() { 
+a_define() {
     case "$LANGUAGE" in
     en_*) dfn_use_new=true ;;
     *) dfn_use_new=false ;;
@@ -516,7 +518,7 @@ a_define() {
     else
         echo "$google_html" | pup 'div.DgZBFd, div.vdBwhd, div[data-dobid="dfn"] text{}' | sed -e 's/^/* /' -e '1 s/^* //' | recode html..ISO-8859-1
     fi
-  }
+}
 
 # Chem facts ( eg: density of silver, density of hydrogen, what is the triple point of oxygen)
 #   "what is the " seems to be required for some things //credit @sudocanttype
@@ -525,7 +527,7 @@ a_kno_val() {
 }
 
 # Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
-a_math() { 
+a_math() {
     echo "$google_html" | pup 'span.qv3Wpe text{}' | tr -d '\n ' | recode html..ISO-8859-1
 }
 
@@ -577,17 +579,17 @@ a_feat() {
 }
 
 # Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
-a_lyrics_int() { 
+a_lyrics_int() {
     echo "$google_html" | pup 'div.bbVIQb text{}' | recode html..ISO-8859-1
 }
 
 # Lyrics for US users, above does not work for US //credit @sudocanttype
-a_lyrics_us() { 
+a_lyrics_us() {
     echo "$google_html" | pup 'span[jsname="YS01Ge"] text{}' | recode html..ISO-8859-1
 }
 
 # Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
-a_weather() { 
+a_weather() {
     weather=$(echo "$google_html" | pup 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
     if [ -n "$weather" ]; then
         if [ $(echo "$weather" | sed -n 2p) -gt $(echo "$weather" | sed -n 3p) ]; then
@@ -598,27 +600,27 @@ a_weather() {
 }
 
 # Units Conversion ( eg: 1m into 1 cm ) //credit @karthink
-a_unit() { 
+a_unit() {
     echo "$google_html" | pup '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | recode html..ISO-8859-1
 }
 
 # Currency Conversion ( eg: 1 USD in rupee ) //credit @karthink
-a_currency() { 
+a_currency() {
     echo "$google_html" | pup '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | recode html..ISO-8859-1
 }
 
 # Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
-a_trans() { 
+a_trans() {
     echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1
 }
 
 # Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
-a_kno_right() { 
+a_kno_right() {
     echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10
 }
 
 # Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
-a_sport_fixture() { 
+a_sport_fixture() {
     sport_fixture="$(echo "$google_html" | pup 'span[jscontroller="f9W5M"] text{}' | recode html..ISO-8859-1)"
     if [ -n "$sport_fixture" ]; then
         case "$sport_fixture" in
@@ -713,7 +715,7 @@ a_sport_fixture() {
 }
 
 # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
-a_pronounce() { 
+a_pronounce() {
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
 
