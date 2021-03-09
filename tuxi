@@ -934,7 +934,7 @@ while [ $answers_found -eq 0 ]; do
             [ $? -eq 0 ] && break 2
         done
         error_msg "No Result!"
-        top_links 1
+        $quiet || top_links 1
         $debug && debug_info
         exit 1
     done
