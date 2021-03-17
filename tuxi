@@ -63,6 +63,7 @@ esac
 #   the first word should be the name of the a_function() followed by a space
 #   you can disable tests by commenting out the line(s)
 priority="
+tracklist       # Album track lists ( eg: noisia outer edges tracklist )
 richcast        # Rich Rich Answers ( eg: social network cast )
 define          # Define ( eg: define Aggrandize )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
@@ -413,7 +414,6 @@ fi
 # the following divs have been removed due to seemingly being redundant
 # Im leaving them here just in case they're needed again in future
 # div.ujudUb (seems to be another lyrics scrape)
-# div.mR2gOd (I think this is a general info scrape, what it gets is currently being presented better by other snippets)
 
 # FUNCTION TEMPLATE
 
@@ -434,35 +434,39 @@ a_define() {
     if $dfn_use_new; then
         define="$(echo "$google_html" | pup 'div.VpH2eb.dZd3De.vmod text{}' | sed '/^[[:space:]]*$/d' | recode html..ISO-8859-1)"
         if [ -n "$define" ]; then
-            printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 '/' | tail -n1)" "$N"
-            printf '%s\n' "$define" | {
-                dfn_counter=1
-                while IFS= read -r dfn_trim; do
-                    case "$dfn_trim" in
-                    noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
-                        break
-                        ;;
-                    *) dfn_counter=$(($dfn_counter + 1)) ;;
-                    esac
-                done
-                return $dfn_counter
-            }
-            dfn_trim=$?
-            define="$(printf '%s\n' "$define" | tail -n +${dfn_trim})"
-            printf '%s\n' "$define" | sed -n 2p | grep -q ':'
-            if [ $? -eq 0 ]; then
-                dfn_start=true
-            else
-                printf '%b%s%b\n' "$Y" "$(printf '%s\n' "$define" | head -n1)" "$N"
-                dfn_start=false
-            fi
-            define="$(printf '%s\n' "$define" | tail -n +2)"
+            printf 'pronounced: %b%s%b\n\n' "$C" "$(printf '%s\n' "$define" | grep -m1 -A1 -w '/' | tail -n1)" "$N"
+            dfn_top=true
+            dfn_end_top=false
+            dfn_start=false
             dfn_append=false
             dfn_marker=false
             dfn_sim_op=false
             dfn_skip=false
             printf '%s\n' "$define" | while IFS= read -r dfn_foo; do
-                if $dfn_append; then
+                if $dfn_top; then
+                    if $dfn_end_top; then
+                        case "$dfn_foo" in
+                        *"noun: " | *"verb: " | *"adjective: " | *"adverb: " | *"pronoun: " | *"preposition: " | *"conjunction: " | *"determiner: " | *"exclamation: ")
+                            printf '%s ' "$dfn_foo"
+                            dfn_append=true
+                            ;;
+                        *"noun:" | *"verb:" | *"adjective:" | *"adverb:" | *"pronoun:" | *"preposition:" | *"conjunction:" | *"determiner:" | *"exclamation:")
+                            printf '%s ' "$dfn_foo"
+                            dfn_append=true
+                            ;;
+                        *) printf '%b%s%b\n\t%b%s%b\n' "$Y" "$dfn_backup" "$N" "$B" "$dfn_foo" "$N" ;;
+                        esac
+                        dfn_top=false
+                    else
+                        case "$dfn_foo" in
+                        noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
+                            dfn_backup="$dfn_foo"
+                            dfn_end_top=true
+                            ;;
+                        *) continue ;;
+                        esac
+                    fi
+                elif $dfn_append; then
                     printf '%b%s%b\n' "$C" "$dfn_foo" "$N"
                     dfn_append=false
                 elif [ $dfn_foo -eq $dfn_foo ] 2>/dev/null; then
@@ -724,6 +728,35 @@ a_sport_fixture() {
 # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
 a_pronounce() {
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
+}
+# Album track lists ( eg: noisia outer edges tracklist )
+a_tracklist() {
+    tracklist="$(echo "$google_html" | pup 'div.mR2gOd json{}')"
+    if [ -n "$tracklist" ]; then
+        tracklist_songs="$(printf '%s\n' "$tracklist" | jq -r '.[0].children[0].children[].children[0].children[].children[0].children[0].children[1].children[1].children[0].children[0].text' \
+            | sed '/^null$/d' | recode html..ISO-8859-1)"
+        [ -z "$tracklist_songs" ] && tracklist_songs="$(printf '%s\n' "$tracklist" \
+            | jq -r '.[0].children[0].children[].children[0].children[].children[0].children[0].children[1].children[0].children[0].children[0].text' \
+            | sed '/^null$/d' | recode html..ISO-8859-1)"
+        [ -z "$tracklist_songs" ] && exit
+        tracklist_links="$(printf '%s\n' "$tracklist" | jq -r '.[1].children[0].children[0].children[].href' | sed '/^null$/d')"
+        printf '%s\n' "$tracklist_links" | grep -q 'youtube.com' || unset tracklist_links
+        [ -n "$tracklist_links" ] && tracklist_use_links=true || tracklist_use_links=false
+        tracklist_title="$(echo "$google_html" | pup 'div.SPZz6b text{}' | recode html..ISO-8859-1)"
+        [ -n "$tracklist_title" ] && printf '%b%s%b (%s)\n' "$C" \
+            "$(printf '%s\n' "$tracklist_title" | head -n1)" "$N" \
+            "$(printf '%s\n' "$tracklist_title" | tail -n1)"
+        tracklist_i=1
+        printf '%s\n' "$tracklist_songs" | while IFS= read -r tracklist_foo; do
+            printf '%s%b)%b\t%b%s%b\n' "$tracklist_i" "$Y" "$N" "$B" "$tracklist_foo" "$N"
+            tracklist_i=$(($tracklist_i + 1))
+        done
+        if $tracklist_use_links; then
+            $raw || printf '%b---%b\n' "$G" "$N"
+            printf '%bassociated video links:%b\n' "$R" "$N"
+            printf '%s\n' "$tracklist_links"
+        fi
+    fi
 }
 
 
