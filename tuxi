@@ -870,8 +870,8 @@ test_answers() {
 # this finds and prints out the top links for your query
 top_links() {
     url_list="$(echo "$google_html" | pup 'div.tF2Cxc json{}' \
-        | jq -r '.[].children[0].children[0].children[1].children[0].text, .[].children[0].children[0].href' \
-        | recode html..ISO-8859-1)"
+        | jq -r '.[].children[0].children[0].children[1].text, .[].children[0].children[0].children[1].children[0].text, .[].children[0].children[0].href' \
+        | sed '/^null$/d' | recode html..ISO-8859-1)"
     if [ -n "$url_list" ]; then
         if [ -n "$1" ]; then
             info_msg "Sorry about that! Perhaps one of these links may be of use?"
