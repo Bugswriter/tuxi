@@ -20,6 +20,7 @@
 # sport_fixture
 # rich
 # kno_right
+# recomedia
 
 did_you_mean Linux Tarvalds
 did_you_mean waht is the office
@@ -104,3 +105,7 @@ richcast cast of event horizon
 richcast cast of equalibrium
 richcast GoT stars
 richcast avengers actors
+
+recomedia anime film suggestions
+recomedia podcast suggestions
+recomedia family movies
