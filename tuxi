@@ -63,6 +63,7 @@ quotes          # Quotes ( eg: mahatma gandhi quotes )
 lyrics_int      # Lyrics ( eg: gecgecgec lyrics )
 lyrics_us       # Lyrics for US users, above does not work for US
 rich            # Rich Answers ( eg: elevation of mount everest )
+recomedia       # Media Recommendations ( eg: anime film suggestions)
 "
 
 ##############################
@@ -430,6 +431,9 @@ a_sport_fixture() { # Shows last or next fixture of a sports team ( eg. Chelsea 
 }
 a_pronounce() { # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
     echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
+}
+a_recomedia() { # Recommended Media ( eg: anime film suggestions ) //credit @Artemis21
+    echo "$google_html" | pup 'div.wDYxhc.NFQFxe div.fl.ellip.oBrLN.S1gFKb.rOVRL' text{} | sed 's/^/* /' | recode html..ISO-8859-1
 }
 
 ###############################
