@@ -76,7 +76,7 @@ all=false
 location=false; loc=""
 
 # search result output format (changes if raw=true)
-output() { 
+output() {
     printf "%b---%b\n%s\n%b---%b\n"  "$G" "$N" "$*" "$G" "$N"
 }
 
@@ -121,10 +121,10 @@ while getopts "vhrqdal" OPT; do
         help_text
         exit 0
         ;;
-    r)  
+    r)
         raw=true
         ;;
-    q)  
+    q)
         quiet=true
         ;;
     d)
@@ -154,7 +154,7 @@ shift $((OPTIND-1))
 if $raw; then
     N=""; R=""; G=""; Y=""; M=""; C="";
 
-    output () { 
+    output () {
         printf "%s\n" "$*"
     }
 fi
@@ -168,11 +168,11 @@ fi
 if [ -z "$1" ]; then
     if [ $quiet = "false" ]; then
         printf "Hi, I'm Tuxi. Ask me anything!\n"
-        help_text | head -n 1 
+        help_text | head -n 1
     fi
     exit 0
 fi
-    
+
 # Else, all arguments are saved in $query
 query="$*"
 
@@ -185,7 +185,7 @@ user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Fi
 google_url="https://www.google.com/search?hl=en_US"
 
 
-# Response from Google via cURL (-G: get, -s: silent) 
+# Response from Google via cURL (-G: get, -s: silent)
 google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
 # Debug only: Outputs HTML to $HOME/.cache/tuxi/ and exits
@@ -217,6 +217,7 @@ fi
 # Weather
 # Translate
 # Rich list
+# Recommended Media
 # Knowledge Graph - top
 # Knowledge Graph - right
 # Units Convertion
@@ -260,7 +261,7 @@ snipcall "$feat"
 trans="$(echo "$google_html" | pup 'pre.XcVN5d span:first-child json{}' | jq -r '.[1] | .text' | sed 's/null//g' | recd)"
 snipcall "$trans"
 
- 
+
 # Rich Rich Answers ( eg: social network cast )
 richcast=$(echo "$google_html" | pup 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | recd)
 snipcall "$richcast"
@@ -291,6 +292,8 @@ weather="$(echo "$google_html" | pup 'div.TylWce text{}' | sed -e '1 s/$/ ºC/' 
 snipcall "$weather"
 
 
+# Recommended Media ( eg: anime film suggestions )
+snipcall "pup 'div.wDYxhc.NFQFxe div.fl.ellip.oBrLN.S1gFKb.rOVRL' text{} | sed 's/^/* /' | recode html..ISO-8859-1"
 
 
 # Knowledge Graph - top (list) ( eg: the office cast )
