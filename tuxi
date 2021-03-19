@@ -369,7 +369,7 @@ fi
 # our patented (honest!) "smrt search" algorithm: the -b flag
 # jokes aside, this is going to need some iterating on, I'll turn it into a tidy loop later
 if $best_match; then
-    j=7
+    j=8
     use_quotes=false
     use_lyrics=false
     use_weather=false
@@ -378,6 +378,7 @@ if $best_match; then
     use_define=false
     use_list=false
     use_pronounce=false
+    use_tracklist=false
 
     query_check="$(printf '%b\n' "$query" | sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
     first_word=$(printf '%b\n' "$query_check" | head -n1)
@@ -392,6 +393,7 @@ if $best_match; then
         define | definition) use_define=true ;;
         list) use_list=true ;;
         pronounce | pronunciation) use_pronounce=true ;;
+        tracklist | songs) use_tracklist=true ;;
         esac
     done
 
@@ -401,6 +403,7 @@ if $best_match; then
     $use_cast && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'lists' -e 'kno_')" || j=$(($j - 1))
     $use_define && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'define')" || j=$(($j - 1))
     $use_pronounce && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'pronounce')" || j=$(($j - 1))
+    $use_tracklist && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep 'tracklist')" || j=$(($j - 1))
     $use_list && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'lists' -e 'kno_')" || j=$(($j - 1))
     [ $j -eq 0 ] && priority="$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | grep -v 'quotes' | grep -v 'lyrics' | grep -v 'weather')"
 fi
