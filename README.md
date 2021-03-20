@@ -70,17 +70,38 @@ operating system while windows are slow on older hardware.
 Use `-h` to display the help message.
 
 ```sh
-$ tuxi -h
 Usage: tuxi [options] query
+OR: query source | tuxi [options]
 
 Options:
   -h                    Show this help message and exit.
+  -v                    Print tuxi version info and exit.
   -r                    Raw search results.
                         (no pretty output, no colors)
   -q                    Only output search results.
                         (silences "Did you mean?", greeting, usage)
+  -a                    Prints all valid answers.
+  -b                    Tries to select the best answer based on keywords at the start and end of your query.
+                        (experimental - eg: define WORD, SONG lyrics, PERSON quotes, weather CITY, FILM cast)
+  -t                    Pick answers to test.
+                        (you can specify multiple answers using tuxi_NAME in your query)
+  -l                    use LANG_[lang] in your query to override the language used
+                        (eg: tuxi -l LANG_en_US my search query)
 
-Report bugs at https://github.com/Bugswriter/tuxi/issues.
+tuxi supports the following environment variables:
+  TUXI_LANG=[lang]      sets default search language (eg: TUXI_LANG='en_US')
+  TUXI_DELAY=[int]      if you find more than one answer is being printed (and you're not using -a)
+                        increase this number by a little (you want it to be as low as possible)
+                        default value is 100 (eg: TUXI_DELAY=120)
+
+developer flags:
+  -d                    prints debug info along with results
+  -s                    saves HTML for this query to /home/magic/.cache/tuxi/tuxi-[date]-[query].html
+  -c                    use most recent cached result and query
+                        this can be combined with -t flag to more quickly test for different answers
+  -p                    disable pipe support (it can break some scripts including our own test script)
+
+Report bugs at https://github.com/Bugswriter/tuxi/issues
 ```
 
 ## Features
