@@ -18,7 +18,6 @@
 # currency
 # trans
 # sport_fixture
-# rich
 # kno_right
 
 did_you_mean Linux Tarvalds
@@ -30,19 +29,19 @@ math 72^43/12(44+1)-3124
 math (40/3)+4*6
 math 45/sqrt(4)*3
 
-basic/kno_val christmas day
+kno_val christmas day
 basic/kno_val summer solstice
 basic/kno_val shortest day of the year
 
-kno_top the office cast
-kno_top legends of runeterra
-kno_top reddit
-kno_top twitter
+richcast/kno_top the office cast
+kno_top/kno_right legends of runeterra
+kno_top/kno_right reddit
+kno_top/kno_right twitter
 
-rich/kno_val elevation of mt everest
-rich/kno_val what is elevation of mt rainier
-rich/kno_val how big is the grand canyon
-rich/kno_val how long is the yellow river?
+kno_val elevation of mt everest
+kno_val what is elevation of mt rainier
+kno_val how big is the grand canyon
+kno_val how long is the yellow river?
 
 feat the meaning of life the universe and everything else
 feat shotgun doom eternal
@@ -79,7 +78,7 @@ weather how cold is it in canada right now?
 
 kno_right lorem ipsum
 kno_right the office
-kno_right what is a firefighter
+kno_right/define what is a firefighter
 kno_right what is the american bill of rights
 
 define define humor
@@ -94,7 +93,6 @@ sport_fixture results of last chelsea match
 
 quotes linus torvalds quotes
 quotes quotes from gandhi
-quotes inspirational quotes
 
 kno_val density of silver
 kno_val density of hydrogen
@@ -102,5 +100,5 @@ kno_val what is the triple point of oxygen
 
 richcast cast of event horizon
 richcast cast of equalibrium
-richcast GoT stars
-richcast avengers actors
+richcast/kno_top GoT stars
+richcast/kno_top avengers actors
