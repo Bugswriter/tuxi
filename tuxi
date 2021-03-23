@@ -256,15 +256,17 @@ error_msg() {
 #####      Dependency check      #####
 ######################################
 
-# Checks if dependencies are installed.
+# Checks for required executable files in PATH.
 check_deps() {
-    while [ -n "$1" ]; do
-        if [ ! "$(command -v $1)" ]; then
-            error_msg "\"$1\" not found!"
-            exit 2
+	dep_err=0
+    for dep in "$@"; do
+        if ! command -v "$dep" 1> /dev/null 2>&1; then
+            error_msg "\"$dep\" not found!"
+			dep_err=$((dep_err + 1))
         fi
-        shift
     done
+
+	[ $dep_err -gt 0 ] && exit 2
 }
 
 # Dependencies
