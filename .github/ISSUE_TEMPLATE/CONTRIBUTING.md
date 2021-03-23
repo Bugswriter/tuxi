@@ -15,19 +15,16 @@
 
 * Create a pull request to merge with the [develop](https://github.com/Bugswriter/tuxi/tree/develop) branch.
 
-```
-# <Name of the SERP> <optional position> ( eg: <relevant search example> )
-#
-# <your scraper code goes here>
-#
+Remember that it must be added in a few places, the first is on priority variable (Search `priority=`).
 
-# Knowledge Graph - right ( eg: the office )
-kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | recode html..ISO-8859-1 | tr ' ' '\0' | xargs -0 -n10)"
-[ -n "$kno_right" ] && output "$kno_right" && exit 0
-
+```sh
+name            # Comment explaining (example)
 ```
 
-* Your code must be **posix compatible**. **Pup**, **Recode**, and **Jq** are dependencies.
+And a function in `Answer functions` section. Remember of the `a_` prefix for the function's name, it's important!
+
+
+* Your code must be **posix compatible**. And dependant of **pup**, **recode**, and **jq**.
 
 * Use **concise and readable variables** (snake_case is preferred).
 
@@ -37,3 +34,4 @@ kno_right="$(echo "$google_html" | pup 'div.kno-rdesc span' | sed -n '2p' | awk 
 * **Fork** the [develop](https://github.com/Bugswriter/tuxi/tree/develop) branch.
 
 * Create a pull request to merge with the [develop](https://github.com/Bugswriter/tuxi/tree/develop) branch.
+
