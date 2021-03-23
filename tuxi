@@ -214,10 +214,10 @@ done
 shift $((OPTIND - 1))
 $pick_search && $best_match && echo "sorry but -b and -t mutually exclusive" && exit 1
 
-# TODO this may need reworking later to use read instead and only capture the first line
-#   question | tuxi [-flags] --> answer :)
+#TODO: Data handled by the user should probably be tested.
+# question | tuxi [-flags] --> answer :)
 if ! $no_pipe; then
-    [ -p /dev/stdin ] && query=$(cat)
+    [ -p /dev/stdin ] && read query
 fi
 
 #######################################
