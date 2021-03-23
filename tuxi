@@ -15,17 +15,17 @@
 #   the -l commandline flag overrides everything
 #   this can also be set in your shell environment with
 #   TUXI_LANG=
-[ -n "$TUXI_LANG" ] && LANGUAGE="$TUXI_LANG" || LANGUAGE=""
+[ -n "$TUXI_LANG" ] && LANGUAGE=$TUXI_LANG || LANGUAGE=''
 
 # if you find more than one answer is being printed (and you're not using -a)
 #   increase this number by a little (you want it to be as low as possible)
 #   this can also be set in your shell environment with
 #   TUXI_DELAY=
-[ -n "$TUXI_DELAY" ] && MICRO_DELAY="$TUXI_DELAY" || MICRO_DELAY=250
+[ -n "$TUXI_DELAY" ] && MICRO_DELAY=$TUXI_DELAY || MICRO_DELAY=250
 
-VERSION="dev 2.0"
-MAIN_PID="$$"
-[ ! "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
+VERSION='dev 2.0'
+MAIN_PID=$$
+[ -z "$XDG_CACHE_HOME" ] && XDG_CACHE_HOME="$HOME/.cache"
 
 #########################################
 #####      macOS compatibility      #####
@@ -33,7 +33,7 @@ MAIN_PID="$$"
 
 # credit to @Zhann in #149
 #   to use it, you will need to have GNU core utils installed
-case "$OSTYPE" in
+case $OSTYPE in
 darwin*)
     sed() {
         gsed "$@"
@@ -56,7 +56,7 @@ esac
 # priority order
 #   the first word should be the name of the a_function() followed by a space
 #   you can disable tests by commenting out the line(s)
-priority="
+priority='
 tracklist       # Album track lists ( eg: noisia outer edges tracklist )
 richcast        # Rich Rich Answers ( eg: social network cast )
 define          # Define ( eg: define Aggrandize )
@@ -76,7 +76,7 @@ trans           # Translate ( eg: Vais para cascais? em ingles )
 sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
 lyrics_us       # Lyrics for US users, above does not work for US
 kno_right       # Knowledge Graph - right ( eg: the office )
-"
+'
 
 ##############################
 #####      Defaults      #####
@@ -101,61 +101,46 @@ plus_urls=false
 # color codes
 N="\033[0m"    # Reset
 B="\033[1m"    # Bold
-R="\033[1;31m" # Red
-G="\033[1;32m" # Green
-Y="\033[1;33m" # Yellow
-M="\033[1;35m" # Magenta
-C="\033[1;36m" # Cyan
+R="\033[1;31m" # Bright Red
+G="\033[1;32m" # Bright Green
+Y="\033[1;33m" # Bright Yellow
+M="\033[1;35m" # Bright Magenta
+C="\033[1;36m" # Bright Cyan
 
 ##################################
 #####      Help message      #####
 ##################################
 
 help_text() {
-    printf "%bUsage:%b tuxi %b[options]%b %bquery%b\n" "$G" "$N" "$Y" "$N" "$M" "$N"
-    printf "%bOR:%b %bquery source%b | tuxi %b[options]%b\n" "$G" "$N" "$M" "$N" "$Y" "$N"
-    printf "\n"
-    printf "%bOptions:%b\n" "$G" "$N"
-    printf "  -h                    Show this help message and exit.\n"
-    printf "  -v                    Print tuxi version info and exit.\n"
-    printf "\n"
-    printf "  -r                    Raw search results.\n"
-    printf "                        (no pretty output, no colors)\n"
-    printf "\n"
-    printf "  -q                    Only output search results.\n"
-    printf "                        (silences \"Did you mean?\", greeting, usage)\n"
-    printf "\n"
-    printf "  -a                    Prints all valid answers.\n"
-    printf "\n"
-    printf "  -u                    Prints out the top handful of URLs for your search query\n"
-    printf "                        (this is automatically printed out if tuxi can't find you an answer)\n"
-    printf "\n"
-    printf "  -b                    Tries to select the best answer based on keywords at the start and end of your query.\n"
-    printf "                        (experimental - eg: define WORD, SONG lyrics, PERSON quotes, weather CITY, FILM cast)\n"
-    printf "\n"
-    printf "  -t                    Pick answers to test.\n"
-    printf "                        (you can specify multiple answers using tuxi_NAME in your query)\n"
-    printf "\n"
-    printf "  -l                    use LANG_[lang] in your query to override the language used\n"
-    printf "                        (eg: tuxi -l LANG_en_US my search query)\n"
-    printf "\n"
-    printf "%btuxi supports the following environment variables:%b\n" "$G" "$N"
-    printf "  TUXI_LANG=[lang]      sets default search language (eg: TUXI_LANG='en_US')\n"
-    printf "\n"
-    printf "  TUXI_DELAY=[int]      if you find more than one answer is being printed (and you're not using -a)\n"
-    printf "                        increase this number by a little (you want it to be as low as possible)\n"
-    printf "                        default value is 250 (eg: TUXI_DELAY=270)\n"
-    printf "\n"
-    printf "%bdeveloper flags:%b\n" "$G" "$N"
-    printf "  -d                    prints debug info along with results\n"
-    printf "  -s                    saves HTML for this query to $XDG_CACHE_HOME/tuxi/[date]-[query].html\n"
-    printf "\n"
-    printf "  -c                    use most recent cached result and query\n"
-    printf "                        this can be combined with -t flag to more quickly test for different answers\n"
-    printf "\n"
-    printf "  -p                    disable pipe support (it can break some scripts including our own test script)\n"
-    printf "\n"
-    printf "%bReport bugs at%b %bhttps://github.com/Bugswriter/tuxi/issues%b\n" "$G" "$N" "$C" "$N"
+    # When adding new information, keep it within 80 columns, including the
+    #   indentation and the code. You don't want this important information
+    #   needlessly wrapping on user's terminals; it's ugly and annoying.
+    #
+    #   Avoid ANSI color escape sequences here, too. Keep it simple to ensure
+    #   the output is readable to ALL users, not just those of a given terminal
+    #   type with a certain color configuration; the same goes for error MSGs.
+    #
+    #   Usage output like this is simply a quick reference; for anything
+    #   more, refer and make changes to the tuxi(1) manual page.
+    while read -r CurLine; do
+        printf '%b\n' "$CurLine"
+    done <<-EOF
+        \rUsage: tuxi [OPTS] [QUERY]
+
+        \r  -h                      - Display this help information.
+        \r  -v                      - Print Tuxi version information.
+        \r  -a                      - Print all valid answers.
+        \r  -b                      - Auto-determine the best answer.
+        \r  -c                      - Use cache from previous QUERY.
+        \r  -d                      - Include debugging information.
+        \r  -l LANG_[STR]           - Override LANG with STR.
+        \r  -p                      - Disable pipe support.
+        \r  -q                      - Output only query results.
+        \r  -r                      - Output query in raw format.
+        \r  -s [FILE]               - Save query result HTML to FILE.
+        \r  -t                      - Choose answers to test.
+        \r  -u                      - Print top bulk of query URLs.
+EOF
 }
 
 #############################
