@@ -46,6 +46,8 @@ $ sudo make install
 
 ### Arch Linux AUR
 Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-git/) package in the **AUR**.
+Note: the AUR package is not maintaned by the project maintainer, nor contribuitor, it is often outdated and it's recommended that you just clone this project.
+
 ```sh
 $ yay -S tuxi-git
 ```
