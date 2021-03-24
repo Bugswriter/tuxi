@@ -161,7 +161,7 @@ EOF
 # -p : disable pipe support (needed for test script)
 # -u : also print out the top links
 while getopts "rvhqabtldscpu" OPT; do
-    case "$OPT" in
+    case $OPT in
     r)
         raw=true
         ;;
@@ -214,10 +214,10 @@ done
 shift $((OPTIND - 1))
 $pick_search && $best_match && echo "sorry but -b and -t mutually exclusive" && exit 1
 
-# TODO this may need reworking later to use read instead and only capture the first line
-#   question | tuxi [-flags] --> answer :)
+#TODO: Data handled by the user should probably be tested.
+# question | tuxi [-flags] --> answer :)
 if ! $no_pipe; then
-    [ -p /dev/stdin ] && query=$(cat)
+    [ -p /dev/stdin ] && read query
 fi
 
 #######################################
@@ -256,15 +256,17 @@ error_msg() {
 #####      Dependency check      #####
 ######################################
 
-# Checks if dependencies are installed.
+# Checks for required executable files in PATH.
 check_deps() {
-    while [ -n "$1" ]; do
-        if [ ! "$(command -v $1)" ]; then
-            error_msg "\"$1\" not found!"
-            exit 2
+	dep_err=0
+    for dep in "$@"; do
+        if ! command -v "$dep" 1> /dev/null 2>&1; then
+            error_msg "\"$dep\" not found!"
+			dep_err=$((dep_err + 1))
         fi
-        shift
     done
+
+	[ $dep_err -gt 0 ] && exit 2
 }
 
 # Dependencies
@@ -289,7 +291,7 @@ if [ -z "$1" ] && [ -z "$query" ]; then
         fi
         exit 0
     else
-        query=$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1 | sed -e 's/tuxi-*[0-9]*-//' -e 's/.html//' -e 's/_/ /g')
+        query=$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1 | sed -e 's/tuxi-*[[:digit:]]*-//' -e 's/.html//' -e 's/_/ /g')
     fi
 fi
 
@@ -352,7 +354,7 @@ if $best_match; then
     last_word=$(printf '%b\n' "$query_check" | tail -n1)
 
     for keywords in printf '%s\n%s\n' "$first_word" "$last_word"; do
-        case "$keywords" in
+        case $keywords in
         quote | quotes) use_quotes=true ;;
         lyrics) use_lyrics=true ;;
         weather) use_weather=true ;;
@@ -395,7 +397,7 @@ fi
 
 # Define (eg: define Aggrandize) //original snippet credit @igaurab
 a_define() {
-    case "$LANGUAGE" in
+    case $LANGUAGE in
     en_*) dfn_use_new=true ;;
     *) dfn_use_new=false ;;
     esac
@@ -413,7 +415,7 @@ a_define() {
             printf '%s\n' "$define" | while IFS= read -r dfn_foo; do
                 if $dfn_top; then
                     if $dfn_end_top; then
-                        case "$dfn_foo" in
+                        case $dfn_foo in
                         *"noun: " | *"verb: " | *"adjective: " | *"adverb: " | *"pronoun: " | *"preposition: " | *"conjunction: " | *"determiner: " | *"exclamation: ")
                             printf '%s ' "$dfn_foo"
                             dfn_append=true
@@ -426,7 +428,7 @@ a_define() {
                         esac
                         dfn_top=false
                     else
-                        case "$dfn_foo" in
+                        case $dfn_foo in
                         noun | verb | adjective | adverb | pronoun | preposition | conjunction | determiner | exclamation)
                             dfn_backup="$dfn_foo"
                             dfn_end_top=true
@@ -455,7 +457,7 @@ a_define() {
                     dfn_marker=false
                     dfn_sim_op=true
                 elif $dfn_start; then
-                    case "$dfn_foo" in
+                    case $dfn_foo in
                     informal) printf '(informal) ' ;;
                     British) printf '(British) ' ;;
                     rare) printf '(rare) ' ;;
@@ -466,7 +468,7 @@ a_define() {
                         ;;
                     esac
                 else
-                    case "$dfn_foo" in
+                    case $dfn_foo in
                     "; "*)
                         printf '%s ' "$dfn_foo"
                         dfn_append=true
@@ -536,7 +538,7 @@ a_lists() {
     if [ -n "$lists" ]; then
         lists_num=0
         printf '%s\n' "$lists" | while IFS= read -r lists_foo; do
-            case "$lists_foo" in
+            case $lists_foo in
             "<div "*) continue ;;
             "</div>") printf '\n' ;;
             "<b>") printf '%b' "$B" ;;
@@ -602,7 +604,7 @@ a_kno_right() {
 a_sport_fixture() {
     sport_fixture="$(echo "$google_html" | pup 'span[jscontroller="f9W5M"] text{}' | recode html..ISO-8859-1)"
     if [ -n "$sport_fixture" ]; then
-        case "$sport_fixture" in
+        case $sport_fixture in
         "Premier League" | "EFL "* | "FA "* | "MLS" | "Canadian Premier League" | "USL "* | "UEFA "* | "Ligue "* | "Coupe de France" | "Trophée des Champions" | *"Bundesliga" | "DFB-Pokal" | "Serie "* | "Coppa Italia" | "Supercoppa Italiana" | "Eredivisie" | "Eerste Divisie" | "Tweede Divisie" | "KNVB "* | "Johan Cruijff"* | "Scottish Premiership" | "Scottish Championship" | "Scottish Cup" | "Scottish League Cup" | "La Liga" | "Segunda División" | "Tercera División" | "Copa del Rey" | "Supercopa de España" | "Copa Federación" | "Allsvenskan" | "Superettan" | "Svenska Cupen" | "Swiss Super League" | "Swiss Challenge League" | "Schweizer Cup" | "Uhrencup")
             sf_use_new=true
             ;;

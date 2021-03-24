@@ -57,7 +57,7 @@ until [ $cycle -eq $max_run ]; do
     $raw && run="-r ${run}"
     printf "\n--> Starting run: %s | flags in use: %s\n\n" "$cycle" "$run" | tee -a testoutputs.txt
     good=true
-    cat testqueries.txt | sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' | while read -r x; do
+    sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d' testqueries.txt | while read -r x; do
         reason=""
         target=$(printf '%s' "$x" | cut -d ' ' -f1)
         multi_target="$(printf '%b\n' "$(printf '%b\n' "$target" | sed 's/\//\\n/g')")"
@@ -126,8 +126,8 @@ until [ $cycle -eq $max_run ]; do
             printf '|-->> FAILED! | Reason: %b\n\n' "$reason" | tee -a testoutputs.txt
         fi
     done
-    passed=$(cat totals.txt | grep -c PASSED)
-    failed=$(cat totals.txt | grep -c FAILED)
+    passed=$(grep -c PASSED totals.txt)
+    failed=$(grep -c FAILED totals.txt)
     printf '\n-->> END RUN %s | Results: PASSED %s FAILED %s\n' $cycle $passed $failed | tee -a testoutputs.txt
     cycle=$(($cycle + 1))
     rm totals.txt
