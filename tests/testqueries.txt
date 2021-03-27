@@ -18,6 +18,7 @@
 # currency
 # trans
 # sport_fixture
+# holidays
 # kno_right
 
 did_you_mean Linux Tarvalds
@@ -102,3 +103,8 @@ richcast cast of event horizon
 richcast cast of equalibrium
 richcast/kno_top GoT stars
 richcast/kno_top avengers actors
+
+holidays Mexican holidays
+holidays what holidays does mexico celebrate?
+holidays holiday in Swiss
+holidays celebrated holidays in india
