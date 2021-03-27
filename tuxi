@@ -75,6 +75,7 @@ quotes          # Quotes ( eg: mahatma gandhi quotes )
 trans           # Translate ( eg: Vais para cascais? em ingles )
 sport_fixture   # Shows last or next fixture of a sports team ( eg. Chelsea next game )
 lyrics_us       # Lyrics for US users, above does not work for US
+holidays        # Public holidays (eg: holiday in Swiss)
 kno_right       # Knowledge Graph - right ( eg: the office )
 "
 
@@ -740,6 +741,10 @@ a_tracklist() {
             printf '%s\n' "$tracklist_links"
         fi
     fi
+}
+
+a_holidays() {
+    echo "$google_html" | pup 'div.ifw9Ub text{}' | sed '/^\s*$/d' | recode html..ISO-8859-1
 }
 
 ###############################
