@@ -1,5 +1,7 @@
 #!/usr/bin/env sh
 
+export TUXI_LANG=en_US
+
 if ! [ -f testqueries.txt ]; then
     printf "Y'all got anymore of those testqueries(.txt)?"
     exit 1

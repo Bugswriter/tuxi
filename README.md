@@ -170,6 +170,22 @@ I love you
 
 **And much more (lyrics, weather, conversions...)**
 
+## Own functions/aliases
+
+You can easily make a function or aliase for a command that you call a lot with tuxi, for example:
+
+```zsh
+translate() {
+
+  echo $(LANG=en_US tuxi -trq "tuxi_trans $@ in english")
+
+}
+```
+
+Will give a new function called `translate` in your shell, you can call it with any phrase/word to be translated to English
+
+---
+
 ## License
 
 This project is licensed under [GPL-3.0](./LICENSE).
