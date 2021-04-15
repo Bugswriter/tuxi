@@ -458,7 +458,7 @@ a_kno_val() {
 
 # Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
 a_math() {
-    clean_html 'span.qv3Wpe text{}' | tr -d '\n ' | clean_recode
+    clean_html 'span.qv3Wpe text{}' | tr -d '\n '
 }
 
 # Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
