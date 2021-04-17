@@ -95,8 +95,11 @@ esac
 LANG=$(echo $LANG | sed 's/\..*//')
 
 # options
-unset raw quiet all best_match pick_search debug \
+unset raw quiet best_match pick_search debug \
       save_html use_cache pick_lang no_pipe plus_urls
+
+# all is a unstable variable... careful with it...
+all=false
 
 # color codes
 N="\033[0m"    # Reset
@@ -180,7 +183,7 @@ while getopts "rvhqabtldscpu" OPT; do
         quiet=1
         ;;
     a)
-        all=1
+        all=true
         ;;
     b)
         best_match=1
@@ -1164,38 +1167,34 @@ done
 # Now we have our first answer, it's time to print it
 # this loops through the child pid list in priority order sending the USR1 kill signal
 # if one has an answer ready that is what gets printed out
-# TODO: This can cause double answers???... Need to fix it
-[ ! $all ] && {
+#
+# "all" is a fucking unstable variable, please, be careful with it
+if ! $all; then
     for lucky_winner in $(printf '%b\n' "$pids"); do
-
         [ $printed -gt 0 ] && break
         kill -0 "$lucky_winner" 1>/dev/null 2>&1
-
-        [ $? -eq 0 ]  && {
+        if [ $? -eq 0 ]; then
             kill -USR1 "$lucky_winner" 1>/dev/null 2>&1
             short_delay
-        }
-
+        fi
     done
-}
+fi
 
 # once an answer has been printed and the -a flag isn't active
 # kills all remaining child processes
 # if -a flag is active then it waits until every answer has been printed first
-[ ! $all ] && {
+if ! $all; then
     for kids in $(printf '%b\n' "$pids"); do
-
         kill -0 "$kids" 1>/dev/null 2>&1
         [ $? -eq 0 ] && kill "$kids" 1>/dev/null 2>&1
-
     done
-}
+fi
 
-[ $all ] && wait
+$all && wait
 
 # another small delay as wait sometimes doesn't seem to wait quite long enough
 # for the last answer to be printed before exiting.
 short_delay 2
 [ $plus_urls ] && top_links
-[ $debug ] && debug_info
+[ $debug ]     && debug_info
 exit 0
