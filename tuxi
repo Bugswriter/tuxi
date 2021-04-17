@@ -1022,16 +1022,15 @@ test_answers() {
     [ -n "$z" ] && {
         the_chosen_one="$1"
 
-        [ ! $all ] && {
+        if ! $all; then
             kill -USR1 "$MAIN_PID"
             sleep 1 &
             sleep_pid="$!"
             wait
-
-        } || {
+        else
             kill -USR1 "$MAIN_PID"
             [ $debug ] && output "$(printf '%b\n\n%b\n' "$(info_msg "Answer selected: $the_chosen_one")" "$z")" || output "$z"
-        }
+        fi
     }
 }
 
