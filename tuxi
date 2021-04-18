@@ -11,7 +11,7 @@
 # Constants
 #-----------------------------------------------
 
- VERSION='dev 2.0'
+ VERSION='dev 2.1'
 MAIN_PID=$$
 
 # Setting this overrides getting the system language variable;
@@ -68,11 +68,22 @@ kno_right       # Knowledge Graph - right ( eg: the office )
 '
 
 #-----------------------------------------------
-# macOS compatibility
+# Appereance
 #-----------------------------------------------
 
-# credit to @Zhann in #149
-#   to use it, you will need to have GNU core utils installed
+N="\033[0m"    # Reset
+B="\033[1m"    # Bold
+R="\033[1;31m" # Bright Red
+G="\033[1;32m" # Bright Green
+Y="\033[1;33m" # Bright Yellow
+M="\033[1;35m" # Bright Magenta
+C="\033[1;36m" # Bright Cyan
+
+#-----------------------------------------------
+# macOS compatibility #149
+#-----------------------------------------------
+
+# to use it, you will need to have GNU core utils installed
 case $OSTYPE in
 darwin*)
 
@@ -95,20 +106,11 @@ esac
 LANG=$(echo $LANG | sed 's/\..*//')
 
 # options
-unset raw quiet best_match pick_search debug \
-      save_html use_cache pick_lang no_pipe plus_urls
+unset raw debug save_html pick_lang plus_urls
 
 # all is a unstable variable... careful with it...
-all=false
-
-# color codes
-N="\033[0m"    # Reset
-B="\033[1m"    # Bold
-R="\033[1;31m" # Bright Red
-G="\033[1;32m" # Bright Green
-Y="\033[1;33m" # Bright Yellow
-M="\033[1;35m" # Bright Magenta
-C="\033[1;36m" # Bright Cyan
+all=false; no_pipe=false; quiet=false; use_cache=false
+pick_search=false; best_match=false
 
 #-----------------------------------------------
 # Help message
@@ -180,16 +182,16 @@ while getopts "rvhqabtldscpu" OPT; do
         exit 0
         ;;
     q)
-        quiet=1
+        quiet=true
         ;;
     a)
         all=true
         ;;
     b)
-        best_match=1
+        best_match=true
         ;;
     t)
-        pick_search=1
+        pick_search=true
         ;;
     d)
         debug=1
@@ -198,13 +200,13 @@ while getopts "rvhqabtldscpu" OPT; do
         save_html=1
         ;;
     c)
-        use_cache=1
+        use_cache=true
         ;;
     l)
         pick_lang=1
         ;;
     p)
-        no_pipe=1
+        no_pipe=true
         ;;
     u)
         plus_urls=1
@@ -221,12 +223,14 @@ done
 shift $((OPTIND - 1))
 
 # Only allow one option
-[ $pick_search ] && [ $best_match ] && \
+$pick_search && $best_match && \
     echo "Sorry, but -b and -t are mutually exclusive." && exit 1
 
 # TODO: Data handled by the user should probably be tested.
 # question | tuxi [-flags] --> answer :)
-[ ! $no_pipe ] && [ -p /dev/stdin ] && read query
+if ! $no_pipe; then
+  [ -p /dev/stdin ] && read query
+fi
 
 #-----------------------------------------------
 # Output formatting
@@ -270,12 +274,12 @@ check_deps() {
 	  dep_err=0
 
     for dep in "$@"; do
-        [ ! command -v "$dep" 1> /dev/null 2>&1 ] && {
+      if ! command -v "$dep" 1> /dev/null 2>&1; then
 
             error_msg "\"$dep\" not found!"
 			      dep_err=$((dep_err + 1))
 
-        }
+      fi
     done
 
 	  [ $dep_err -gt 0 ] && exit 2
@@ -292,25 +296,25 @@ check_deps pup recode jq
 [ -z "$1" ] && [ -z "$query" ] && {
 
     # If query is empty (no -c): exit
-    [ ! $use_cache ] && {
+    if ! $use_cache; then
 
         # If quiet=false: Prints greeting and usage
-        [ ! $quiet ] && {
+        if ! $quiet; then
 
             printf "Hi, I'm Tuxi. Ask me anything!\n"
             help_text | head -n 1
 
-        }
+        fi
         exit 0
 
-    } || {
+    else
 
         query=$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1 | sed \
                 -e 's/tuxi-*[[:digit:]]*-//' \
                 -e 's/.html//' \
                 -e 's/_/ /g')
 
-    }
+    fi
   }
 
 # Else, all arguments are saved in $query
@@ -330,17 +334,36 @@ check_deps pup recode jq
 # Custom Answers: the -t flag
 #   Clears the list of snippets to check (saving the original list to print out if a mistake is made)
 #   then loops through the query looking for tuxi_ and updates the priority variable to use only those snippets
-[ $pick_search ] && {
+$pick_search && {
+
+    # Show list of valid 'tuxi_...' that the user can use
+    warn_helpful_list() {
+
+        echo "Sorry but %s is not a valid search type\n" \
+             "Please retry your search using one of the following:\n" \
+             "$pick_words" \
+             "$(echo "$list_priority" | tail -n +1 | head -c -1 | sed \
+                -e 's/^/tuxi_/' \
+                -e '1 s/tuxi_//' )\n\n" \
+             "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" \
+             "$pick_words"
+        exit 1
+
+    }
 
     list_priority="$priority"
     snippet_check=$(printf '%b\n' "$list_priority" | \
                     cut -d ' ' -f1 | sed -e '/^\s*#.*$/d' -e '/^\s*$/d')
             query=$(printf '%b\n' "$query" | sed 's/ /\\n/g')
 
-    unset priority matched
+    unset priority
+
+    matched=false
+
+    enabled_snippets=$(printf '%b\n' "$query" | grep 'tuxi_' | sed 's/tuxi_//g')
 
     # For every word "tuxi_..." clean it 
-    for pick_words in $(printf '%b\n' "$query" | grep 'tuxi_' | sed 's/tuxi_//g'); do
+    for pick_words in $(printf "$enabled_snippets"); do
 
         # Check every "tuxi_..."
         for check_pick_words in $(printf '%b\n' "$snippet_check"); do
@@ -349,26 +372,21 @@ check_deps pup recode jq
 
                 [ -z "$priority" ] && priority=$(printf '%s\n' "$pick_words") \
                                    || priority=$(printf '%b\n%s\n' "$priority" "$pick_words")
-                matched=1
+                matched=true
 
             }
 
         done
 
-        # No matches? Print out the following:
-        [ ! $matched ] && {
-
-            echo "Sorry but %s is not a valid search type\n" \
-                 "Please retry your search using one of the following: tuxi_\n" \
-                 "$pick_words" \
-                 "$list_priority\n" \
-                 "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" \
-                 "$pick_words"
-            exit 1
-
-        }
+        # No matches? Print out the warning
+        if ! $matched; then
+            warn_helpful_list
+        fi
 
     done
+
+    # Double verification if the user typed any 'tuxi_...' whatsoever
+    [ $enabled_snippets ] || warn_helpful_list
 
     query=$(printf '%b\n' "$query" | grep -v 'tuxi_' | sed 's/\\n/ /g')
 
@@ -378,7 +396,7 @@ check_deps pup recode jq
 #   our patented (honest!) "smrt search" algorithm: the -b flag
 #   jokes aside, this is going to need some iterating on, I'll turn it into a tidy loop later
 # TODO: add more ways to identify a query
-[ $best_match ] && {
+$best_match && {
 
     unset use_quotes use_lyrics use_weather use_cast \
           use_define use_list use_pronounce use_tracklist
@@ -415,11 +433,11 @@ check_deps pup recode jq
     [ $use_list ] && priority=$(printf '%b\n' "$priority" | cut -d ' ' -f1 | grep -e 'lists' -e 'kno_') || j=$(($j - 1))
 
     [ $j -eq 0 ] && priority=$(printf '%b\n' "$priority" | cut -d ' ' -f1 | sed \
-                                 -e '/^\s*#.*$/d' \
-                                 -e '/^[[:space:]]*$/d' | grep \
-                                 -v 'quotes' | grep \
-                                 -v 'lyrics' | grep \
-                                 -v 'weather')
+                                  -e '/^\s*#.*$/d' \
+                                  -e '/^[[:space:]]*$/d' | grep \
+                                  -v 'quotes' | grep \
+                                  -v 'lyrics' | grep \
+                                  -v 'weather')
 
 }
 
@@ -454,83 +472,83 @@ clean_recode() {
 
 # this div is google's top line answer, works for simple dates, values etc
 # eg: density of silver, what is the triple point of oxygen, elevation of mount everest, christmas day
-# "what is the " seems to be required for some things //credit @sudocanttype
+# "what is the " seems to be required for some things
 a_kno_val() {
     clean_html 'div.Z0LcW.XcVN5d text{}' | tr '\n' ' '
 }
 
-# Math ( eg: log_2(3) * pi^e ) //credit @BeyondMagic
+# Math ( eg: log_2(3) * pi^e )
 a_math() {
     clean_html 'span.qv3Wpe text{}' | tr -d '\n '
 }
 
-# Knowledge Graph - top (list) ( eg: the office cast ) //credit @Bugswriter
+# Knowledge Graph - top (list) ( eg: the office cast )
 a_kno_top() {
     clean_html 'div.dAassd json{}' | jq -r '.[] | .children | .[] | .text' | \
                sed ':a;N;$!ba;s/\n/ /g;s/null/\n/g' | \
                sed '1s/.*/* &/;2,$s/.*/*&/;$d' | clean_recode
 }
 
-# Quotes ( eg: mahatma gandhi quotes ) //credit @PoseidonCoder
+# Quotes ( eg: mahatma gandhi quotes )
 a_quotes() {
     clean_html 'div.Qynugf text{}' | clean_recode
 }
 
-# Basic Answers ( eg: summer solstice || easter ) // @Bugswriter
-# this displays similar info to kno_val but uses a different div in the google results
+# Basic Answers ( eg: summer solstice || easter )
+# this displays similar info to kno_val but uses a different div in the google results 
 a_basic() {
     clean_html 'div.zCubwf text{}' | tr -d '\n' | clean_recode
 }
 
-# Rich Rich Answers ( eg: social network cast ) //credit @BeyondMagic
+# Rich Rich Answers ( eg: social network cast )
 a_richcast() {
     clean_html 'a.ct5Ked json{}' | jq -r '.[] | .title' | sed 's/^/* /' | clean_recode
 }
 
-# Featured Snippets ( eg: who is garfield ) //credit @Bugswriter
+# Featured Snippets ( eg: who is garfield )
 a_feat() {
     clean_html 'span.hgKElc text{}' | tr -d '\n' | clean_recode | tr ' ' '\0' | xargs -0 -n10
 }
 
-# Lyrics ( eg: gecgecgec lyrics ) //credit @d-shaun
+# Lyrics ( eg: gecgecgec lyrics )
 a_lyrics_int() {
     clean_html 'div.bbVIQb text{}' | clean_recode
 }
 
-# Lyrics for US users, above does not work for US //credit @sudocanttype
+# Lyrics for US users, above does not work for US
 a_lyrics_us() {
     clean_html 'span[jsname="YS01Ge"] text{}' | clean_recode
 }
 
-# Units Conversion ( eg: 1m into 1 cm ) //credit @karthink
+# Units Conversion ( eg: 1m into 1 cm )
 a_unit() {
     clean_html '#NotFQb json{}' | jq -r '.[] | .children | .[0] | .value' | clean_recode
 }
 
-# Currency Conversion ( eg: 1 USD in rupee ) //credit @karthink
+# Currency Conversion ( eg: 1 USD in rupee )
 a_currency() {
     clean_html '.SwHCTb text{}' | sed 's/\n//g;s/\ /\0/g' | clean_recode
 }
 
-# Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
+# Translate ( eg: Vais para cascais? em ingles )
 a_trans() {
     clean_html 'pre.XcVN5d json{}' | \
               jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | \
               sed 's/null//g' | clean_recode
 }
 
-# Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
+# Knowledge Graph - right ( eg: the office )
 a_kno_right() {
     clean_html 'div.kno-rdesc span' | sed -n '2p' | awk '{$1=$1;print}' | \
                 clean_recode | tr ' ' '\0' | xargs -0 -n10
 }
 
-# Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
+# Learn to pronounce ( eg: pronounce linux )
 a_pronounce() {
     clean_html 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
 
-# Simple lists (eg: how to exit vim || how to update windows) //original snippet credit @BeyondMagic
+# Simple lists (eg: how to exit vim || how to update windows)
 a_lists() {
     lists=$(clean_html 'div.co8aDb.XcVN5d, li.TrT0Xe' | sed 's/^[[:blank:]]*//g' | clean_recode)
 
@@ -557,7 +575,7 @@ a_lists() {
       }
 }
 
-# Weather ( eg: weather new york) //credit @jhagas + @Genghius + @BeyondMagic
+# Weather ( eg: weather new york)
 a_weather() {
     weather=$(clean_html 'div.UQt4rd json{}' | jq -r '.. | .text?, .alt?' | \
               sed '/null/d' | sed '$!N; /^\(.*\)\n\1$/!P; D')
@@ -576,7 +594,7 @@ a_weather() {
     }
 }
 
-# Shows last or next fixture of a sports team ( eg. Chelsea next game ) //original snippet credit @ismayilkarimli
+# Shows last or next fixture of a sports team ( eg. Chelsea next game )
 a_sport_fixture() {
     sport_fixture=$(clean_html 'span[jscontroller="f9W5M"] text{}' | clean_recode)
 
@@ -764,7 +782,7 @@ a_tracklist() {
     }
 }
 
-# Define (eg: define Aggrandize) - original snippet credit @igaurab
+# Define (eg: define Aggrandize)
 a_define() {
 
     # If it's not english, then do not use the _advanced_ script.
@@ -1036,16 +1054,15 @@ test_answers() {
 
 # This finds and prints out the top links for your query
 top_links() {
-
-  url_list=$(clean_html 'div.tF2Cxc json{}' | \
-      jq -r '.[].children[0].children[0].children[1].text, .[].children[0].children[0].children[1].children[0].text, .[].children[0].children[0].href' | \
-      sed '/^null$/d' | clean_recode)
+    url_list=$(echo "$google_html" | pup 'div.tF2Cxc json{}' \
+        | jq -r '.[].children[0].children[0].children[1].text, .[].children[0].children[0].children[1].children[0].text, .[].children[0].children[0].href' \
+        | sed '/^null$/d' | recode html..ISO-8859-1)
 
     [ -n "$url_list" ] && {
 
         [ -n "$1" ] && {
             info_msg "Sorry about that! Perhaps one of these links may be of use?"
-            [ $raw ] || printf '%b---%b\n' "$G" "$N"
+            $raw || printf '%b---%b\n' "$G" "$N"
         }
 
         links_num=$(($(printf '%s\n' "$url_list" | wc -l) / 2))
@@ -1062,14 +1079,12 @@ top_links() {
 
             until [ $links_i -gt $links_num ]; do
                 links_j=$(($links_i + $links_num))
-                printf '%b%s%b\n%s\n' "$C" $(eval echo \"\$links_bar_${links_i}\") \
+                printf '%b%s%b\n%s\n' "$C" "$(eval echo \"\$links_bar_${links_i}\")" \
                     "$N" "$(eval echo \"\$links_bar_${links_j}\")"
                 links_i=$(($links_i + 1))
             done
         }
-
-        [ $raw ] || printf '%b---%b\n' "$G" "$N"
-
+        $raw || printf '%b---%b\n' "$G" "$N"
     }
 }
 
@@ -1081,11 +1096,11 @@ top_links() {
 # in which case we use the most recent cached html from $XDG_CACHE_HOME/tuxi
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
-[ $use_cache ] && google_html=$(cat $XDG_CACHE_HOME/tuxi/$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1))
+$use_cache && google_html=$(cat $XDG_CACHE_HOME/tuxi/$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1))
 
 [ -z "$google_html" ] && {
 
-    [ $use_cache ] && printf 'no cached pages found!\n' && exit 1
+    $use_cache && printf 'no cached pages found!\n' && exit 1
     google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
     [ -z "$google_html" ] && error_msg "No valid response from google!" && exit 1
@@ -1108,10 +1123,10 @@ unset pids
 answers_found=0
       printed=0
 
-[ ! $pick_search ] || [ ! $best_match ] && {
+if ! $pick_search || ! $best_match; then
     priority=$(printf '%b\n' "$priority" | cut -d ' ' -f1 | \
                sed -e '/^\s*#.*$/d' -e '/^[[:space:]]*$/d')
-}
+fi
 
 # loops through $priority forking all the tests in order
 for tests in $(printf '%b\n' "$priority"); do
@@ -1121,7 +1136,7 @@ done
 
 # did you mean is processed here to make controling the order things get printed easier
 # forking the tests makes things faster (hopefully) but makes passing information around harder
-[ ! $quiet ] && {
+if ! $quiet; then
 
     # silenced if quiet=true
     did_you_mean=$(clean_html 'a.gL9Hy text{}')
@@ -1136,9 +1151,9 @@ done
             did_you_mean=$(printf '%b\n' "$did_you_mean" | sed "s/${errors}/${replacement}/g")
         done
 
-        info_msg "$(printf 'did you mean "%b%b%b" ?\n' "$B" "$did_you_mean" "$N")"
+        info_msg $(printf 'did you mean "%b%b%b" ?\n' "$B" "$did_you_mean" "$N")
     }
-}
+fi
 
 # loops to spin wheels until an answer has been found
 # if all the launched processes exit without an answer being found
@@ -1156,7 +1171,7 @@ while [ $answers_found -eq 0 ]; do
 
         error_msg "No Result!"
 
-        [ $quiet ] || top_links 1
+        $quiet || top_links 1
         [ $debug ] && debug_info
         exit 1
 
@@ -1197,3 +1212,22 @@ short_delay 2
 [ $plus_urls ] && top_links
 [ $debug ]     && debug_info
 exit 0
+
+#-----------------------------------------------
+# Lovely contributors 
+#   We're going to find a better place to put 
+#   y'all.
+#-----------------------------------------------
+
+# @Zhann
+# @sudocanttyp
+# @sdushantha
+# @PureArtistry
+# @PoseidonCoder
+# @karthink
+# @jhagas
+# @ismayilkarimli
+# @igaurab
+# @Genghius
+# @d-shaun
+# @BeyondMagic

@@ -186,10 +186,12 @@ Will give a new function called `translate` in your shell, you can call it with 
 
 ---
 
-## License
-
-This project is licensed under [GPL-3.0](./LICENSE).
-
 ## Contributing
 
 If you want to contribute, please see [CONTRIBUTING](./.github/ISSUE_TEMPLATE/CONTRIBUTING.md).
+
+---
+
+## License
+
+This project is licensed under [GPL-3.0](./LICENSE).

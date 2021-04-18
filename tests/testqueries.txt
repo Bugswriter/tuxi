@@ -29,7 +29,7 @@ math 72^43/12(44+1)-3124
 math (40/3)+4*6
 math 45/sqrt(4)*3
 
-kno_val christmas day
+basic/kno_val christmas day
 basic/kno_val summer solstice
 basic/kno_val shortest day of the year
 
