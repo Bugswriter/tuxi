@@ -339,15 +339,28 @@ $pick_search && {
     # Show list of valid 'tuxi_...' that the user can use
     warn_helpful_list() {
 
-        echo "Sorry but %s is not a valid search type\n" \
-             "Please retry your search using one of the following:\n" \
-             "$pick_words" \
-             "$(echo "$list_priority" | tail -n +1 | head -c -1 | sed \
-                -e 's/^/tuxi_/' \
-                -e '1 s/tuxi_//' )\n\n" \
-             "If %s is on that list could you please file a bug report, thanks! (and sorry)\n" \
-             "$pick_words"
-        exit 1
+
+        [ $pick_words ] && {
+
+            echo "Sorry but '$pick_words' is not a valid search type\n" \
+                 "Please retry your search using one of the following:\n" \
+                 "$(echo "$list_priority" | tail -n +1 | head -c -1 | sed \
+                         -e 's/^/tuxi_/' \
+                         -e '1 s/tuxi_//' )\n\n" \
+                 "If '$pick_words' is on that list could you please file a bug report, thanks! (and sorry)\n"
+             exit 1
+
+        } || {
+
+            echo "Sorry but I couldn't identify your search type\n" \
+                 "Please retry your search using one of the following:\n" \
+                 "$(echo "$list_priority" | tail -n +1 | head -c -1 | sed \
+                         -e 's/^/tuxi_/' \
+                         -e '1 s/tuxi_//' )\n\n" \
+                 "If your search type is on that list could you please file a bug report, thanks! (and sorry).\n"
+             exit 1
+
+        }
 
     }
 
