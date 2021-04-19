@@ -106,10 +106,10 @@ esac
 LANG=$(echo $LANG | sed 's/\..*//')
 
 # options
-unset raw debug save_html pick_lang plus_urls
+unset raw all pick_search use_cache \
+      no_pipe quiet debug save_html pick_lang plus_urls
 
-# all is a unstable variable... careful with it...
-all=false; no_pipe=false; quiet=false; use_cache=false
+# those are unstable variables... careful with it...
 pick_search=false; best_match=false
 
 #-----------------------------------------------
@@ -182,10 +182,10 @@ while getopts "rvhqabtldscpu" OPT; do
         exit 0
         ;;
     q)
-        quiet=true
+        quiet=1
         ;;
     a)
-        all=true
+        all=1
         ;;
     b)
         best_match=true
@@ -200,13 +200,13 @@ while getopts "rvhqabtldscpu" OPT; do
         save_html=1
         ;;
     c)
-        use_cache=true
+        use_cache=1
         ;;
     l)
         pick_lang=1
         ;;
     p)
-        no_pipe=true
+        no_pipe=1
         ;;
     u)
         plus_urls=1
@@ -228,9 +228,8 @@ $pick_search && $best_match && \
 
 # TODO: Data handled by the user should probably be tested.
 # question | tuxi [-flags] --> answer :)
-if ! $no_pipe; then
-  [ -p /dev/stdin ] && read query
-fi
+[ $no_pipe ] || [ -p /dev/stdin ] && read query
+
 
 #-----------------------------------------------
 # Output formatting
@@ -296,26 +295,26 @@ check_deps pup recode jq
 [ -z "$1" ] && [ -z "$query" ] && {
 
     # If query is empty (no -c): exit
-    if ! $use_cache; then
+    [ $use_cache ] || {
 
         # If quiet=false: Prints greeting and usage
-        if ! $quiet; then
+        [ $quiet ] || {
 
             printf "Hi, I'm Tuxi. Ask me anything!\n"
             help_text | head -n 1
 
-        fi
+        }
         exit 0
 
-    else
+    } && {
 
         query=$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1 | sed \
                 -e 's/tuxi-*[[:digit:]]*-//' \
                 -e 's/.html//' \
                 -e 's/_/ /g')
 
-    fi
-  }
+    }
+}
 
 # Else, all arguments are saved in $query
 [ -z "$query" ] && query="$*"
@@ -1053,15 +1052,15 @@ test_answers() {
     [ -n "$z" ] && {
         the_chosen_one="$1"
 
-        if ! $all; then
+        [ $all ] || {
             kill -USR1 "$MAIN_PID"
             sleep 1 &
             sleep_pid="$!"
             wait
-        else
+        } && {
             kill -USR1 "$MAIN_PID"
             [ $debug ] && output "$(printf '%b\n\n%b\n' "$(info_msg "Answer selected: $the_chosen_one")" "$z")" || output "$z"
-        fi
+        }
     }
 }
 
@@ -1109,11 +1108,11 @@ top_links() {
 # in which case we use the most recent cached html from $XDG_CACHE_HOME/tuxi
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 
-$use_cache && google_html=$(cat $XDG_CACHE_HOME/tuxi/$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1))
+[ $use_cache ] && google_html=$(cat $XDG_CACHE_HOME/tuxi/$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1))
 
 [ -z "$google_html" ] && {
 
-    $use_cache && printf 'no cached pages found!\n' && exit 1
+    [ $use_cache ] && printf 'no cached pages found!\n' && exit 1
     google_html=$(curl -Gs --compressed "$google_url" --user-agent "$user_agent" --data-urlencode "q=$query")
 
     [ -z "$google_html" ] && error_msg "No valid response from google!" && exit 1
@@ -1149,7 +1148,7 @@ done
 
 # did you mean is processed here to make controling the order things get printed easier
 # forking the tests makes things faster (hopefully) but makes passing information around harder
-if ! $quiet; then
+[ $quiet ] || {
 
     # silenced if quiet=true
     did_you_mean=$(clean_html 'a.gL9Hy text{}')
@@ -1166,7 +1165,7 @@ if ! $quiet; then
 
         info_msg $(printf 'did you mean "%b%b%b" ?\n' "$B" "$did_you_mean" "$N")
     }
-fi
+}
 
 # loops to spin wheels until an answer has been found
 # if all the launched processes exit without an answer being found
@@ -1184,7 +1183,7 @@ while [ $answers_found -eq 0 ]; do
 
         error_msg "No Result!"
 
-        $quiet || top_links 1
+        [ $quiet ] || top_links 1
         [ $debug ] && debug_info
         exit 1
 
@@ -1196,7 +1195,7 @@ done
 # if one has an answer ready that is what gets printed out
 #
 # "all" is a fucking unstable variable, please, be careful with it
-if ! $all; then
+[ $all ] || {
     for lucky_winner in $(printf '%b\n' "$pids"); do
         [ $printed -gt 0 ] && break
         kill -0 "$lucky_winner" 1>/dev/null 2>&1
@@ -1205,19 +1204,19 @@ if ! $all; then
             short_delay
         fi
     done
-fi
+}
 
 # once an answer has been printed and the -a flag isn't active
 # kills all remaining child processes
 # if -a flag is active then it waits until every answer has been printed first
-if ! $all; then
+[ $all ] || {
     for kids in $(printf '%b\n' "$pids"); do
         kill -0 "$kids" 1>/dev/null 2>&1
         [ $? -eq 0 ] && kill "$kids" 1>/dev/null 2>&1
     done
-fi
+}
 
-$all && wait
+[ $all ] && wait
 
 # another small delay as wait sometimes doesn't seem to wait quite long enough
 # for the last answer to be printed before exiting.
