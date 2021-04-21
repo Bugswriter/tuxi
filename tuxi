@@ -415,8 +415,8 @@ $best_match && {
 
     j=8
 
-    query_check=$(printf '%b\n' "$query" | \
-                  sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')
+    query_check="$(printf '%b\n' "$query" | \
+                  sed 's/ /\\n/g' | tr '[:upper:]' '[:lower:]')"
      first_word=$(printf '%b\n' "$query_check" | head -n1)
       last_word=$(printf '%b\n' "$query_check" | tail -n1)
 
