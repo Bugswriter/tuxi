@@ -58,6 +58,7 @@ esac
 #   you can disable tests by commenting out the line(s)
 priority="
 tracklist       # Album track lists ( eg: noisia outer edges tracklist )
+discography     # Band Discography ( eg: meshuggah albums )
 richcast        # Rich Rich Answers ( eg: social network cast )
 define          # Define ( eg: define Aggrandize )
 lists           # Simple lists ( eg Need for Speed Heat cars list )
@@ -740,6 +741,13 @@ a_tracklist() {
             printf '%s\n' "$tracklist_links"
         fi
     fi
+}
+# Band Discography ( eg: meshuggah discography ) // credit @lesutachi
+a_discography() {
+    # Unsorted
+    # echo "$google_html" | pup 'a.MiPcId json{}' | jq -r '.[].children[].title' | recode html..ISO-8859-1
+    # Sorted by year
+    echo "$google_html" | pup 'a.MiPcId json{}' | jq -r '.[].children[].title' | sed 's@\(.*\)\(([0-9]\{4\}\)\(.*\)@\2:;:\1:;:\3@' | sort | sed 's@\(.*\):;:\(.*\):;:\(.*\)@\2\1\3@' | recode html..ISO-8859-1
 }
 
 ###############################
