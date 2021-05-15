@@ -747,7 +747,7 @@ a_discography() {
     # Unsorted
     # echo "$google_html" | pup 'a.MiPcId json{}' | jq -r '.[].children[].title' | recode html..ISO-8859-1
     # Sorted by year
-    echo "$google_html" | pup 'a.MiPcId json{}' | jq -r '.[].children[].title' | sed 's@\(.*\)\(([0-9]\{4\}\)\(.*\)@\2:;:\1:;:\3@' | sort | sed 's@\(.*\):;:\(.*\):;:\(.*\)@\2\1\3@' | recode html..ISO-8859-1
+    echo "$google_html" | pup 'a.MiPcId json{}' | jq -r '.[].children[].title' | sed 's@\(.*\)\(([0-9]\{4\}\)\(.*\)@\2:;:\1\2\3@' | sort | sed 's@\(.*\):;:@@' | recode html..ISO-8859-1
 }
 
 ###############################
