@@ -99,13 +99,13 @@ no_pipe=false
 plus_urls=false
 
 # color codes
-N="\033[0m"    # Reset
-B="\033[1m"    # Bold
-R="\033[1;31m" # Bright Red
-G="\033[1;32m" # Bright Green
-Y="\033[1;33m" # Bright Yellow
-M="\033[1;35m" # Bright Magenta
-C="\033[1;36m" # Bright Cyan
+N="$(tput sgr0)"           # Reset
+B="$(tput bold)"           # Bold
+R="${B}$(tput setaf 1)"    # Bright Red
+G="${B}$(tput setaf 2)"    # Bright Green
+Y="${B}$(tput setaf 3)"    # Bright Yellow
+M="${B}$(tput setaf 5)"    # Bright Magenta
+C="${B}$(tput setaf 6)"    # Bright Cyan
 
 ##################################
 #####      Help message      #####
