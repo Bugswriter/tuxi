@@ -1,0 +1,53 @@
+# bash completion for tuxi
+
+_tuxi_parameterless() {
+    local param
+    # parameter-less completion
+    # param= COMMAND parameters
+    param="$dashoptions"
+    COMPREPLY=($(compgen -W "$param" -- $cur))
+
+}
+
+_tuxi() {
+    local cur dashoptions prev params
+
+    COMPREPLY=()
+    cur=$(_get_cword)
+    prev=${COMP_WORDS[COMP_CWORD - 1]}
+
+    # available options
+    dashoptions='--help --version --raw --quiet --all --top-links --best --test --lang --debug --save-html --use-cache --disable-pipe'
+
+    # language word list
+    lang_codes='LANG_de LANG_en LANG_es LANG_es-419 LANG_fr LANG_hr LANG_it LANG_nl LANG_pl LANG_pt-BR LANG_pt-PT LANG_vi LANG_tr LANG_ru LANG_ar LANG_th LANG_ko LANG_zh-CN LANG_zh-TW LANG_ja LANG_ach LANG_af LANG_ak LANG_az LANG_ban LANG_su LANG_ceb LANG_xx-bork LANG_bs LANG_br LANG_ca LANG_cs LANG_sn LANG_co LANG_cy LANG_da LANG_yo LANG_et LANG_xx-elmer LANG_eo LANG_eu LANG_ee LANG_tl LANG_fil LANG_fo LANG_fy LANG_gaa LANG_ga LANG_gd LANG_gl LANG_gn LANG_xx-hacker LANG_ht LANG_ha LANG_haw LANG_bem LANG_ig LANG_rn LANG_id LANG_ia LANG_xh LANG_zu LANG_is LANG_jw LANG_rw LANG_sw LANG_tlh LANG_kg LANG_mfe LANG_kri LANG_la LANG_lv LANG_to LANG_lt LANG_ln LANG_loz LANG_lua LANG_lg LANG_hu LANG_mg LANG_mt LANG_ms LANG_pcm LANG_no LANG_nn LANG_nso LANG_ny LANG_uz LANG_oc LANG_om LANG_xx-pirate LANG_ro LANG_rm LANG_qu LANG_nyn LANG_crs LANG_sq LANG_sk LANG_sl LANG_so LANG_st LANG_sr-ME LANG_sr-Latn LANG_fi LANG_sv LANG_mi LANG_tn LANG_tum LANG_tk LANG_tw LANG_wo LANG_el LANG_be LANG_bg LANG_ky LANG_kk LANG_mk LANG_mn LANG_sr LANG_tt LANG_tg LANG_uk LANG_ka LANG_hy LANG_yi LANG_iw LANG_ug LANG_ur LANG_ps LANG_sd LANG_fa LANG_ckb LANG_ti LANG_am LANG_ne LANG_mr LANG_hi LANG_bn LANG_pa LANG_gu LANG_or LANG_ta LANG_te LANG_kn LANG_ml LANG_si LANG_lo LANG_my LANG_km LANG_chr'
+
+    case "$prev" in
+    tuxi)
+        case "$cur" in
+        --*)
+            # parameter completion
+            COMPREPLY=($(compgen -W "$dashoptions" -- $cur))
+            ;;
+        *)
+            # no parameter given
+            _tuxi_parameterless
+            ;;
+
+        esac
+        ;;
+    -a | --all | -b | --best | -c | --use-cache | -d | --debug | -q | --quiet | -r | --raw | -s | --save-html | -t | --test | -u | --top-links)
+        COMPREPLY=($(compgen -W "$dashoptions" -- $cur))
+        ;;
+    -l | --lang)
+        COMPREPLY=($(compgen -W "$lang_codes" -- $cur))
+        ;;
+    -h | --help | -v | --version)
+        # standalone parameters
+        return 0
+
+        ;;
+    esac
+}
+
+complete -F _tuxi tuxi
