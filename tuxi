@@ -127,19 +127,19 @@ help_text() {
     done <<-EOF
         \rUsage: tuxi [OPTS] [QUERY]
 
-        \r  -h                      - Display this help information.
-        \r  -v                      - Print Tuxi version information.
-        \r  -a                      - Print all valid answers.
-        \r  -b                      - Auto-determine the best answer.
-        \r  -c                      - Use cache from previous QUERY.
-        \r  -d                      - Include debugging information.
-        \r  -l LANG_[STR]           - Override LANG with STR.
-        \r  -p                      - Disable pipe support.
-        \r  -q                      - Output only query results.
-        \r  -r                      - Output query in raw format.
-        \r  -s [FILE]               - Save query result HTML to FILE.
-        \r  -t                      - Choose answers to test.
-        \r  -u                      - Print top bulk of query URLs.
+        \r  -h, --help                 - Display this help information.
+        \r  -v, --version              - Print Tuxi version information.
+        \r  -a, --all                  - Print all valid answers.
+        \r  -b, --best                 - Auto-determine the best answer.
+        \r  -c, --use-cache            - Use cache from previous QUERY.
+        \r  -d, --debug                - Include debugging information.
+        \r  -l, --lang LANG_[STR]      - Override LANG with STR.
+        \r  -p, --disable-pipe         - Disable pipe support.
+        \r  -q, --quiet                - Output only query results.
+        \r  -r, --raw                  - Output query in raw format.
+        \r  -s, --save-html [FILE]     - Save query result HTML to FILE.
+        \r  -t, --test                 - Choose answers to test.
+        \r  -u, --top-links            - Print top bulk of query URLs.
 EOF
 }
 
@@ -147,19 +147,40 @@ EOF
 #####      Getopts      #####
 #############################
 
-# -r : raw output
-# -v : version info
-# -h : help
-# -q : silences greeting and did you mean
-# -a : print all answers
-# -b : best match
-# -t : specify answer type
-# -l : specify language using LANG_[code] - eg LANG_en_US
-# -d : print debug info
-# -s : save google HTML response
-# -c : use most recent cached results
-# -p : disable pipe support (needed for test script)
-# -u : also print out the top links
+# -r, --raw           : raw output
+# -v, --version       : version info
+# -h, --help          : help
+# -q, --quiet         : silences greeting and did you mean
+# -a, --all           : print all answers
+# -b, --best          : best match
+# -t, --test          : specify answer type
+# -l, --lang          : specify language using LANG_[code] - eg LANG_en_US
+# -d, --debug         : print debug info
+# -s, --save-html     : save google HTML response
+# -c, --use-cache     : use most recent cached results
+# -p, --disable-pipe  : disable pipe support (needed for test script)
+# -u, --top-links     : also print out the top links
+
+# loops through arguments and changes sets long options to short
+for arg in "$@"; do
+    shift
+    case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    "--version") set -- "$@" "-v" ;;
+    "--quiet") set -- "$@" "-q" ;;
+    "--all") set -- "$@" "-a" ;;
+    "--top-links") set -- "$@" "-u" ;;
+    "--best") set -- "$@" "-b" ;;
+    "--test") set -- "$@" "-t" ;;
+    "--lang") set -- "$@" "-l" ;;
+    "--debug") set -- "$@" "-d" ;;
+    "--save-html") set -- "$@" "-s" ;;
+    "--use-cache") set -- "$@" "-c" ;;
+    "--disable-pipe") set -- "$@" "-p" ;;
+    *) set -- "$@" "$arg" ;;
+    esac
+done
+
 while getopts "rvhqabtldscpu" OPT; do
     case $OPT in
     r)
@@ -258,15 +279,15 @@ error_msg() {
 
 # Checks for required executable files in PATH.
 check_deps() {
-	dep_err=0
+    dep_err=0
     for dep in "$@"; do
-        if ! command -v "$dep" 1> /dev/null 2>&1; then
+        if ! command -v "$dep" 1>/dev/null 2>&1; then
             error_msg "\"$dep\" not found!"
-			dep_err=$((dep_err + 1))
+            dep_err=$((dep_err + 1))
         fi
     done
 
-	[ $dep_err -gt 0 ] && exit 2
+    [ $dep_err -gt 0 ] && exit 2
 }
 
 # Dependencies
@@ -319,8 +340,8 @@ if $pick_search; then
     for pick_words in $(printf '%b\n' "$query" | grep 'tuxi_' | sed 's/tuxi_//g'); do
         for check_pick_words in $(printf '%b\n' "$snippet_check"); do
             if [ "$check_pick_words" = "$pick_words" ]; then
-                [ -z "$priority" ] && priority="$(printf '%s\n' "$pick_words")" \
-                    || priority="$(printf '%b\n%s\n' "$priority" "$pick_words")"
+                [ -z "$priority" ] && priority="$(printf '%s\n' "$pick_words")" ||
+                    priority="$(printf '%b\n%s\n' "$priority" "$pick_words")"
                 matched=true
             fi
         done
@@ -487,8 +508,8 @@ a_define() {
                         dfn_start=true
                         ;;
                     *)
-                        $dfn_sim_op && printf '\t%s\n' "$dfn_foo" \
-                            || printf '\t%b%s%b\n' "$B" "$dfn_foo" "$N"
+                        $dfn_sim_op && printf '\t%s\n' "$dfn_foo" ||
+                            printf '\t%b%s%b\n' "$B" "$dfn_foo" "$N"
                         ;;
                     esac
                 fi
@@ -592,7 +613,8 @@ a_currency() {
 
 # Translate ( eg: Vais para cascais? em ingles ) //credit @Genghius
 a_trans() {
-    echo "$google_html" | pup 'pre.XcVN5d json{}' | jq -r '[.[] | .children | .[] | select(.class!="BCGytf")][1] | .text' | sed 's/null//g' | recode html..ISO-8859-1
+    echo "$google_html" | pup '#tw-target-text span.Y2IQFc text{}' | sed 's/null//g' | recode html..ISO-8859-1
+    echo "$google_html" | pup '#tw-target-rmn span.Y2IQFc text{}' | sed 's/null//g' | recode html..ISO-8859-1
 }
 
 # Knowledge Graph - right ( eg: the office ) //credit @Bugswriter
@@ -697,17 +719,17 @@ a_sport_fixture() {
 
 # Learn to pronounce ( eg: pronounce linux ) //credit @sdushantha
 a_pronounce() {
-    echo "$google_html" | pup 'div.fQ02Rb.eDzgme span.seLqNc text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
+    echo "$google_html" | pup 'div.TQ7enb span.RES9jf text{}' | paste -s -d ' ' | sed 's/\s/∙/g'
 }
 # Album track lists ( eg: noisia outer edges tracklist )
 a_tracklist() {
     tracklist="$(echo "$google_html" | pup 'div.mR2gOd json{}')"
     if [ -n "$tracklist" ]; then
-        tracklist_songs="$(printf '%s\n' "$tracklist" | jq -r '.[0].children[0].children[].children[0].children[].children[0].children[0].children[1].children[1].children[0].children[0].text' \
-            | sed '/^null$/d' | recode html..ISO-8859-1)"
-        [ -z "$tracklist_songs" ] && tracklist_songs="$(printf '%s\n' "$tracklist" \
-            | jq -r '.[0].children[0].children[].children[0].children[].children[0].children[0].children[1].children[0].children[0].children[0].text' \
-            | sed '/^null$/d' | recode html..ISO-8859-1)"
+        tracklist_songs="$(printf '%s\n' "$tracklist" | jq -r '.[0].children[0].children[].children[0].children[].children[0].children[0].children[1].children[1].children[0].children[0].text' |
+            sed '/^null$/d' | recode html..ISO-8859-1)"
+        [ -z "$tracklist_songs" ] && tracklist_songs="$(printf '%s\n' "$tracklist" |
+            jq -r '.[0].children[0].children[].children[0].children[].children[0].children[0].children[1].children[0].children[0].children[0].text' |
+            sed '/^null$/d' | recode html..ISO-8859-1)"
         [ -z "$tracklist_songs" ] && exit
         tracklist_links="$(printf '%s\n' "$tracklist" | jq -r '.[1].children[0].children[0].children[].href' | sed '/^null$/d')"
         printf '%s\n' "$tracklist_links" | grep -q 'youtube.com' || unset tracklist_links
@@ -837,9 +859,9 @@ test_answers() {
 
 # this finds and prints out the top links for your query
 top_links() {
-    url_list="$(echo "$google_html" | pup 'div.tF2Cxc json{}' \
-        | jq -r '.[].children[0].children[0].children[1].text, .[].children[0].children[0].children[1].children[0].text, .[].children[0].children[0].href' \
-        | sed '/^null$/d' | recode html..ISO-8859-1)"
+    url_list="$(echo "$google_html" | pup 'div.tF2Cxc json{}' |
+        jq -r '.[].children[0].children[0].children[1].text, .[].children[0].children[0].children[1].children[0].text, .[].children[0].children[0].href' |
+        sed '/^null$/d' | recode html..ISO-8859-1)"
     if [ -n "$url_list" ]; then
         if [ -n "$1" ]; then
             info_msg "Sorry about that! Perhaps one of these links may be of use?"
