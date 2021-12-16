@@ -30,16 +30,16 @@ to process and return results, and `recode` to unescape html.
 cURL **tuxi** to your **$PATH** and give execute permissions.
 
 ```sh
-$ sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
-$ sudo chmod +x /usr/local/bin/tuxi
+sudo curl -sL "https://raw.githubusercontent.com/Bugswriter/tuxi/main/tuxi" -o /usr/local/bin/tuxi
+sudo chmod +x /usr/local/bin/tuxi
 ```
 > To update, just do `curl` again, no need to `chmod` anymore.  
 > To uninstall, simply remove `tuxi` from your **$PATH**, for example `sudo rm -f /usr/local/bin/tuxi`.
 
 ### Make
 ```sh
-$ git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
-$ sudo make install
+git clone https://github.com/Bugswriter/tuxi.git && cd tuxi/
+sudo make install
 ```
 > To update, just `git pull` on your local tuxi repository and reinstall with `sudo make install`.  
 > To uninstall, simply run `sudo make uninstall`.
@@ -49,7 +49,7 @@ Tuxi is available as the [`tuxi-git`](https://aur.archlinux.org/packages/tuxi-gi
 Note: the AUR package is not maintaned by the project maintainer, nor contribuitor, it is often outdated and it's recommended that you just clone this project.
 
 ```sh
-$ yay -S tuxi-git
+yay -S tuxi-git
 ```
 
 ## Usage
