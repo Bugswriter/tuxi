@@ -24,6 +24,8 @@ to process and return results, and `recode` to unescape html.
 * [recode](https://github.com/rrthomas/recode) - Charset converter tool and library.
 * [jq](https://github.com/stedolan/jq) - Command-line JSON processor.
 
+Note for Mac users, the above packages are available via Homebrew for ease of download.
+
 ## Installation
 
 ### cURL
