@@ -883,7 +883,7 @@ top_links() {
 
 # fetch response from Google via cURL (-G: get, -s: silent) unless -c flag is passed
 # in which case we use the most recent cached html from $XDG_CACHE_HOME/tuxi
-user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:53.0) Gecko/20100101 Firefox/53.0"
+user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) QtWebEngine/5.15.2 Chrome/87.0.4280.144 Safari/537.36"
 google_url="https://www.google.com/search?hl="${LANGUAGE:="${LANG:=en_US}"}""
 $use_cache && google_html="$(cat $XDG_CACHE_HOME/tuxi/$(ls -1t $XDG_CACHE_HOME/tuxi | head -n1))"
 if [ -z "$google_html" ]; then
